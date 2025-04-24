@@ -45,6 +45,7 @@ class HistoryService extends GetxService {
     // 取消定时器
     _timer?.cancel();
     _timer = null;
+    curLiveRoomHistory = null;
     Log.i("本次观看时长：$_elapsed");
   }
 
@@ -60,6 +61,9 @@ class HistoryService extends GetxService {
 
   // updateHistory
   void _updateHistory() {
+    if(curLiveRoomHistory == null){
+      return;
+    }
     // 累加到当前历史记录
     _elapsed = _stopwatch.elapsed;
     Duration curTime = _oldWatchedDuration+_elapsed;
