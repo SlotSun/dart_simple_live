@@ -8,6 +8,7 @@ import 'package:simple_live_core/src/interface/live_site.dart';
 import 'package:simple_live_core/src/model/live_anchor_item.dart';
 import 'package:simple_live_core/src/model/live_category.dart';
 import 'package:simple_live_core/src/model/live_message.dart';
+import 'package:simple_live_core/src/model/live_play_url.dart';
 import 'package:simple_live_core/src/model/live_room_item.dart';
 import 'package:simple_live_core/src/model/live_search_result.dart';
 import 'package:simple_live_core/src/model/live_room_detail.dart';
@@ -183,7 +184,7 @@ class HuyaSite implements LiveSite {
   }
 
   @override
-  Future<List<String>> getPlayUrls(
+  Future<LivePlayUrl> getPlayUrls(
       {required LiveRoomDetail detail,
       required LivePlayQuality quality}) async {
     var ls = <String>[];
@@ -192,7 +193,16 @@ class HuyaSite implements LiveSite {
       var url = await getPlayUrl(line, quality.data["bitRate"]);
       ls.add(url);
     }
-    return ls;
+    return LivePlayUrl(
+      urls: ls,
+      headers: {
+        // Date: 2025-04-29
+        // UA string from the latest Huya Windows app
+        // THIS UA IS VALID ONLY FOR WUP REQUESTS
+        // The 6070100 part is something that changes, but idk how its computed and its no actually checked
+        "user-agent": "HYSDK(Windows, 30000002)_APP(pc_exe&6070100&official)_SDK(trans&2.21.0.4784)",
+      },
+    );
   }
 
   Future<String> getPlayUrl(HuyaLineModel line, int bitRate) async {

@@ -1,5 +1,5 @@
 name: simple_live_app
-version: 1.7.11+10711
+version: 1.7.12+10712
 publish_to: none
 description: "Simple Live APP"
 environment: 
@@ -35,11 +35,7 @@ dependencies:
   flutter_smart_dialog: ^4.9.8+7 #各种弹窗 Toast/Dialog/Popup
   sticky_headers: ^0.3.0+2 #吸顶
   lottie: ^1.4.3 #lottie动画
-  ns_danmaku: #弹幕
-    git: 
-        url: https://github.com/xiaoyaocz/flutter_ns_danmaku.git
-        tag: v0.0.9
-
+  canvas_danmaku: ^0.2.7
 
   #系统交互
   package_info_plus: ^8.2.1 #包信息

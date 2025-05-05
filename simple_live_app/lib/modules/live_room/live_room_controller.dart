@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:ns_danmaku/ns_danmaku.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/constant.dart';
@@ -73,6 +73,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
   /// 线路数据
   RxList<String> playUrls = RxList<String>();
+
+  Map<String, String>? playHeaders;
 
   /// 当前线路
   var currentLineIndex = -1;
@@ -169,7 +171,6 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       }
     });
   }
-
   // 弹窗逻辑
 
   void refreshRoom() {
@@ -235,7 +236,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       }
 
       addDanmaku([
-        DanmakuItem(
+        DanmakuContentItem(
           msg.message,
           color: Color.fromARGB(
             255,
@@ -388,11 +389,12 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     currentLineIndex = -1;
     var playUrl = await site.liveSite
         .getPlayUrls(detail: detail.value!, quality: qualites[currentQuality]);
-    if (playUrl.isEmpty) {
+    if (playUrl.urls.isEmpty) {
       SmartDialog.showToast("无法读取播放地址");
       return;
     }
-    playUrls.value = playUrl;
+    playUrls.value = playUrl.urls;
+    playHeaders = playUrl.headers;
     currentLineIndex = 0;
     currentLineInfo.value = "线路${currentLineIndex + 1}";
     //重置错误次数
@@ -410,21 +412,6 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   void setPlayer() async {
     currentLineInfo.value = "线路${currentLineIndex + 1}";
     errorMsg.value = "";
-    Map<String, String> headers = {};
-    if (site.id == Constant.kBiliBili) {
-      headers = {
-        "referer": "https://live.bilibili.com",
-        "user-agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.188"
-      };
-    } else if (site.id == Constant.kHuya) {
-      // fix #594
-      var currentTs = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-      headers = {
-        //"referer": "https://m.huya.com",
-        "user-agent": "HYSDK(Windows, $currentTs)"
-      };
-    }
 
     var playurl = playUrls[currentLineIndex];
     if (AppSettingsController.instance.playerForceHttps.value) {
@@ -434,7 +421,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     player.open(
       Media(
         playurl,
-        httpHeaders: headers,
+        httpHeaders: playHeaders,
       ),
     );
 
@@ -468,7 +455,6 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   }
 
   int mediaErrorRetryCount = 0;
-
   @override
   void mediaError(String error) async {
     super.mediaEnd();
