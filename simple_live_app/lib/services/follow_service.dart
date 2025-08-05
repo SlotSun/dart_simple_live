@@ -85,9 +85,9 @@ class FollowService extends GetxService {
     followTagList.add(item);
   }
 
-  void delFollowUserTag(FollowUserTag tag) {
+  Future delFollowUserTag(FollowUserTag tag) async{
     followTagList.remove(tag);
-    DBService.instance.deleteFollowTag(tag.id);
+    await DBService.instance.deleteFollowTag(tag.id);
   }
 
   // 获取用户自定义标签列表
@@ -397,6 +397,7 @@ class FollowService extends GetxService {
             "userName": item.userName,
             "face": item.face,
             "addTime": item.addTime.toString(),
+            "tag": item.tag
           },
         )
         .toList();
@@ -408,6 +409,16 @@ class FollowService extends GetxService {
 
     for (var item in data) {
       var user = FollowUser.fromJson(item);
+      // 导入关注列表同时导入标签列表 此方法可优化为所有导入逻辑
+      if (user.tag != "全部") {
+        if (!DBService.instance.getFollowTagExistByTag(user.tag)) {
+          DBService.instance.addFollowTag(user.tag);
+        } else {
+          var tag = DBService.instance.getFollowTag(user.tag);
+          tag!.userId.add(item.id);
+          DBService.instance.updateFollowTag(tag);
+        }
+      }
       await DBService.instance.followBox.put(user.id, user);
     }
   }

@@ -4,10 +4,12 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
+  flutter_js
   media_kit_libs_linux
   media_kit_video
   screen_retriever_linux
   url_launcher_linux
+  volume_controller
   window_manager
 )
 

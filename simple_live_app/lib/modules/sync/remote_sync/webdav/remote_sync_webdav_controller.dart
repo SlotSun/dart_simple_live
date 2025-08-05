@@ -176,7 +176,13 @@ class RemoteSyncWebDAVController extends BaseController {
       };
       final userFollowJsonFile = File(join(profile.path, _userFollowJsonName));
       await userFollowJsonFile.writeAsString(jsonEncode(dataFollowsMap));
-
+      // 用户自定义标签
+      var userTagsList = DBService.instance.getFollowTagList();
+      var dataTagsMap = {
+        'data': userTagsList.map((e) => e.toJson()).toList()
+      };
+      var userTagsJsonFile = File(join(profile.path, _userTagsJsonName));
+      await userTagsJsonFile.writeAsString(jsonEncode(dataTagsMap));
       // histories
       var userHistoriesList = DBService.instance.getHistores();
       var dataHistoriesMap = {
@@ -202,12 +208,6 @@ class RemoteSyncWebDAVController extends BaseController {
           File(join(profile.path, _userBilibiliAccountJsonName));
       await bilibiliAccountJsonFile
           .writeAsString(jsonEncode(userBiliAccountCookieMap));
-      // 用户自定义标签
-      var userTagsList = DBService.instance.getFollowTagList();
-      var dataTagsMap = {
-        'data': userTagsList.map((e) => e.toJson()).toList()
-      };
-      var userTagsJsonFile = File(join(profile.path, _userTagsJsonName));
       await userTagsJsonFile.writeAsString(jsonEncode(dataTagsMap));
       // 同步所有设置
       var settingList = LocalStorageService.instance.settingsBox.toMap();
@@ -241,7 +241,7 @@ class RemoteSyncWebDAVController extends BaseController {
       await _recovery(file);
     }
     // 旧版本备份需要迁移
-    MigrationService.instance.migrateDataByVersion();
+    MigrationService.migrateDataByVersion();
     SmartDialog.dismiss();
     SmartDialog.showToast('同步完成');
     DateTime recoverTime =DateTime.now();
@@ -322,7 +322,23 @@ class RemoteSyncWebDAVController extends BaseController {
         } catch (e) {
           Log.e("同步用户设置失败：$e", StackTrace.current);
         }
-      } else {
+      }else if (file.name == _userTagsJsonName && isSyncFollows.value) {
+        try {
+          // 标签功能和关注具有依赖关系，必须同时同步
+          // 清空本地标签列表
+          await DBService.instance.tagBox.clear();
+          for (var item in jsonData) {
+            var tag = FollowUserTag.fromJson(item);
+            await DBService.instance.tagBox.put(tag.id, tag);
+            // 插入之后验证
+            var insertedTag = DBService.instance.tagBox.get(tag.id);
+            Log.i('Inserted tag: ${insertedTag?.tag}');
+          }
+          Log.i('已同步用户自定义标签');
+        } catch (e) {
+          Log.e('同步用户自定义标签失败:$e',StackTrace.current);
+        }
+      }  else {
         return;
       }
     } else {
