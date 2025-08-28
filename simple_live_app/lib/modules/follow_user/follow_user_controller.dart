@@ -102,34 +102,32 @@ class FollowUserController extends BasePageController<FollowUser> {
     if (!result) {
       return;
     }
+    // 取消关注同时删除标签内的 userId
+    if (item.tag != "全部") {
+      var tag = tagList.firstWhere((tag) => tag.tag == item.tag);
+      tag.userId.remove(item.id);
+      updateTag(tag);
+    }
     await DBService.instance.followBox.delete(item.id);
     refreshData();
   }
 
-  void updateItem(FollowUser item){
+  void updateItem(FollowUser item) {
     FollowService.instance.addFollow(item);
   }
 
   void setItemTag(FollowUser item, FollowUserTag targetTag) {
-    FollowUserTag tarTag = targetTag;
-    FollowUserTag curTag =
-        tagList.firstWhere((tag) => tag.tag == item.tag);
-    curTag.userId.remove(item.id);
-    tarTag.userId.addIf(!tarTag.userId.contains(item.id), item.id);
-    item.tag = tarTag.tag;
-    updateTag(curTag);
-    updateTag(tarTag);
-    updateItem(item);
+    FollowService.instance.setItemTag(item, targetTag);
     filterData();
   }
 
   void removeIdFromTag() {}
 
-  Future removeTag(FollowUserTag tag) async{
+  Future removeTag(FollowUserTag tag) async {
     // 将tag下的所有follow设置为全部
-    for(var i in tag.userId){
+    for (var i in tag.userId) {
       var follow = DBService.instance.followBox.get(i);
-      if(follow != null){
+      if (follow != null) {
         follow.tag = "全部";
         updateItem(follow);
       }
@@ -146,7 +144,7 @@ class FollowUserController extends BasePageController<FollowUser> {
   }
 
   void updateTag(FollowUserTag followUserTag) {
-    if(followUserTag.tag == '全部'){
+    if (followUserTag.tag == '全部') {
       return;
     }
     FollowService.instance.updateFollowUserTag(followUserTag);
@@ -165,9 +163,9 @@ class FollowUserController extends BasePageController<FollowUser> {
     final FollowUserTag newTag = followUserTag.copyWith(tag: newTagName);
     updateTag(newTag);
     // update item's tag when update tagName
-    for(var i in newTag.userId){
+    for (var i in newTag.userId) {
       var follow = DBService.instance.followBox.get(i);
-      if(follow != null){
+      if (follow != null) {
         follow.tag = newTagName;
         updateItem(follow);
       }

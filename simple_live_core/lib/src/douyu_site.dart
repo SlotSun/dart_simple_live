@@ -1,26 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_js/flutter_js.dart';
+import 'package:html_unescape/html_unescape.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
 import 'package:simple_live_core/src/common/js_engine.dart';
-import 'package:simple_live_core/src/danmaku/douyu_danmaku.dart';
-import 'package:simple_live_core/src/interface/live_danmaku.dart';
-import 'package:simple_live_core/src/interface/live_site.dart';
-import 'package:simple_live_core/src/model/live_anchor_item.dart';
-import 'package:simple_live_core/src/model/live_category.dart';
-import 'package:simple_live_core/src/model/live_message.dart';
-import 'package:simple_live_core/src/model/live_play_url.dart';
-import 'package:simple_live_core/src/model/live_room_item.dart';
-import 'package:simple_live_core/src/model/live_search_result.dart';
-import 'package:simple_live_core/src/model/live_room_detail.dart';
-import 'package:simple_live_core/src/model/live_play_quality.dart';
-import 'package:simple_live_core/src/model/live_category_result.dart';
-import 'package:html_unescape/html_unescape.dart';
 
 class DouyuSite implements LiveSite {
   @override
@@ -338,7 +325,8 @@ class DouyuSite implements LiveSite {
     try{
       var did = '10000000000000000000000000001501';
       JsEngine.init();
-      JsEvalResult jsEvalResult = await JsEngine.jsRuntime.evaluate("$html;ub98484234();");
+      JsEvalResult jsEvalResult =
+          await JsEngine.evaluateAsync("$html;ub98484234();");
       var res = jsEvalResult.stringResult;
       String t10 = (DateTime.now().millisecondsSinceEpoch ~/ 1000).toString();
       RegExp vReg = RegExp(r'v=(\d+)');
@@ -349,11 +337,16 @@ class DouyuSite implements LiveSite {
           .replaceAll(RegExp(r'return rt;}\);?'), 'return rt;}')
           .replaceAll('(function (', 'function sign(')
           .replaceAll('CryptoJS.MD5(cb).toString()', '"$rb"');
-      final params = JsEngine.jsRuntime.evaluate("$jsSign;sign($rid,'$did',$t10);").stringResult;
-      return params;
-    }catch(e){
+
+      final params =
+          await JsEngine.evaluateAsync("$jsSign;sign($rid,'$did',$t10);");
+
+      return params.stringResult;
+    } catch (e) {
       CoreLog.error(e);
       return "";
+    } finally{
+      JsEngine.dispose();
     }
     // 自部署：https://github.com/SlotSun/simple_live_api
   }
