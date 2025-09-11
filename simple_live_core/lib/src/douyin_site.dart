@@ -3,15 +3,9 @@ import 'dart:math';
 
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/convert_helper.dart';
+import 'package:simple_live_core/src/common/douyin/douyin_utils.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
-
-mixin DouyinRequestParams {
-  static const String kDefaultUserAgent =
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0";
-  static const AID_VALUE = "6383";
-  static const VERSION_CODE_VALUE = "180800";
-  static const SDK_VERSION = "1.0.14-beta.0";
-}
+import 'common/douyin/douyinRequestParams.dart';
 
 class DouyinSite implements LiveSite {
   @override
@@ -35,7 +29,8 @@ class DouyinSite implements LiveSite {
 
   Future<Map<String, dynamic>> getRequestHeaders() async {
     try {
-      if (headers.containsKey("cookie")) {
+      final existCookies = headers['cookie'] ?? '';
+      if(existCookies.contains('ttwid')){
         return headers;
       }
       var head = await HttpClient.instance
@@ -43,7 +38,8 @@ class DouyinSite implements LiveSite {
       head.headers["set-cookie"]?.forEach((element) {
         var cookie = element.split(";")[0];
         if (cookie.contains("ttwid")) {
-          headers["cookie"] = cookie;
+          final newCookie = '$cookie; $existCookies';
+          headers['cookie'] = newCookie;
         }
       });
       return headers;
@@ -432,7 +428,7 @@ class DouyinSite implements LiveSite {
       },
     );
 
-    var renderData = RegExp(r'\{\\"state\\":\{\\"isLiveModal.*?\]\\n')
+    var renderData = RegExp(r'\{\\"state\\":\{\\"appStore.*?\]\\n')
             .firstMatch(result)
             ?.group(0) ??
         "";
@@ -449,29 +445,17 @@ class DouyinSite implements LiveSite {
   /// - [webRid] 直播间RID
   Future<Map> _getRoomDataByApi(String webRid) async {
     var requestHeader = await getRequestHeaders();
+    var queryParams = {
+      'app_name': 'douyin_web',
+      'enter_from': 'web_live',
+      'live_id': '1',
+      'web_rid': webRid,
+      'is_need_double_stream': "false"
+    };
+    var targetUrl = DouyinUtils.buildRequestUrl("https://live.douyin.com/webcast/room/web/enter/", queryParams);
+    CoreLog.d("targetUrl: $targetUrl");
     var result = await HttpClient.instance.getJson(
-      "https://live.douyin.com/webcast/room/web/enter/",
-      //2025-08-02 dy_server checks the existence of the parameter "a_bogus" but doesn't check its value
-      queryParameters: {
-        "aid": 6383,
-        "app_name": "douyin_web",
-        "live_id": 1,
-        "device_platform": "web",
-        "enter_from": "web_live",
-        "web_rid": webRid,
-        "room_id_str": "",
-        "enter_source": "",
-        "Room-Enter-User-Login-Ab": 0,
-        "is_need_double_stream": false,
-        "cookie_enabled": true,
-        "screen_width": 1980,
-        "screen_height": 1080,
-        "browser_language": "zh-CN",
-        "browser_platform": "Win32",
-        "browser_name": "Edge",
-        "browser_version": "125.0.0.0",
-        "a_bogus": "0"
-      },
+      targetUrl,
       header: requestHeader,
     );
     return result["data"];
