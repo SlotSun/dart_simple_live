@@ -123,7 +123,7 @@ class AppSettingsController extends GetxController {
 
     videoOutputDriver.value = LocalStorageService.instance.getValue(
       LocalStorageService.kVideoOutputDriver,
-      Platform.isAndroid ? "gpu" : "libmpv",
+      Platform.isAndroid ? "mediacodec_embed" : "libmpv",
     );
 
     audioOutputDriver.value = LocalStorageService.instance.getValue(
@@ -133,7 +133,12 @@ class AppSettingsController extends GetxController {
 
     videoHardwareDecoder.value = LocalStorageService.instance.getValue(
       LocalStorageService.kVideoHardwareDecoder,
-      Platform.isAndroid ? "auto-safe" : "auto",
+      Platform.isAndroid ? "mediacodec" : "auto",
+    );
+
+    videoDoubleBuffering.value = LocalStorageService.instance.getValue(
+      LocalStorageService.kVideoDoubleBuffering,
+      Platform.isLinux ? true : false,
     );
 
     autoUpdateFollowEnable.value = LocalStorageService.instance
@@ -496,6 +501,13 @@ class AppSettingsController extends GetxController {
     videoHardwareDecoder.value = e;
     LocalStorageService.instance
         .setValue(LocalStorageService.kVideoHardwareDecoder, e);
+  }
+
+  var videoDoubleBuffering= false.obs;
+  void setVideoDoubleBuffering(bool e) {
+    videoDoubleBuffering.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kVideoDoubleBuffering, e);
   }
 
   var autoUpdateFollowEnable = false.obs;

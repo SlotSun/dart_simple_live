@@ -1,10 +1,10 @@
 name: simple_live_app
-version: 1.7.15+10715
+version: 1.7.18+10718
 publish_to: none
 description: "Simple Live APP"
 environment: 
   sdk: '>=3.0.5 <4.0.0'
-  flutter: 3.32.0
+  flutter: 3.32.8
 
 dependencies: 
   simple_live_core:
@@ -22,11 +22,12 @@ dependencies:
   logger: ^2.0.2 #日志
   intl: ^0.20.2 #国际化
   qr_flutter: ^4.1.0 #二维码生成
-  dynamic_color: ^1.7.0 #动态颜色
+  dynamic_color: ^1.8.1 #动态颜色
   path: any
   udp: ^5.0.3 #UDP
   uuid: ^4.5.1 #UUID
   synchronized: ^3.3.1 #线程安全
+  collection: ^1.18.0
 
   #Widget
   flutter_staggered_grid_view: ^0.7.0 #瀑布流/GridView
@@ -52,7 +53,11 @@ dependencies:
   file_picker: ^10.1.2 #文件选择
   window_manager: ^0.5.0 #窗口管理
   floating: ^6.0.0 #PIP画中画
-  flutter_inappwebview: ^6.1.5 #WebView
+  flutter_inappwebview:
+    git:
+      url: https://github.com/guide-inc-org/guide-flutter_inappwebview.git
+      path: flutter_inappwebview
+      ref: sbi_fx_pc/v6.2.0-beta.3
   connectivity_plus: ^6.0.3 #网络状态
   flutter_single_instance: ^1.5.1 #应用启动检测
   qr_code_scanner_plus: ^2.0.10+1 #二维码扫描
@@ -65,9 +70,21 @@ dependencies:
   signalr_netcore: ^1.3.9 #SignalR
 
   # 视频播放
-  media_kit: ^1.2.0 # Primary package.
-  media_kit_video: ^1.3.0 # For video rendering.
-  media_kit_libs_video: ^1.0.6 # Native video dependencies.
+  media_kit:
+    git:
+      url: https://github.com/SlotSun/media-kit.git
+      ref: 808bf6e390bdf537cc2081dc7a93077a3a3c5832
+      path: ./media_kit
+  media_kit_video:
+    git:
+      url: https://github.com/SlotSun/media-kit.git
+      ref: 808bf6e390bdf537cc2081dc7a93077a3a3c5832
+      path: ./media_kit_video
+  media_kit_libs_video:
+    git:
+      url: https://github.com/SlotSun/media-kit.git
+      ref: 808bf6e390bdf537cc2081dc7a93077a3a3c5832
+      path: ./libs/universal/media_kit_libs_video
 
   flutter: 
     sdk: flutter
@@ -81,6 +98,33 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_test: 
     sdk: flutter
+
+dependency_overrides:
+  media_kit_libs_linux:
+    git:
+      url: https://github.com/SlotSun/media-kit.git
+      ref: 808bf6e390bdf537cc2081dc7a93077a3a3c5832
+      path: ./libs/linux/media_kit_libs_linux
+  media_kit_libs_ios_video:
+    git:
+      url: https://github.com/SlotSun/media-kit.git
+      ref: 808bf6e390bdf537cc2081dc7a93077a3a3c5832
+      path: ./libs/ios/media_kit_libs_ios_video
+  media_kit_libs_android_video:
+    git:
+      url: https://github.com/SlotSun/media-kit.git
+      ref: 808bf6e390bdf537cc2081dc7a93077a3a3c5832
+      path: ./libs/android/media_kit_libs_android_video
+  media_kit_libs_windows_video:
+    git:
+      url: https://github.com/SlotSun/media-kit.git
+      ref: 808bf6e390bdf537cc2081dc7a93077a3a3c5832
+      path: ./libs/windows/media_kit_libs_windows_video
+  media_kit_libs_macos_video:
+    git:
+      url: https://github.com/SlotSun/media-kit.git
+      ref: 808bf6e390bdf537cc2081dc7a93077a3a3c5832
+      path: ./libs/macos/media_kit_libs_macos_video
 
 flutter_launcher_icons:
   android: true

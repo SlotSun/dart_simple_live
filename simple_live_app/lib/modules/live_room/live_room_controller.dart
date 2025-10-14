@@ -113,7 +113,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     }
     initAutoExit();
     showDanmakuState.value = AppSettingsController.instance.danmuEnable.value;
-    followed.value = DBService.instance.getFollowExist("${site.id}_$roomId");
+    followed.value = FollowService.instance.getFollowExist("${site.id}_$roomId");
     loadData();
 
     scrollController.addListener(scrollListener);
@@ -314,7 +314,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
       addHistory();
       // 确认房间关注状态
-      followed.value = DBService.instance.getFollowExist("${site.id}_$roomId");
+      followed.value = FollowService.instance.getFollowExist("${site.id}_$roomId");
       online.value = detail.value!.online;
       liveStatus.value = detail.value!.status || detail.value!.isRecord;
       if (liveStatus.value) {
@@ -420,15 +420,15 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       playurl = playurl.replaceAll("http://", "https://");
     }
 
- // 初始化播放器并设置 ao 参数
-  await initializePlayer();
+    // 初始化播放器并设置 ao 参数
+    await initializePlayer();
 
-  await player.open(
-    Media(
-      playurl,
-      httpHeaders: playHeaders,
-    ),
-  );
+    await player.open(
+      Media(
+        playurl,
+        httpHeaders: playHeaders,
+      ),
+    );
     Log.d("播放链接\r\n：$playurl");
   }
 

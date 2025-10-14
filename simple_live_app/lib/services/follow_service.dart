@@ -18,6 +18,7 @@ import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/models/db/history.dart';
 import 'package:simple_live_app/services/db_service.dart';
+import 'package:simple_live_core/simple_live_core.dart';
 import 'package:synchronized/synchronized.dart';
 
 class FollowService extends GetxService {
@@ -55,11 +56,15 @@ class FollowService extends GetxService {
 
   Timer? updateTimer;
 
+  int _totalToUpdate = 0;
+
+  int _refreshCycle = 0;
+
   @override
   void onInit() {
     subscription = EventBus.instance.listen(Constant.kUpdateFollow, (data) {
       if (data is History) {
-        updateFollow(data);
+        updateFollowHistory(data);
       } else {
         loadData(updateStatus: false);
       }
@@ -68,8 +73,24 @@ class FollowService extends GetxService {
     super.onInit();
   }
 
-  void updateFollowUserTag(FollowUserTag tag) {
-    DBService.instance.updateFollowTag(tag);
+  void updateTagName(FollowUserTag followUserTag, String newTagName) {
+    final FollowUserTag newTag = followUserTag.copyWith(tag: newTagName);
+    updateFollowUserTag(newTag);
+    // update item's tag when update tagName
+    for (var i in newTag.userId) {
+      var follow = DBService.instance.followBox.get(i);
+      if (follow != null) {
+        follow.tag = newTagName;
+        addFollow(follow);
+      }
+    }
+  }
+
+  Future<void> updateFollowUserTag(FollowUserTag tag) async {
+    if (tag.tag == '全部') {
+      return;
+    }
+    await DBService.instance.updateFollowTag(tag);
     // 查找并修改
     var index = followTagList.indexWhere((oTag) => oTag.id == tag.id);
     followTagList[index] = tag;
@@ -85,7 +106,15 @@ class FollowService extends GetxService {
     followTagList.add(item);
   }
 
-  Future delFollowUserTag(FollowUserTag tag) async {
+  Future removeFollowUserTag(FollowUserTag tag) async {
+    // 将tag下的所有follow设置为全部
+    for (var i in tag.userId) {
+      var follow = DBService.instance.followBox.get(i);
+      if (follow != null) {
+        follow.tag = "全部";
+        FollowService.instance.addFollow(follow);
+      }
+    }
     followTagList.remove(tag);
     await DBService.instance.deleteFollowTag(tag.id);
   }
@@ -105,7 +134,7 @@ class FollowService extends GetxService {
   }
 
   /// 为关注项设置标签（统一逻辑）
-  void setItemTag(FollowUser item, FollowUserTag targetTag) {
+  void setFollowTag(FollowUser item, FollowUserTag targetTag) {
     // 当前标签对象（可能为“全部”且不在 followTagList 中）
     FollowUserTag? currentTag;
     if (item.tag != '全部') {
@@ -177,18 +206,27 @@ class FollowService extends GetxService {
     );
   }
 
+  void updateFollowTagOrder(List<FollowUserTag> userTagList) {
+    DBService.instance.updateFollowTagOrder(userTagList);
+  }
+
   // 添加关注
   void addFollow(FollowUser follow) {
     DBService.instance.addFollow(follow);
   }
 
   // 取消关注
-  void removeFollowUser(String id) {
-    DBService.instance.deleteFollow(id);
+  Future<void> removeFollowUser(String id) async {
+    await DBService.instance.deleteFollow(id);
+  }
+
+  // 判断关注是否存在
+  bool getFollowExist(String id) {
+    return DBService.instance.getFollowExist(id);
   }
 
   // 更新关注的历史记录
-  void updateFollow(History history) {
+  void updateFollowHistory(History history) {
     var follow =
         followList.where((follow) => follow.id == history.id).firstOrNull;
     if (follow == null) {
@@ -203,13 +241,15 @@ class FollowService extends GetxService {
   void initTimer() {
     if (AppSettingsController.instance.autoUpdateFollowEnable.value) {
       updateTimer?.cancel();
+      _refreshCycle = 0;
       updateTimer = Timer.periodic(
         Duration(
             minutes:
                 AppSettingsController.instance.autoUpdateFollowDuration.value),
         (timer) {
-          Log.logPrint("Update Follow Timer");
-          loadData();
+          CoreLog.i("Update Follow Timer - Cycle: $_refreshCycle");
+          loadData(updateStatus: true, cycle: _refreshCycle);
+          _refreshCycle = (_refreshCycle + 1) % 2; // 2-cycle rotation
         },
       );
     } else {
@@ -217,23 +257,102 @@ class FollowService extends GetxService {
     }
   }
 
-  Future<void> loadData({bool updateStatus = true}) async {
+  Future<void> loadData({bool updateStatus = true, int? cycle}) async {
     var list = DBService.instance.getFollowList();
     getAllTagList();
     if (list.isEmpty) {
       updating.value = false;
       followList.assignAll(list);
+      liveList.clear();
+      notLiveList.clear();
+      _updatedListController.add(0);
       return;
     }
     followList.assignAll(list);
     if (updateStatus) {
-      startUpdateStatus();
+      startUpdateStatus(cycle: cycle);
     }
   }
 
-  void startUpdateStatus() async {
+  void multiRoundPriority() {
+    final historyList = DBService.instance.getHistories();
+    final Map<String, int> historyRankMap = {
+      for (var i = 0; i < historyList.length; i++) historyList[i].id: i
+    };
+    final int maxRank = historyList.isNotEmpty ? historyList.length : 1;
+
+    Duration maxDuration = const Duration();
+    for (var user in followList) {
+      final duration = user.watchDuration!.toDuration();
+      if (duration > maxDuration) {
+        maxDuration = duration;
+      }
+    }
+    final double maxDurationInSeconds =
+        maxDuration.inSeconds > 0 ? maxDuration.inSeconds.toDouble() : 1.0;
+    // 简单线性加权组合算法，目前认定观看时长和最近观看时间权重一致
+    // 如果用户历史行为序列非常长：可替换为时间衰减 + 观看时长加权
+    followList.sort((a, b) {
+      // 静态权重
+      const double wDuration = 0.5;
+      const double wRecency = 0.5;
+
+      double normDurationA =
+          a.watchDuration!.toDuration().inSeconds.toDouble() /
+              maxDurationInSeconds;
+      int rankA = historyRankMap[a.id] ?? maxRank;
+      double normRecencyA = (maxRank - rankA).toDouble() / maxRank;
+      double scoreA = (wDuration * normDurationA) + (wRecency * normRecencyA);
+
+      double normDurationB =
+          b.watchDuration!.toDuration().inSeconds.toDouble() /
+              maxDurationInSeconds;
+      int rankB = historyRankMap[b.id] ?? maxRank;
+      double normRecencyB = (maxRank - rankB).toDouble() / maxRank;
+      double scoreB = (wDuration * normDurationB) + (wRecency * normRecencyB);
+
+      return scoreB.compareTo(scoreA);
+    });
+  }
+
+  void startUpdateStatus({int? cycle}) async {
+    List<FollowUser> usersToUpdate;
+    final totalUsers = followList.length;
+
+    if (cycle != null && totalUsers > 100) {
+      // 简单28
+      final topNCount = (totalUsers * 0.2).round(); // Top 50%
+      final bottomNCount = (totalUsers * 0.2).round(); // Bottom 20%
+      final middlePartEndIndex = totalUsers - bottomNCount;
+      multiRoundPriority();
+      final topNUsers = followList.sublist(0, topNCount);
+      final middleUsers = followList.sublist(topNCount, middlePartEndIndex);
+      if (cycle == 0) {
+        usersToUpdate = topNUsers;
+        CoreLog.i(
+            "Update Follow: Cycle 0, updating top ${usersToUpdate.length}/$totalUsers users.");
+      } else {
+        usersToUpdate = [...topNUsers, ...middleUsers];
+        CoreLog.i(
+            "Update Follow: Cycle 1, updating top+middle ${usersToUpdate.length}/$totalUsers users.");
+      }
+    } else {
+      usersToUpdate = List.from(followList);
+      if (cycle != null) {
+        CoreLog.i(
+            "Update Follow: List <= 100, updating all ${usersToUpdate.length} users.");
+      }
+    }
+
+    _totalToUpdate = usersToUpdate.length;
     updatedCount = 0;
     updating.value = true;
+
+    if (_totalToUpdate == 0) {
+      updating.value = false;
+      filterData();
+      return;
+    }
 
     var threadCount =
         AppSettingsController.instance.updateFollowThreadCount.value;
@@ -242,14 +361,13 @@ class FollowService extends GetxService {
     for (var i = 0; i < threadCount; i++) {
       tasks.add(
         Future(() async {
-          var start = i * followList.length ~/ threadCount;
-          var end = (i + 1) * followList.length ~/ threadCount;
+          var start = i * usersToUpdate.length ~/ threadCount;
+          var end = (i + 1) * usersToUpdate.length ~/ threadCount;
 
-          // 确保 end 不超出列表长度
-          if (end > followList.length) {
-            end = followList.length;
+          if (end > usersToUpdate.length) {
+            end = usersToUpdate.length;
           }
-          var items = followList.sublist(start, end);
+          var items = usersToUpdate.sublist(start, end);
           for (var item in items) {
             await updateLiveStatus(item);
           }
@@ -270,7 +388,7 @@ class FollowService extends GetxService {
       await _lock.synchronized(() {
         updatedCount++;
       });
-      if (updatedCount >= followList.length) {
+      if (updatedCount >= _totalToUpdate) {
         filterData();
         updating.value = false;
       }
@@ -449,6 +567,7 @@ class FollowService extends GetxService {
             "roomId": item.roomId,
             "userName": item.userName,
             "face": item.face,
+            "watchDuration": item.watchDuration,
             "addTime": item.addTime.toString(),
             "tag": item.tag
           },
@@ -461,18 +580,16 @@ class FollowService extends GetxService {
     var data = jsonDecode(content);
 
     for (var item in data) {
-      var user = FollowUser.fromJson(item);
+      var follow = FollowUser.fromJson(item);
       // 导入关注列表同时导入标签列表 此方法可优化为所有导入逻辑
-      if (user.tag != "全部") {
-        if (!DBService.instance.getFollowTagExistByTag(user.tag)) {
-          DBService.instance.addFollowTag(user.tag);
-        } else {
-          var tag = DBService.instance.getFollowTag(user.tag);
-          tag!.userId.add(item.id);
-          DBService.instance.updateFollowTag(tag);
-        }
+      if (follow.tag != "全部") {
+        // logic: 尝试添加，存在则返回已存在的对象
+        var tag = await DBService.instance.addFollowTag(follow.tag);
+        // 更新tag
+        tag.userId.addIf(!tag.userId.contains(follow.id), follow.id);
+        DBService.instance.updateFollowTag(tag);
       }
-      await DBService.instance.followBox.put(user.id, user);
+      await DBService.instance.addFollow(follow);
     }
   }
 
