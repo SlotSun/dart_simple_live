@@ -136,19 +136,33 @@ class DouyinSite implements LiveSite {
     var ids = category.id.split(',');
     var partitionId = ids[0];
     var partitionType = ids[1];
+    var queryParameters = {
+      "aid": '6383',
+      "app_name": "douyin_web",
+      "live_id": '1',
+      "device_platform": "web",
+      "language": "zh-CN",
+      "enter_from": "link_share",
+      "cookie_enabled": "true",
+      "screen_width": "1980",
+      "screen_height": "1080",
+      "browser_language": "zh-CN",
+      "browser_platform": "Win32",
+      "browser_name": "Edge",
+      "browser_version": "125.0.0.0",
+      "browser_online": "true",
+      "count": '15',
+      "offset": ((page - 1) * 15).toString(),
+      "partition": partitionId,
+      "partition_type": partitionType,
+      "req_from": '2'
+    };
+    var categoryRoomUrl =
+        "https://live.douyin.com/webcast/web/partition/detail/room/v2/";
+    var targetUrl =
+        DouyinUtils.buildRequestUrl(categoryRoomUrl, queryParameters);
     var result = await HttpClient.instance.getJson(
-      "https://live.douyin.com/webcast/web/partition/detail/room/v2/",
-      queryParameters: {
-        "aid": 6383,
-        "app_name": "douyin_web",
-        "live_id": 1,
-        "device_platform": "web",
-        "count": 15,
-        "offset": (page - 1) * 15,
-        "partition": partitionId,
-        "partition_type": partitionType,
-        "req_from": 2
-      },
+      targetUrl,
       header: await getRequestHeaders(),
     );
 
@@ -298,7 +312,7 @@ class DouyinSite implements LiveSite {
 
     // 读取用户唯一ID，用于弹幕连接
     // 似乎这个参数不是必须的，先随机生成一个
-    //var userUniqueId = await _getUserUniqueId(webRid);
+    //var userUniqueId = await _getUserUniqueId(webRid) ;
     var userUniqueId = generateRandomNumber(12).toString();
 
     var owner = roomData["owner"];
@@ -596,21 +610,9 @@ class DouyinSite implements LiveSite {
       "round_trip_time": "100",
       "webid": "7382872326016435738",
     });
-    //var requlestUrl = await getAbogusUrl(uri.toString());
     var requlestUrl = uri.toString();
-    var headResp = await HttpClient.instance
-        .head('https://live.douyin.com', header: headers);
-    var dyCookie = "";
-    headResp.headers["set-cookie"]?.forEach((element) {
-      var cookie = element.split(";")[0];
-      if (cookie.contains("ttwid")) {
-        dyCookie += "$cookie;";
-      }
-      if (cookie.contains("__ac_nonce")) {
-        dyCookie += "$cookie;";
-      }
-    });
-
+    var headResp = await getRequestHeaders();
+    var dyCookie = headResp['cookie'];
     var result = await HttpClient.instance.getJson(
       requlestUrl,
       queryParameters: {},
