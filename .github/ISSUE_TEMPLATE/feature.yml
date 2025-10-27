@@ -9,7 +9,7 @@ body:
     attributes:
       value: |
         你的Issue大概率会搁置很久，除非是那种我能随手解决的。
-        暂时不会添加新的平台支持（因为我自己用不上）。如果你有开发能力，建议的自行开发后提交个PR。
+        暂时不会添加新的平台支持（因为我自己用不上）。如果你有开发能力，建议在自行开发后提交个PR。
 
   - type: checkboxes
     id: terms
@@ -46,4 +46,5 @@ body:
     attributes:
       label: 附加信息
       description: 可以附加相关截图、视频或链接（好让我知道要我抄哪个APP）
+
 
