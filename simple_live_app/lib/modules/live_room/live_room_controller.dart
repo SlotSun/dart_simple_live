@@ -29,6 +29,7 @@ import 'package:simple_live_core/simple_live_core.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:simple_live_app/app/utils/sandbox.dart';
 
 class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   final Site pSite;
@@ -113,7 +114,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     }
     initAutoExit();
     showDanmakuState.value = AppSettingsController.instance.danmuEnable.value;
-    followed.value = FollowService.instance.getFollowExist("${site.id}_$roomId");
+    followed.value =
+        FollowService.instance.getFollowExist("${site.id}_$roomId");
     loadData();
 
     scrollController.addListener(scrollListener);
@@ -314,7 +316,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
       addHistory();
       // 确认房间关注状态
-      followed.value = FollowService.instance.getFollowExist("${site.id}_$roomId");
+      followed.value =
+          FollowService.instance.getFollowExist("${site.id}_$roomId");
       online.value = detail.value!.online;
       liveStatus.value = detail.value!.status || detail.value!.isRecord;
       if (liveStatus.value) {
@@ -338,7 +341,6 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
   /// 初始化播放器
   void getPlayQualites() async {
-    qualites.clear();
     currentQuality = -1;
 
     try {
@@ -349,7 +351,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
         SmartDialog.showToast("无法读取播放清晰度");
         return;
       }
-      qualites.value = playQualites;
+      qualites.assignAll(playQualites);
       var qualityLevel = await getQualityLevel();
       if (qualityLevel == 2) {
         //最高
@@ -362,8 +364,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
         int middle = (playQualites.length / 2).floor();
         currentQuality = middle;
       }
-
-      getPlayUrl();
+      await getPlayUrl();
     } catch (e) {
       Log.logPrint(e);
       SmartDialog.showToast("无法读取播放清晰度");
@@ -384,8 +385,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     return qualityLevel;
   }
 
-  void getPlayUrl() async {
-    playUrls.clear();
+  Future<void> getPlayUrl() async {
     currentQualityInfo.value = qualites[currentQuality].quality;
     currentLineInfo.value = "";
     currentLineIndex = -1;
@@ -395,13 +395,13 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       SmartDialog.showToast("无法读取播放地址");
       return;
     }
-    playUrls.value = playUrl.urls;
+    playUrls.assignAll(playUrl.urls);  // 深拷贝
     playHeaders = playUrl.headers;
     currentLineIndex = 0;
     currentLineInfo.value = "线路${currentLineIndex + 1}";
     //重置错误次数
     mediaErrorRetryCount = 0;
-    setPlayer();
+    initPlaylist();
   }
 
   void changePlayLine(int index) {
@@ -411,25 +411,33 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     setPlayer();
   }
 
-  void setPlayer() async {
+  void initPlaylist() async {
     currentLineInfo.value = "线路${currentLineIndex + 1}";
     errorMsg.value = "";
 
-    var playurl = playUrls[currentLineIndex];
-    if (AppSettingsController.instance.playerForceHttps.value) {
-      playurl = playurl.replaceAll("http://", "https://");
-    }
+    final mediaList = playUrls.map((url) {
+      var finalUrl = url;
+      if (AppSettingsController.instance.playerForceHttps.value) {
+        finalUrl = finalUrl.replaceAll("http://", "https://");
+      }
+      return Media(finalUrl, httpHeaders: playHeaders);
+    }).toList();
 
     // 初始化播放器并设置 ao 参数
     await initializePlayer();
 
     await player.open(
-      Media(
-        playurl,
-        httpHeaders: playHeaders,
-      ),
+      Playlist(
+        mediaList
+      )
     );
-    Log.d("播放链接\r\n：$playurl");
+  }
+
+  void setPlayer() async {
+    currentLineInfo.value = "线路${currentLineIndex + 1}";
+    errorMsg.value = "";
+
+    await player.jump(currentLineIndex);
   }
 
   @override
@@ -560,7 +568,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     if (detail.value == null) {
       return;
     }
-    Share.share(detail.value!.url);
+    SharePlus.instance.share(ShareParams(text: detail.value!.url));
   }
 
   void copyUrl() {
@@ -572,8 +580,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   }
 
   Future<void> visitWebLive() async {
-    var uri = Uri.parse(detail.value!.url);
-    if (await canLaunchUrl(uri)) {
+    Uri uri = Uri.parse(detail.value!.url);
+    if (await canLaunchUrl(uri) || runningInSandbox()) {
       await launchUrl(uri);
     } else {
       throw '无法打开网页 $uri';
@@ -634,21 +642,23 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   void showQualitySheet() {
     Utils.showBottomSheet(
       title: "切换清晰度",
-      child: ListView.builder(
-        itemCount: qualites.length,
-        itemBuilder: (_, i) {
-          var item = qualites[i];
-          return RadioListTile(
-            value: i,
-            groupValue: currentQuality,
-            title: Text(item.quality),
-            onChanged: (e) {
-              Get.back();
-              currentQuality = i;
-              getPlayUrl();
-            },
-          );
+      child: RadioGroup(
+        groupValue: currentQuality,
+        onChanged: (e) async {
+          Get.back();
+          currentQuality = e ?? 0;
+          await getPlayUrl();
         },
+        child: ListView.builder(
+          itemCount: qualites.length,
+          itemBuilder: (_, i) {
+            var item = qualites[i];
+            return RadioListTile(
+              value: i,
+              title: Text(item.quality),
+            );
+          },
+        ),
       ),
     );
   }
@@ -656,24 +666,26 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   void showPlayUrlsSheet() {
     Utils.showBottomSheet(
       title: "切换线路",
-      child: ListView.builder(
-        itemCount: playUrls.length,
-        itemBuilder: (_, i) {
-          return RadioListTile(
-            value: i,
-            groupValue: currentLineIndex,
-            title: Text("线路${i + 1}"),
-            secondary: Text(
-              playUrls[i].contains(".flv") ? "FLV" : "HLS",
-            ),
-            onChanged: (e) {
-              Get.back();
-              //currentLineIndex = i;
-              //setPlayer();
-              changePlayLine(i);
-            },
-          );
+      child: RadioGroup(
+        groupValue: currentLineIndex,
+        onChanged: (e) {
+          Get.back();
+          //currentLineIndex = i;
+          //setPlayer();
+          changePlayLine(e ?? 0);
         },
+        child: ListView.builder(
+          itemCount: playUrls.length,
+          itemBuilder: (_, i) {
+            return RadioListTile(
+              value: i,
+              title: Text("线路${i + 1}"),
+              secondary: Text(
+                playUrls[i].contains(".flv") ? "FLV" : "HLS",
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -685,55 +697,41 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
         () => ListView(
           padding: AppStyle.edgeInsetsV12,
           children: [
-            RadioListTile(
-              value: 0,
-              title: const Text("适应"),
-              visualDensity: VisualDensity.compact,
+            RadioGroup(
               groupValue: AppSettingsController.instance.scaleMode.value,
               onChanged: (e) {
                 AppSettingsController.instance.setScaleMode(e ?? 0);
                 updateScaleMode();
               },
-            ),
-            RadioListTile(
-              value: 1,
-              title: const Text("拉伸"),
-              visualDensity: VisualDensity.compact,
-              groupValue: AppSettingsController.instance.scaleMode.value,
-              onChanged: (e) {
-                AppSettingsController.instance.setScaleMode(e ?? 1);
-                updateScaleMode();
-              },
-            ),
-            RadioListTile(
-              value: 2,
-              title: const Text("铺满"),
-              visualDensity: VisualDensity.compact,
-              groupValue: AppSettingsController.instance.scaleMode.value,
-              onChanged: (e) {
-                AppSettingsController.instance.setScaleMode(e ?? 2);
-                updateScaleMode();
-              },
-            ),
-            RadioListTile(
-              value: 3,
-              title: const Text("16:9"),
-              visualDensity: VisualDensity.compact,
-              groupValue: AppSettingsController.instance.scaleMode.value,
-              onChanged: (e) {
-                AppSettingsController.instance.setScaleMode(e ?? 3);
-                updateScaleMode();
-              },
-            ),
-            RadioListTile(
-              value: 4,
-              title: const Text("4:3"),
-              visualDensity: VisualDensity.compact,
-              groupValue: AppSettingsController.instance.scaleMode.value,
-              onChanged: (e) {
-                AppSettingsController.instance.setScaleMode(e ?? 4);
-                updateScaleMode();
-              },
+              child: Column(
+                children: [
+                  RadioListTile(
+                    value: 0,
+                    title: const Text("适应"),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  RadioListTile(
+                    value: 1,
+                    title: const Text("拉伸"),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  RadioListTile(
+                    value: 2,
+                    title: const Text("铺满"),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  RadioListTile(
+                    value: 3,
+                    title: const Text("16:9"),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  RadioListTile(
+                    value: 4,
+                    title: const Text("4:3"),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -1002,6 +1000,8 @@ ${error?.stackTrace}''');
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.paused) {
+      var height = MediaQuery.of(Get.context!).padding.top;
+      Log.d("当前状态栏高度$height");
       Log.d("进入后台");
       //进入后台，关闭弹幕
       danmakuController?.clear();
@@ -1009,7 +1009,11 @@ ${error?.stackTrace}''');
     } else
     //返回前台
     if (state == AppLifecycleState.resumed) {
+      // update();
+      var height = MediaQuery.of(Get.context!).padding.top;
+      Log.d("当前状态栏高度$height");
       Log.d("返回前台");
+      danmakuController?.onResume();
       isBackground = false;
     }
   }

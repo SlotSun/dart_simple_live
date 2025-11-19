@@ -7,7 +7,7 @@ import 'package:simple_live_app/modules/settings/indexed_settings/indexed_settin
 import 'package:simple_live_app/widgets/settings/settings_card.dart';
 
 class IndexedSettingsPage extends GetView<IndexedSettingsController> {
-  const IndexedSettingsPage({Key? key}) : super(key: key);
+  const IndexedSettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,9 @@ class IndexedSettingsPage extends GetView<IndexedSettingsController> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 onReorder: controller.updateSiteSort,
-                children: controller.siteSort.map(
+                children: controller.siteSort
+                    .where((key) => Sites.allSites[key]?.name != 'Twitch')
+                    .map(
                   (key) {
                     var e = Sites.allSites[key]!;
                     return ListTile(

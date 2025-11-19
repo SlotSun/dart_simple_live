@@ -37,10 +37,13 @@ import 'package:simple_live_app/services/sync_service.dart';
 import 'package:simple_live_app/services/window_service.dart';
 import 'package:simple_live_app/widgets/status/app_loadding_widget.dart';
 import 'package:simple_live_core/simple_live_core.dart';
-import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // init-queue:
+  // window(first)->migration->media_kit->Hive->services->start
+  // window(second)->open
+  await firstOpen();
   await MigrationService.migrateData();
   MediaKit.ensureInitialized();
   await Hive.initFlutter(
@@ -64,23 +67,26 @@ void main() async {
   runApp(const MyApp());
 }
 
+Future firstOpen() async {
+  // 判定程序是否启动-- windows 交给原生
+  if (Platform.isWindows == false) {
+    if (!await FlutterSingleInstance().isFirstInstance()) {
+      Log.i("App is already running");
+      final err = await FlutterSingleInstance().focus();
+      if (err != null) {
+        Log.e("Error focusing running instance: $err", StackTrace.current);
+      }
+      exit(0);
+    }
+  }
+}
+
 Future initWindow() async {
   if (!(Platform.isMacOS || Platform.isWindows || Platform.isLinux)) {
     return;
   }
   await windowManager.ensureInitialized();
-  // 判定程序是否启动
-  if (!await FlutterSingleInstance().isFirstInstance()) {
-    Log.i("App is already running");
-    final err = await FlutterSingleInstance().focus();
-    if (err != null) {
-      Log.e("Error focusing running instance: $err", StackTrace.current);
-    }
-    exit(0);
-  }
-
   WindowService.instance.init();
-
 }
 
 Future initServices() async {

@@ -1,13 +1,12 @@
 
 
-
 <p align="center">
     <img width="128" src="/assets/logo.png" alt="Simple Live logo">
 </p>
 <h2 align="center">Slive</h2>
 
 <p align="center">
-简简单单的看直播
+我就默默看你表演
 </p>
 
 ![浅色模式](/assets/screenshot_light.jpg)
@@ -51,7 +50,7 @@ Windows建议下载UWP版[聚合直播](https://www.microsoft.com/store/apps/9N1
 
 ## 环境
 
-flutter 3.32.8
+flutter 3.35.7
 
 ## 参考及引用
 

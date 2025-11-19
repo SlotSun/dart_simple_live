@@ -8,7 +8,7 @@ import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
-import 'package:simple_live_app/app/utils/duration2strUtils.dart';
+import 'package:simple_live_app/app/utils/duration_2_str_utils.dart';
 import 'package:simple_live_app/app/utils/dynamic_filter.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
@@ -23,7 +23,7 @@ class FollowAppSettingsController extends BaseController {
 
   // 用户自定义条件
   Rx<int> takeLast = 15.obs;
-  Rx<int> minutes= 30.obs;
+  Rx<int> minutes = 30.obs;
 
   @override
   void onInit() {
@@ -140,7 +140,7 @@ class FollowAppSettingsController extends BaseController {
     bool upMode = title == "添加标签" ? true : false;
     Get.dialog(
       AlertDialog(
-        contentPadding: const EdgeInsets.all(16.0),
+        contentPadding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
@@ -179,8 +179,7 @@ class FollowAppSettingsController extends BaseController {
                   Get.back();
                 },
               ),
-              Container(
-                margin: AppStyle.edgeInsetsB4,
+              SizedBox(
                 width: double.infinity,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -230,7 +229,7 @@ class FollowAppSettingsController extends BaseController {
       await FollowService.instance.removeFollowUser(follow.id);
     }
     SmartDialog.dismiss();
-    EventBus.instance.emit(Constant.kUpdateFollow,0);
+    EventBus.instance.emit(Constant.kUpdateFollow, 0);
     SmartDialog.showToast("清理完成");
   }
 
@@ -260,7 +259,8 @@ class FollowAppSettingsController extends BaseController {
       ),
     ];
     // 根据动态条件筛选出需要清理的 关注id
-    final df = dynamicFilter(followedHistories, conditions, takeLast: takeLast.value);
+    final df =
+        dynamicFilter(followedHistories, conditions, takeLast: takeLast.value);
     final uidsToClean = df.map((history) => history.id).toSet();
 
     final autoCleanPool =

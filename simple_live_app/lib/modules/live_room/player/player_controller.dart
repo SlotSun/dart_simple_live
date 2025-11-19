@@ -33,15 +33,16 @@ mixin PlayerMixin {
     configuration: PlayerConfiguration(
       title: "Slive Player",
       logLevel: AppSettingsController.instance.logEnable.value
-          ? MPVLogLevel.info
+          ? MPVLogLevel.debug
           : MPVLogLevel.error,
     ),
   );
+
   /// 初始化播放器并设置 ao 参数
   Future<void> initializePlayer() async {
     var pp = player.platform as NativePlayer;
     // 在所有平台上正确启用双重缓存
-    if(AppSettingsController.instance.videoDoubleBuffering.value) {
+    if (AppSettingsController.instance.videoDoubleBuffering.value) {
       final directory = await getTemporaryDirectory();
       await pp.setProperty("demuxer-cache-dir", directory.path);
     }
@@ -51,7 +52,35 @@ mixin PlayerMixin {
         'ao',
         AppSettingsController.instance.audioOutputDriver.value,
       );
+    } else if (Platform.isLinux) {
+      await pp.setProperty('ao', 'alsa');
     }
+    // media_kit 仓库更新导致的问题，临时解决办法
+    if(Platform.isAndroid){
+      // 通过错误参数强制media_kit不seek, 解决了加载-pause-seek 在直播流上的开屏问题
+      await pp.setProperty('force-seekable', 'yes');
+    }
+    // 低内存管理
+    //
+    // 根据：https://mpv.io/manual/stable/#cache
+    // --cache=<yes|no|auto>// --cache-secs=<seconds>
+    // --demuxer-seekable-cache=<yes|no|auto>
+    // --demuxer-max-back-bytes=<bytesize>
+    // --demuxer-donate-buffer==<yes|no>
+    //
+    // 内存换空间, 同时通过调整参数禁用mpv回放缓存（直播暂时不需要）
+    // hls流/令牌流/.. 根据mdk-sdk作者回复, rtsp 在 ffmpeg存在内存泄露, 这意味着我们只能等待修复
+    await pp.setProperty("cache", "no");
+    await pp.setProperty("cache-secs", "0");
+    await pp.setProperty('demuxer-seekable-cache', 'no');
+    await pp.setProperty('demuxer-donate-buffer', 'no');
+    await pp.setProperty("demuxer-max-back-bytes", "0");
+    // bili/douyin流存在时间戳跳变问题
+    // 真机建议-空间换内存-暂时不需要
+    // windows:
+    //  icc-cache-dir = "~~/cache/icc";
+    //  gpu-shader-cache-dir = "~~/cache/shader"
+    //  watch-later-dir = "~~/cache/watch_later"
   }
 
   /// 视频控制器
@@ -59,19 +88,19 @@ mixin PlayerMixin {
     player,
     configuration: AppSettingsController.instance.customPlayerOutput.value
         ? VideoControllerConfiguration(
-      vo: AppSettingsController.instance.videoOutputDriver.value,
-      hwdec: AppSettingsController.instance.videoHardwareDecoder.value,
-    )
+            vo: AppSettingsController.instance.videoOutputDriver.value,
+            hwdec: AppSettingsController.instance.videoHardwareDecoder.value,
+          )
         : AppSettingsController.instance.playerCompatMode.value
-        ? const VideoControllerConfiguration(
-      vo: 'mediacodec_embed',
-      hwdec: 'mediacodec',
-    )
-        : VideoControllerConfiguration(
-      enableHardwareAcceleration:
-      AppSettingsController.instance.hardwareDecode.value,
-      androidAttachSurfaceAfterVideoParameters: false,
-    ),
+            ? const VideoControllerConfiguration(
+                vo: 'mediacodec_embed',
+                hwdec: 'mediacodec',
+              )
+            : VideoControllerConfiguration(
+                enableHardwareAcceleration:
+                    AppSettingsController.instance.hardwareDecode.value,
+                androidAttachSurfaceAfterVideoParameters: false,
+              ),
   );
 }
 mixin PlayerStateMixin on PlayerMixin {
@@ -107,6 +136,9 @@ mixin PlayerStateMixin on PlayerMixin {
 
   /// 显示提示底部Tip
   RxBool showBottomTip = false.obs;
+
+  /// 是否显示OSD统计信息
+  RxBool showOSDStats = false.obs;
 
   /// 提示底部Tip文本
   RxString bottomTipText = "".obs;
@@ -229,11 +261,6 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
 
     // 开始隐藏计时
     resetHideControlsTimer();
-
-    // 进入全屏模式
-    if (AppSettingsController.instance.autoFullScreen.value) {
-      enterFullScreen();
-    }
   }
 
   /// 释放一些系统状态
@@ -249,7 +276,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
     if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
       // 亮度重置,桌面平台可能会报错,暂时不处理桌面平台的亮度
       try {
-        await screenBrightness.resetScreenBrightness();
+        await screenBrightness.resetApplicationScreenBrightness();
       } catch (e) {
         Log.logPrint(e);
       }
@@ -368,9 +395,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
     if (Platform.isIOS) {
       var info = await deviceInfo.iosInfo;
       var version = info.systemVersion;
-      var versionInt = int.tryParse(version
-          .split('.')
-          .first) ?? 0;
+      var versionInt = int.tryParse(version.split('.').first) ?? 0;
       return versionInt < 16;
     } else {
       return false;
@@ -405,9 +430,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
         var path = await FilePicker.platform.saveFile(
           allowedExtensions: ["jpg"],
           type: FileType.image,
-          fileName: "${DateTime
-              .now()
-              .millisecondsSinceEpoch}.jpg",
+          fileName: "${DateTime.now().millisecondsSinceEpoch}.jpg",
         );
         if (path == null) {
           SmartDialog.showToast("取消保存");
@@ -464,7 +487,8 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
 
     _pipSubscription ??= pip.pipStatusStream.listen((event) {
       if (event == PiPStatus.disabled) {
-        danmakuController?.clear();
+        // 返回前台时恢复弹幕
+        danmakuController?.resume();
         showDanmakuState.value = danmakuStateBeforePIP;
       }
       Log.w(event.toString());
@@ -472,7 +496,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
   }
 }
 mixin PlayerGestureControlMixin
-on PlayerStateMixin, PlayerMixin, PlayerSystemMixin {
+    on PlayerStateMixin, PlayerMixin, PlayerSystemMixin {
   /// 单击显示/隐藏控制器
   void onTap() {
     if (showControlsState.value) {
@@ -496,10 +520,7 @@ on PlayerStateMixin, PlayerMixin, PlayerSystemMixin {
   }
 
   void onHover(PointerHoverEvent event, BuildContext context) {
-    final screenHeight = MediaQuery
-        .of(context)
-        .size
-        .height;
+    final screenHeight = MediaQuery.of(context).size.height;
     final targetPosition = screenHeight * 0.25; // 计算屏幕顶部25%的位置
     if (event.position.dy <= targetPosition ||
         event.position.dy >= targetPosition * 3) {
@@ -554,7 +575,7 @@ on PlayerStateMixin, PlayerMixin, PlayerSystemMixin {
       _currentVolume = await volumeController.getVolume();
     }
     if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
-      _currentBrightness = await screenBrightness.current;
+      _currentBrightness = await screenBrightness.application;
     }
   }
 
@@ -627,7 +648,7 @@ on PlayerStateMixin, PlayerMixin, PlayerSystemMixin {
       if (seek < 0) {
         seek = 0;
       }
-      screenBrightness.setScreenBrightness(seek);
+      screenBrightness.setApplicationScreenBrightness(seek);
 
       gestureTipText.value = "亮度 ${(seek * 100).toInt()}%";
       Log.logPrint(value);
@@ -638,7 +659,7 @@ on PlayerStateMixin, PlayerMixin, PlayerSystemMixin {
         seek = 1;
       }
 
-      screenBrightness.setScreenBrightness(seek);
+      screenBrightness.setApplicationScreenBrightness(seek);
       gestureTipText.value = "亮度 ${(seek * 100).toInt()}%";
       Log.logPrint(value);
     }
@@ -709,22 +730,28 @@ class PlayerController extends BaseController
     });
     _widthSubscription = player.stream.width.listen((event) {
       Log.d(
-          'width:$event  W:${(player.state.width)}  H:${(player.state
-              .height)}');
-      isVertical.value =
-          (player.state.height ?? 9) > (player.state.width ?? 16);
+          'width:$event  W:${(player.state.width)}  H:${(player.state.height)}');
+      if(player.state.width == null){
+        return;
+      }else{
+        // 可获取直播流size时且不为全屏模式时判断是否进入全屏模式
+        isVertical.value =
+            player.state.height! > player.state.width!;
+        if (AppSettingsController.instance.autoFullScreen.value && !fullScreenState.value) {
+          enterFullScreen();
+        }
+      }
     });
     _heightSubscription = player.stream.height.listen((event) {
       Log.d(
-          'height:$event  W:${(player.state.width)}  H:${(player.state
-              .height)}');
+          'height:$event  W:${(player.state.width)}  H:${(player.state.height)}');
       isVertical.value =
           (player.state.height ?? 9) > (player.state.width ?? 16);
     });
     _escSubscription =
         EventBus.instance.listen(EventBus.kEscapePressed, (event) {
-          exitFull();
-        });
+      exitFull();
+    });
   }
 
   void disposeStream() {
@@ -746,11 +773,25 @@ class PlayerController extends BaseController
     WakelockPlus.disable();
   }
 
+  Future<void> toggleOSDStats() async {
+    showOSDStats.value = !showOSDStats.value;
+    if (player.platform is NativePlayer) {
+      await (player.platform as NativePlayer).command([
+        'script-binding',
+        'stats/display-page-1-toggle',
+      ]);
+    }
+  }
+
   void showDebugInfo() {
     Utils.showBottomSheet(
       title: "播放信息",
       child: ListView(
         children: [
+          Obx(() => SwitchListTile(
+              title: const Text("OSD 显示"),
+              value: showOSDStats.value,
+              onChanged: (value) => toggleOSDStats())),
           ListTile(
             title: const Text("Resolution"),
             subtitle: Text('${player.state.width}x${player.state.height}'),
@@ -758,7 +799,7 @@ class PlayerController extends BaseController
               Clipboard.setData(
                 ClipboardData(
                   text:
-                  "Resolution\n${player.state.width}x${player.state.height}",
+                      "Resolution\n${player.state.width}x${player.state.height}",
                 ),
               );
             },
