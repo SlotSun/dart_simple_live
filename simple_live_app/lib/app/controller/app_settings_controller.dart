@@ -37,6 +37,8 @@ class AppSettingsController extends GetxController {
         .getValue(LocalStorageService.kDanmuSpeed, 10.0);
     danmuEnable.value = LocalStorageService.instance
         .getValue(LocalStorageService.kDanmuEnable, true);
+    danmakuMaskEnable.value = LocalStorageService.instance
+        .getValue(LocalStorageService.kDanmakuMaskEnable, false);
     danmuStrokeWidth.value = LocalStorageService.instance
         .getValue(LocalStorageService.kDanmuStrokeWidth, 2.0);
     danmuTopMargin.value = LocalStorageService.instance
@@ -81,6 +83,9 @@ class AppSettingsController extends GetxController {
 
     playerForceHttps.value = LocalStorageService.instance
         .getValue(LocalStorageService.kPlayerForceHttps, false);
+
+    douyinHlsFirst.value = LocalStorageService.instance
+        .getValue(LocalStorageService.kDouyinHlsFirst, false);
 
     autoFullScreen.value = LocalStorageService.instance
         .getValue(LocalStorageService.kAutoFullScreen, false);
@@ -307,6 +312,13 @@ class AppSettingsController extends GetxController {
   void setDanmuEnable(bool e) {
     danmuEnable.value = e;
     LocalStorageService.instance.setValue(LocalStorageService.kDanmuEnable, e);
+  }
+
+  var danmakuMaskEnable = false.obs;
+  void setDanmakuMaskEnable(bool e) {
+    danmakuMaskEnable.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kDanmakuMaskEnable, e);
   }
 
   var danmuStrokeWidth = 2.0.obs;
@@ -543,5 +555,12 @@ class AppSettingsController extends GetxController {
     playerForceHttps.value = e;
     LocalStorageService.instance
         .setValue(LocalStorageService.kPlayerForceHttps, e);
+  }
+
+  var douyinHlsFirst = false.obs;
+  void setDouyinHlsFirst(bool e) {
+    douyinHlsFirst.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kDouyinHlsFirst, e);
   }
 }

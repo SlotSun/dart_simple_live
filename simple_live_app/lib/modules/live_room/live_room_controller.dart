@@ -18,6 +18,7 @@ import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/history.dart';
+import 'package:simple_live_app/modules/live_room/danmu/danmaku_mask.dart';
 import 'package:simple_live_app/modules/live_room/player/player_controller.dart';
 import 'package:simple_live_app/modules/settings/danmu_settings_page.dart';
 import 'package:simple_live_app/services/db_service.dart';
@@ -35,6 +36,12 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   final Site pSite;
   final String pRoomId;
   late LiveDanmaku liveDanmaku;
+  IsolateDanmakuMask? danmakuMask;
+
+  List<LiveMessage> danmakuBuffer = [];
+  Timer? danmakuTimer;
+  bool _isProcessingBuffer = false;
+
   LiveRoomController({
     required this.pSite,
     required this.pRoomId,
@@ -120,7 +127,66 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
     scrollController.addListener(scrollListener);
 
+    _initDanmakuMask();
     super.onInit();
+  }
+
+  void _initDanmakuMask() async {
+    danmakuMask = await IsolateDanmakuMask.create(adaptiveWindow: true);
+    danmakuTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      _processDanmakuBuffer();
+    });
+  }
+
+  // 缓存降低跨线程消息开销 估算弹幕延迟在800ms左右
+  void _processDanmakuBuffer() async {
+    if (_isProcessingBuffer) return;
+    if (danmakuBuffer.isEmpty || danmakuMask == null) return;
+
+    _isProcessingBuffer = true;
+    try {
+      final batch = List<LiveMessage>.from(danmakuBuffer);
+      danmakuBuffer.clear();
+
+      final batchMessages = batch.map((e) => e.message).toList();
+      final nowMs = DateTime.now().millisecondsSinceEpoch;
+      final allowedResults = await danmakuMask!.allowList(batchMessages, nowMs);
+
+      final filteredBatch = <LiveMessage>[];
+      for (int i = 0; i < batch.length; i++) {
+        if (allowedResults[i]) {
+          filteredBatch.add(batch[i]);
+        }
+      }
+
+      if (filteredBatch.isEmpty) return;
+
+      messages.addAll(filteredBatch);
+      if (messages.length > 200 && !disableAutoScroll.value) {
+        messages.removeRange(0, messages.length - 200);
+      }
+
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => chatScrollToBottom(),
+      );
+      if (!liveStatus.value || isBackground) {
+        return;
+      }
+
+      addDanmaku(filteredBatch
+          .map((msg) => DanmakuContentItem(
+                msg.message,
+                color: Color.fromARGB(
+                  255,
+                  msg.color.r,
+                  msg.color.g,
+                  msg.color.b,
+                ),
+              ))
+          .toList());
+    } finally {
+      _isProcessingBuffer = false;
+    }
   }
 
   void scrollListener() {
@@ -202,12 +268,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   }
 
   /// 接收到WebSocket信息
-  void onWSMessage(LiveMessage msg) {
+  void onWSMessage(LiveMessage msg) async {
     if (msg.type == LiveMessageType.chat) {
-      if (messages.length > 200 && !disableAutoScroll.value) {
-        messages.removeAt(0);
-      }
-
       // 关键词屏蔽检查
       for (var keyword in AppSettingsController.instance.shieldList) {
         Pattern? pattern;
@@ -228,26 +290,35 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
         }
       }
 
-      messages.add(msg);
+      //  messages.length>n 预加载部分弹幕后启用去重功能
+      if (AppSettingsController.instance.danmakuMaskEnable.value &&
+          danmakuMask != null &&
+          messages.length > 50) {
+        danmakuBuffer.add(msg);
+      } else {
+        if (messages.length > 200 && !disableAutoScroll.value) {
+          messages.removeAt(0);
+        }
+        messages.add(msg);
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => chatScrollToBottom(),
+        );
+        if (!liveStatus.value || isBackground) {
+          return;
+        }
 
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => chatScrollToBottom(),
-      );
-      if (!liveStatus.value || isBackground) {
-        return;
-      }
-
-      addDanmaku([
-        DanmakuContentItem(
-          msg.message,
-          color: Color.fromARGB(
-            255,
-            msg.color.r,
-            msg.color.g,
-            msg.color.b,
+        addDanmaku([
+          DanmakuContentItem(
+            msg.message,
+            color: Color.fromARGB(
+              255,
+              msg.color.r,
+              msg.color.g,
+              msg.color.b,
+            ),
           ),
-        ),
-      ]);
+        ]);
+      }
     } else if (msg.type == LiveMessageType.online) {
       online.value = msg.data;
     } else if (msg.type == LiveMessageType.superChat) {
@@ -395,7 +466,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       SmartDialog.showToast("无法读取播放地址");
       return;
     }
-    playUrls.assignAll(playUrl.urls);  // 深拷贝
+    playUrls.assignAll(playUrl.urls); // 深拷贝
     playHeaders = playUrl.headers;
     currentLineIndex = 0;
     currentLineInfo.value = "线路${currentLineIndex + 1}";
@@ -426,11 +497,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     // 初始化播放器并设置 ao 参数
     await initializePlayer();
 
-    await player.open(
-      Playlist(
-        mediaList
-      )
-    );
+    await player.open(Playlist(mediaList));
   }
 
   void setPlayer() async {
@@ -535,6 +602,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       return;
     }
     var id = "${site.id}_$roomId";
+    var historyDuration =
+        HistoryService.instance.getHistoryDuration(followUserId: id);
     FollowService.instance.addFollow(
       FollowUser(
         id: id,
@@ -543,6 +612,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
         userName: detail.value?.userName ?? "",
         face: detail.value?.userAvatar ?? "",
         addTime: DateTime.now(),
+        watchDuration: historyDuration,
       ),
     );
     followed.value = true;
@@ -1023,9 +1093,11 @@ ${error?.stackTrace}''');
     WidgetsBinding.instance.removeObserver(this);
     scrollController.removeListener(scrollListener);
     autoExitTimer?.cancel();
+    danmakuTimer?.cancel();
     HistoryService.instance.stop();
 
     liveDanmaku.stop();
+    danmakuMask?.dispose();
     danmakuController = null;
     super.onClose();
   }
