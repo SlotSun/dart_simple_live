@@ -14,6 +14,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:simple_live_app/app/event_bus.dart';
+import 'package:simple_live_app/services/window_service.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
@@ -41,11 +42,6 @@ mixin PlayerMixin {
   /// 初始化播放器并设置 ao 参数
   Future<void> initializePlayer() async {
     var pp = player.platform as NativePlayer;
-    // 在所有平台上正确启用双重缓存
-    if (AppSettingsController.instance.videoDoubleBuffering.value) {
-      final directory = await getTemporaryDirectory();
-      await pp.setProperty("demuxer-cache-dir", directory.path);
-    }
     // 设置音频输出驱动
     if (AppSettingsController.instance.customPlayerOutput.value) {
       await pp.setProperty(
@@ -56,7 +52,7 @@ mixin PlayerMixin {
       await pp.setProperty('ao', 'alsa');
     }
     // media_kit 仓库更新导致的问题，临时解决办法
-    if(Platform.isAndroid){
+    if (Platform.isAndroid) {
       // 通过错误参数强制media_kit不seek, 解决了加载-pause-seek 在直播流上的开屏问题
       await pp.setProperty('force-seekable', 'yes');
     }
@@ -75,6 +71,15 @@ mixin PlayerMixin {
     await pp.setProperty('demuxer-seekable-cache', 'no');
     await pp.setProperty('demuxer-donate-buffer', 'no');
     await pp.setProperty("demuxer-max-back-bytes", "0");
+    // 在所有平台上正确启用双重缓存,覆写mpv设置
+    if (AppSettingsController.instance.videoDoubleBuffering.value) {
+      final directory = await getTemporaryDirectory();
+      await pp.setProperty("cache", "yes");
+      await pp.setProperty("cache-secs", "3");
+      await pp.setProperty('demuxer-seekable-cache', 'yes');
+      await pp.setProperty('demuxer-donate-buffer', 'yes');
+      await pp.setProperty("demuxer-cache-dir", directory.path);
+    }
     // bili/douyin流存在时间戳跳变问题
     // 真机建议-空间换内存-暂时不需要
     // windows:
@@ -248,6 +253,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
   final screenBrightness = ScreenBrightness();
   final VolumeController volumeController = VolumeController.instance;
   final pip = Floating();
+  final windowService = Get.find<WindowService>();
   StreamSubscription<PiPStatus>? _pipSubscription;
 
   /// 初始化一些系统状态
@@ -333,6 +339,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
     if (!(Platform.isAndroid || Platform.isIOS)) {
       fullScreenState.value = true;
       smallWindowState.value = true;
+      windowService.isPIP = smallWindowState.value;
 
       // 读取窗口大小
       _lastWindowSize = await windowManager.getSize();
@@ -361,6 +368,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
     if (!(Platform.isAndroid || Platform.isIOS)) {
       fullScreenState.value = false;
       smallWindowState.value = false;
+      windowService.isPIP = smallWindowState.value;
       windowManager.setTitleBarStyle(TitleBarStyle.normal);
       windowManager.setSize(_lastWindowSize!);
       windowManager.setPosition(_lastWindowPosition!);
@@ -731,13 +739,13 @@ class PlayerController extends BaseController
     _widthSubscription = player.stream.width.listen((event) {
       Log.d(
           'width:$event  W:${(player.state.width)}  H:${(player.state.height)}');
-      if(player.state.width == null){
+      if (player.state.width == null) {
         return;
-      }else{
+      } else {
         // 可获取直播流size时且不为全屏模式时判断是否进入全屏模式
-        isVertical.value =
-            player.state.height! > player.state.width!;
-        if (AppSettingsController.instance.autoFullScreen.value && !fullScreenState.value) {
+        isVertical.value = player.state.height! > player.state.width!;
+        if (AppSettingsController.instance.autoFullScreen.value &&
+            !fullScreenState.value) {
           enterFullScreen();
         }
       }

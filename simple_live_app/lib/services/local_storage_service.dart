@@ -59,6 +59,9 @@ class LocalStorageService extends GetxService {
   /// 弹幕开启
   static const String kDanmuEnable = "DanmuEnable";
 
+  /// 弹幕去重
+  static const String kDanmakuMaskEnable = "DanmakuMaskEnable";
+
   /// 弹幕字重
   static const String kDanmuFontWeight = "DanmuFontWeight";
 
@@ -101,6 +104,9 @@ class LocalStorageService extends GetxService {
 
   /// 播放器强制使用HTTPS
   static const String kPlayerForceHttps = "PlayerForceHttps";
+
+  /// Douyin设置hls优先
+  static const String kDouyinHlsFirst = "DouyinHlsFirst";
 
   /// 自动全屏
   static const String kAutoFullScreen = "AutoFullScreen";
