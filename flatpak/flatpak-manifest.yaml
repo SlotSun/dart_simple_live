@@ -1,10 +1,10 @@
-app-id: io.github.SlotSun.dart_simple_live
+app-id: io.github.SlotSun.Slive
 runtime: org.freedesktop.Platform
 runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.llvm21
-command: Slive
+command: io.github.SlotSun.Slive
 finish-args:
   - --share=ipc
   - --socket=fallback-x11
@@ -47,7 +47,7 @@ modules:
         url: https://static.rust-lang.org/rustup/dist/aarch64-unknown-linux-gnu/rustup-init
         sha256: e3853c5a252fca15252d07cb23a1bdd9377a8c6f3efa01531109281ae47f841c
 
-  - name: dart_simple_live
+  - name: Slive
     buildsystem: simple
     build-options:
       build-args:
@@ -59,12 +59,12 @@ modules:
         aarch64:
           env:
             BUNDLE_PATH: simple_live_app/build/linux/arm64/release/bundle
-      append-path: /var/lib/rustup/bin:/usr/lib/sdk/llvm21/bin:/run/build/dart_simple_live/flutter/bin
+      append-path: /var/lib/rustup/bin:/usr/lib/sdk/llvm21/bin:/run/build/Slive/flutter/bin
       prepend-ld-library-path: /usr/lib/sdk/llvm21/lib
       env:
         RUSTUP_HOME: /var/lib/rustup
         CARGO_HOME: /var/lib/rustup
-        PUB_CACHE: /run/build/dart_simple_live/.pub-cache
+        PUB_CACHE: /run/build/Slive/.pub-cache
     build-commands:
       - cd simple_live_app && flutter build linux --release
       - install -dvm755 ${FLATPAK_DEST}/bin

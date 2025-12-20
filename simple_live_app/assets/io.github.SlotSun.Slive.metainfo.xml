@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
-  <id>io.github.SlotSun.dart_simple_live</id>
-  <launchable type="desktop-id">io.github.SlotSun.dart_simple_live.desktop</launchable>
+  <id>io.github.SlotSun.Slive</id>
+  <launchable type="desktop-id">io.github.SlotSun.Slive.desktop</launchable>
   <name>Slive</name>
   <developer id="io.github.slotsun">
     <name>SlotSun</name>

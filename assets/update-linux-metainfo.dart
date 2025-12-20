@@ -12,7 +12,7 @@ void main() {
   final projectRoot = Directory.current.path;
   final jsonPath = '$projectRoot/assets/app_version.json';
   final targetPath =
-      '$projectRoot/simple_live_app/assets/io.github.SlotSun.dart_simple_live.metainfo.xml';
+      '$projectRoot/simple_live_app/assets/io.github.SlotSun.Slive.metainfo.xml';
 
   final jsonFile = File(jsonPath);
   if (!jsonFile.existsSync()) {
