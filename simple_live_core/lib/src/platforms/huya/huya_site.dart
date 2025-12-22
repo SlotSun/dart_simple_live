@@ -6,8 +6,6 @@ import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
 import 'package:simple_live_core/src/model/tars/get_cdn_token_ex_req.dart';
 import 'package:simple_live_core/src/model/tars/get_cdn_token_ex_resp.dart';
-import 'package:simple_live_core/src/model/tars/get_cdn_token_req.dart';
-import 'package:simple_live_core/src/model/tars/get_cdn_token_resp.dart';
 import 'package:simple_live_core/src/model/tars/types.dart';
 import 'package:simple_live_core/src/platforms/huya/utils.dart';
 import 'package:tars_dart/tars/net/base_tars_http.dart';
@@ -30,7 +28,7 @@ class HuyaSite implements LiveSite {
   static const String AYYUID_REGEX = r'"yyid":"?(\d+)"?';
 
   static const String HYSDK_UA =
-      "HYSDK(Windows,30000002)_APP(pc_exe&7030003&official)_SDK(trans&2.29.0.5493)";
+      "HYSDK(Windows, 30000002)_APP(pc_exe&7060000&official)_SDK(trans&2.32.3.5646)";
 
   static Map<String, String> get requestHeaders {
     return {
@@ -361,12 +359,12 @@ class HuyaSite implements LiveSite {
   /// return ture anticode
   String buildAntiCode(String stream, int presenterUid, String antiCode) {
     var mapAnti = Uri(query: antiCode).queryParametersAll;
-    if (mapAnti.containsKey("fm")) {
+    if (!mapAnti.containsKey("fm")) {
       return antiCode;
     }
 
     var ctype = mapAnti["ctype"]?.first ?? "huya_pc_exe";
-    var platformId = int.tryParse(mapAnti["ctype"]?.first ?? "0");
+    var platformId = int.tryParse(mapAnti["t"]?.first ?? "0");
 
     bool isWap = platformId == 103;
     var clacStartTime = DateTime.now().millisecondsSinceEpoch;
@@ -420,7 +418,7 @@ class HuyaSite implements LiveSite {
   Future<String> getCndTokenInfoEx(String stream) async {
     var func = "getCdnTokenInfoEx";
     var tid = HuyaUserId();
-    tid.sHuYaUA = HYSDK_UA;
+    tid.sHuYaUA = "pc_exe&7060000&official";
     var tReq = GetCdnTokenExReq();
     tReq.tId = tid;
     tReq.sStreamName = stream;
