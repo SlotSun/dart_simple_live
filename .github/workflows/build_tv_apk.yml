@@ -1,0 +1,61 @@
+name: Build Android TV APK
+
+on:
+  push:
+    tags:
+      - 'v*' # 当你推送以 v 开头的标签（如 v1.0.0）时触发
+  workflow_dispatch: # 支持手动点击运行
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      # 关键步骤：构建 TV 版 APK
+      # dart_simple_live 项目通常通过 --dart-define 分辨版本
+      - name: Build TV APK
+        run: flutter build apk --release --dart-define=IS_TV=true
+
+      # 使用专用 Action 进行手动签名
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: build/app/outputs/flutter-apk
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      # 将签名后的 APK 变成 GitHub Release 附件
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-live-tv-release
+          path: ${{ codesign_app.outputs.signedReleaseFile }}
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ steps.sign_app.outputs.signedReleaseFile }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
