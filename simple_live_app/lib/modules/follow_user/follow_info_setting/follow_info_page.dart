@@ -57,7 +57,10 @@ class FollowInfoPage extends GetView<FollowInfoController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          controller.followUser.value!.userName,
+                          controller.followUser.value!.remark?.isNotEmpty ==
+                                  true
+                              ? '${controller.followUser.value!.userName} (${controller.followUser.value!.remark!})'
+                              : controller.followUser.value!.userName,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -114,6 +117,72 @@ class FollowInfoPage extends GetView<FollowInfoController> {
                     orElse: () => items.first,
                   );
                   controller.changeTag(target);
+                },
+              );
+            }),
+          ),
+          AppStyle.divider,
+          Padding(
+            padding: AppStyle.edgeInsetsA12,
+            child: Obx(() {
+              return ListTile(
+                title:
+                    Text('备注设置', style: Theme.of(context).textTheme.bodyLarge),
+                visualDensity: VisualDensity.compact,
+                shape: RoundedRectangleBorder(
+                  borderRadius: AppStyle.radius8,
+                ),
+                contentPadding: AppStyle.edgeInsetsL16.copyWith(right: 8),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      controller.followUser.value?.remark?.isNotEmpty == true
+                          ? controller.followUser.value!.remark!
+                          : '无',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .copyWith(color: Colors.grey),
+                    ),
+                    AppStyle.hGap4,
+                    const Icon(
+                      Icons.chevron_right,
+                      color: Colors.grey,
+                    ),
+                  ],
+                ),
+                onTap: () {
+                  final textController = TextEditingController(
+                      text: controller.followUser.value?.remark);
+                  Get.dialog(
+                    AlertDialog(
+                      title: const Text("修改备注"),
+                      content: TextField(
+                        controller: textController,
+                        decoration: const InputDecoration(
+                            border: OutlineInputBorder(), hintText: "请输入备注名"),
+                        autofocus: true,
+                        onSubmitted: (value) {
+                          controller.updateRemark(value.trim());
+                          Get.back();
+                        },
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Get.back(),
+                          child: const Text("取消"),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            controller.updateRemark(textController.text.trim());
+                            Get.back();
+                          },
+                          child: const Text("确定"),
+                        ),
+                      ],
+                    ),
+                  );
                 },
               );
             }),
