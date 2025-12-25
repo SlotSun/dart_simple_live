@@ -41,7 +41,6 @@ class HuyaSite implements LiveSite {
   final BaseTarsHttp tupClient =
       BaseTarsHttp("http://wup.huya.com", "liveui", headers: requestHeaders);
 
-  bool _shouldSkipQueryBuild = false;
 
   @override
   String id = "huya";
@@ -292,36 +291,29 @@ class HuyaSite implements LiveSite {
           // HuyaUrlDataModel
           var huyaLines = <HuyaLineModel>[];
           var huyaBiterates = <HuyaBitRateModel>[];
-
+          final lineTypes = {
+            'sFlvUrl': HuyaLineType.flv,
+            'sHlsUrl': HuyaLineType.hls,
+          };
           //读取可用线路
           var lines = streamDataJson["gameStreamInfoList"];
           for (var item in lines) {
-            if ((item["sFlvUrl"]?.toString() ?? "").isNotEmpty) {
-              huyaLines.add(
-                HuyaLineModel(
-                  line: item["sFlvUrl"].toString(),
-                  lineType: HuyaLineType.flv,
-                  flvAntiCode: item["sFlvAntiCode"].toString(),
-                  hlsAntiCode: item["sHlsAntiCode"].toString(),
-                  streamName: item["sStreamName"].toString(),
-                  cdnType: item["sCdnType"].toString(),
-                  presenterUid: topSid ?? 0,
-                ),
-              );
-            }
-            if ((item["sHlsUrl"]?.toString() ?? "").isNotEmpty) {
-              huyaLines.add(
-                HuyaLineModel(
-                  line: item["sHlsUrl"].toString(),
-                  lineType: HuyaLineType.hls,
-                  flvAntiCode: item["sFlvAntiCode"].toString(),
-                  hlsAntiCode: item["sHlsAntiCode"].toString(),
-                  streamName: item["sStreamName"].toString(),
-                  cdnType: item["sCdnType"].toString(),
-                  presenterUid: topSid ?? 0,
-                ),
-              );
-            }
+            lineTypes.forEach((key, type) {
+              final url = item[key]?.toString() ?? "";
+              if (url.isNotEmpty) {
+                huyaLines.add(
+                  HuyaLineModel(
+                    line: url,
+                    lineType: type,
+                    flvAntiCode: item["sFlvAntiCode"].toString(),
+                    hlsAntiCode: item["sHlsAntiCode"].toString(),
+                    streamName: item["sStreamName"].toString(),
+                    cdnType: item["sCdnType"].toString(),
+                    presenterUid: topSid ?? 0,
+                  ),
+                );
+              }
+            });
           }
           //清晰度
           var biterates = streamJson["vMultiStreamInfo"];
@@ -399,7 +391,7 @@ class HuyaSite implements LiveSite {
       'ctype': ctype,
       'ver': '1',
       'fs': mapAnti['fs']!.first,
-      'fm': Uri.encodeComponent(mapAnti['fm']!.first),
+      'fm': fm,
       't': platformId,
     };
     if (isWap) {
@@ -523,13 +515,7 @@ class HuyaSite implements LiveSite {
     }
     return false;
   }
-
-  void checkShouldSkipQuery(int gid) {
-    // "xingxiu" use default queryParams
-    CoreLog.i("gid: $gid");
-    _shouldSkipQueryBuild = gid == 1663 ? true : false;
-  }
-
+  
   /// 匿名登录获取uid
   Future<String> getAnonymousUid() async {
     var result = await HttpClient.instance.postJson(
@@ -574,48 +560,6 @@ class HuyaSite implements LiveSite {
       }
     }
     return o.join("");
-  }
-
-  String processAnticode(String anticode, String uid, String streamname) {
-    // 来源：https://github.com/iceking2nd/real-url/blob/master/huya.py
-    // https://github.com/SeaHOH/ykdl/blob/master/ykdl/extractors/huya/live.py
-    // 通过ChatGPT转换的Dart代码
-    var query = Uri.splitQueryString(anticode);
-
-    query["t"] = "103";
-    query["ctype"] = "tars_mobile";
-
-    final wsTime = (DateTime.now().millisecondsSinceEpoch ~/ 1000 + 21600)
-        .toRadixString(16);
-    final seqId =
-        (DateTime.now().millisecondsSinceEpoch + int.parse(uid)).toString();
-
-    final fm = utf8.decode(base64.decode(Uri.decodeComponent(query['fm']!)));
-    final wsSecretPrefix = fm.split('_').first;
-    final wsSecretHash = md5
-        .convert(utf8.encode('$seqId|${query["ctype"]}|${query["t"]}'))
-        .toString();
-    final wsSecret = md5
-        .convert(utf8.encode(
-            '${wsSecretPrefix}_${uid}_${streamname}_${wsSecretHash}_$wsTime'))
-        .toString();
-
-    return Uri(queryParameters: {
-      "wsSecret": wsSecret,
-      "wsTime": wsTime,
-      "seqid": seqId,
-      "ctype": query["ctype"]!,
-      "ver": "1",
-      "fs": query["fs"]!,
-      "dMod": "mseh-0",
-      "sdkPcdn": "1_1",
-      "uid": uid,
-      "uuid": getUUid(),
-      "t": query["t"]!,
-      "sv": "202411221719",
-      "sdk_sid": "1732862566708",
-      "a_block": "0"
-    }).query;
   }
 
   @override
