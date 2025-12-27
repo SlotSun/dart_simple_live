@@ -45,3 +45,9 @@ class HomePageItem {
     required this.index,
   });
 }
+
+enum DownloadState {
+  notDownloaded,
+  downloading,
+  downloaded,
+}

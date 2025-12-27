@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -19,88 +17,72 @@ class AppColors {
 }
 
 class AppStyle {
-  static ThemeData lightTheme = ThemeData(
-    colorScheme: AppColors.lightColorScheme,
-    useMaterial3: true,
-    fontFamily: Platform.isWindows ? "Microsoft YaHei" : null,
-    visualDensity: VisualDensity.standard,
-    appBarTheme: AppBarTheme(
-      //elevation: 0,
-      centerTitle: true,
-      titleTextStyle: const TextStyle(
-        fontSize: 16,
-        color: AppColors.black333,
-      ),
-      foregroundColor: AppColors.black333,
-      systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
-        systemNavigationBarColor: Colors.transparent,
-      ),
-    ),
-
-    // radioTheme: RadioThemeData(
-    //   fillColor: MaterialStateProperty.all(AppColors.lightColorScheme.primary),
-    // ),
-    // checkboxTheme: CheckboxThemeData(
-    //   fillColor: MaterialStateProperty.all(AppColors.lightColorScheme.primary),
-    // ),
-    // tabBarTheme: TabBarTheme(
-    //   labelColor: AppColors.lightColorScheme.primary,
-    //   unselectedLabelColor: Colors.white70,
-    //   indicatorSize: TabBarIndicatorSize.tab,
-    //   indicator: RectangularIndicator(
-    //     color: Colors.white.withOpacity(.8),
-    //     topLeftRadius: 24,
-    //     bottomLeftRadius: 24,
-    //     topRightRadius: 24,
-    //     bottomRightRadius: 24,
-    //     verticalPadding: 8,
-    //     horizontalPadding: 0,
-    //   ),
-    // ),
-  );
-
-  static ThemeData darkTheme = ThemeData.dark().copyWith(
-    colorScheme: AppColors.darkColorScheme,
-    visualDensity: VisualDensity.standard,
-    textTheme: ThemeData.dark().textTheme.apply(
-          fontFamily: Platform.isWindows ? "Microsoft YaHei" : null,
+  static ThemeData light({String? fontFamily}) {
+    return ThemeData(
+      colorScheme: AppColors.lightColorScheme,
+      useMaterial3: true,
+      fontFamily: fontFamily,
+      visualDensity: VisualDensity.standard,
+      appBarTheme: AppBarTheme(
+        //elevation: 0,
+        centerTitle: true,
+        titleTextStyle: const TextStyle(
+          fontSize: 16,
+          color: AppColors.black333,
         ),
-    primaryTextTheme: ThemeData().textTheme.apply(
-          fontFamily: Platform.isWindows ? "Microsoft YaHei" : null,
+        foregroundColor: AppColors.black333,
+        systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
+          systemNavigationBarColor: Colors.transparent,
         ),
-    appBarTheme: AppBarTheme(
-      //elevation: 0,
+      ),
+    );
+  }
 
-      centerTitle: true,
-      titleTextStyle: const TextStyle(
-        fontSize: 16,
-        color: Colors.white,
+  static ThemeData darkTheme({String? fontFamily}) {
+    return ThemeData.dark().copyWith(
+      colorScheme: AppColors.darkColorScheme,
+      visualDensity: VisualDensity.standard,
+      textTheme: ThemeData.dark().textTheme.apply(
+            fontFamily: fontFamily,
+          ),
+      primaryTextTheme: ThemeData().textTheme.apply(
+            fontFamily: fontFamily,
+          ),
+      appBarTheme: AppBarTheme(
+        //elevation: 0,
+
+        centerTitle: true,
+        titleTextStyle: const TextStyle(
+          fontSize: 16,
+          color: Colors.white,
+        ),
+        foregroundColor: Colors.white,
+        systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
+          systemNavigationBarColor: Colors.transparent,
+        ),
       ),
-      foregroundColor: Colors.white,
-      systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
-        systemNavigationBarColor: Colors.transparent,
-      ),
-    ),
-    // radioTheme: RadioThemeData(
-    //   fillColor: MaterialStateProperty.all(AppColors.darkColorScheme.primary),
-    // ),
-    // checkboxTheme: CheckboxThemeData(
-    //   fillColor: MaterialStateProperty.all(AppColors.darkColorScheme.primary),
-    // ),
-    // tabBarTheme: TabBarTheme(
-    //   labelColor: AppColors.darkColorScheme.primary,
-    //   unselectedLabelColor: Colors.white70,
-    //   indicator: RectangularIndicator(
-    //     color: Colors.white.withAlpha(50),
-    //     topLeftRadius: 24,
-    //     bottomLeftRadius: 24,
-    //     topRightRadius: 24,
-    //     bottomRightRadius: 24,
-    //     verticalPadding: 8,
-    //     horizontalPadding: 0,
-    //   ),
-    // ),
-  );
+      // radioTheme: RadioThemeData(
+      //   fillColor: MaterialStateProperty.all(AppColors.darkColorScheme.primary),
+      // ),
+      // checkboxTheme: CheckboxThemeData(
+      //   fillColor: MaterialStateProperty.all(AppColors.darkColorScheme.primary),
+      // ),
+      // tabBarTheme: TabBarTheme(
+      //   labelColor: AppColors.darkColorScheme.primary,
+      //   unselectedLabelColor: Colors.white70,
+      //   indicator: RectangularIndicator(
+      //     color: Colors.white.withAlpha(50),
+      //     topLeftRadius: 24,
+      //     bottomLeftRadius: 24,
+      //     topRightRadius: 24,
+      //     bottomRightRadius: 24,
+      //     verticalPadding: 8,
+      //     horizontalPadding: 0,
+      //   ),
+      // ),
+    );
+  }
+
   static const vGap4 = SizedBox(
     height: 4,
   );

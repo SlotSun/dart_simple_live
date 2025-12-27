@@ -1,12 +1,12 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
-
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class AppSettingsController extends GetxController {
   static AppSettingsController get instance =>
@@ -105,11 +105,7 @@ class AppSettingsController extends GetxController {
     pipHideDanmu.value = LocalStorageService.instance
         .getValue(LocalStorageService.kPIPHideDanmu, true);
 
-    styleColor.value = LocalStorageService.instance
-        .getValue(LocalStorageService.kStyleColor, 0xff3498db);
 
-    isDynamic.value = LocalStorageService.instance
-        .getValue(LocalStorageService.kIsDynamic, false);
 
     bilibiliLoginTip.value = LocalStorageService.instance
         .getValue(LocalStorageService.kBilibiliLoginTip, true);
@@ -182,6 +178,7 @@ class AppSettingsController extends GetxController {
 
     initSiteSort();
     initHomeSort();
+
     super.onInit();
   }
 
@@ -229,46 +226,9 @@ class AppSettingsController extends GetxController {
     LocalStorageService.instance.setValue(LocalStorageService.kFirstRun, false);
   }
 
-  void changeTheme() {
-    Get.dialog(
-      SimpleDialog(
-        title: const Text("设置主题"),
-        children: [
-          RadioGroup<int>(
-            groupValue: themeMode.value,
-            onChanged: (e) {
-              Get.back();
-              setTheme(e ?? 0);
-            },
-            child: Column(
-              children: [
-                RadioListTile<int>(
-                  title: const Text("跟随系统"),
-                  value: 0,
-                ),
-                RadioListTile<int>(
-                  title: const Text("浅色模式"),
-                  value: 1,
-                ),
-                RadioListTile<int>(
-                  title: const Text("深色模式"),
-                  value: 2,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  void setTheme(int i) {
-    themeMode.value = i;
-    var mode = ThemeMode.values[i];
 
-    LocalStorageService.instance.setValue(LocalStorageService.kThemeMode, i);
-    Get.changeThemeMode(mode);
-  }
+
 
   var hardwareDecode = true.obs;
 
@@ -491,20 +451,6 @@ class AppSettingsController extends GetxController {
   void setPIPHideDanmu(bool e) {
     pipHideDanmu.value = e;
     LocalStorageService.instance.setValue(LocalStorageService.kPIPHideDanmu, e);
-  }
-
-  var styleColor = 0xff3498db.obs;
-
-  void setStyleColor(int e) {
-    styleColor.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kStyleColor, e);
-  }
-
-  var isDynamic = false.obs;
-
-  void setIsDynamic(bool e) {
-    isDynamic.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kIsDynamic, e);
   }
 
   var danmuTopMargin = 0.0.obs;
