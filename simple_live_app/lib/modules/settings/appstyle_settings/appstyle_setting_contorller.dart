@@ -95,7 +95,7 @@ class AppStyleSettingController extends GetxController {
       await fontDir.create(recursive: true);
     }
     Log.d("开始下载----$fontName");
-    const baseUrl = "https://cdn.jsdelivr.net/gh/SlotSun/fonts@master/";
+    const baseUrl = "https://gcore.jsdelivr.net/gh/SlotSun/fonts@master/";
     fontState.value = DownloadState.downloading;
     for (var filePath in curFontModel.value!.files) {
       final fileName = filePath.split('/').last;
@@ -137,7 +137,6 @@ class AppStyleSettingController extends GetxController {
     if (fontName != null && fontName != "Microsoft YaHei") {
       // 确认本地是否存在此字体
       if (await fontDownloadCheck(fontName)) {
-        fontState.value = DownloadState.notDownloaded;
         // 存在则加载并应用
         await loadFont(fontName);
       } else {
@@ -153,6 +152,11 @@ class AppStyleSettingController extends GetxController {
     } else {
       curFontModel.value = fontMap.keys.first;
     }
+    // maybe curFontName = null
+    fontState.value = await fontDownloadCheck(curFontModel.value!.id)
+        ? DownloadState.downloaded
+        : DownloadState.notDownloaded;
+
     Log.d("当前字体模型：${curFontModel.value!.id}");
   }
 
