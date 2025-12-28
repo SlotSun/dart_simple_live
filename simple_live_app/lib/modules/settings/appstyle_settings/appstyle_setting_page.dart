@@ -15,11 +15,29 @@ class AppStyleSettingPage extends GetView<AppStyleSettingController> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
-          onPressed: controller.fontReset,
-          icon: Icon(RemixIcons.reset_right_fill),
+        Tooltip(
+          message: "重置为默认字体",
+          child: IconButton(
+            onPressed: controller.fontReset,
+            icon: Icon(RemixIcons.reset_right_fill),
+          ),
         ),
         AppStyle.hGap4,
+        Visibility(
+          visible: controller.fontState.value == DownloadState.downloaded,
+          child:
+        Tooltip(
+          message: "删除字体",
+          child: IconButton(
+            onPressed: controller.fontDelete,
+            icon: Icon(Icons.delete_outline_outlined),
+          ),
+        ),
+        ),
+        Visibility(
+          visible: controller.fontState.value == DownloadState.downloaded,
+          child: AppStyle.hGap4,
+        ),
         widget,
       ],
     );
@@ -177,9 +195,12 @@ class AppStyleSettingPage extends GetView<AppStyleSettingController> {
                   switch (controller.fontState.value) {
                     case DownloadState.notDownloaded:
                       return trailingBuild(
-                        widget: IconButton(
-                          icon: const Icon(Icons.download),
-                          onPressed: () => controller.downloadFont(),
+                        widget: Tooltip(
+                          message: "下载字体",
+                          child: IconButton(
+                            icon: const Icon(Icons.download),
+                            onPressed: () => controller.downloadFont(),
+                          ),
                         ),
                       );
 
@@ -193,9 +214,12 @@ class AppStyleSettingPage extends GetView<AppStyleSettingController> {
                       );
                     case DownloadState.downloaded:
                       return trailingBuild(
-                        widget: IconButton(
-                          icon: const Icon(Icons.check_circle_outline_outlined),
-                          onPressed: () => controller.changeFontFamily(),
+                        widget: Tooltip(
+                          message: "应用字体",
+                          child: IconButton(
+                            icon: const Icon(Icons.check_circle_outline_outlined),
+                            onPressed: () => controller.changeFontFamily(),
+                          ),
                         ),
                       );
                   }

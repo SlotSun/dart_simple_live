@@ -40,6 +40,21 @@ class AppStyleSettingController extends GetxController {
     await userFontInit();
   }
 
+  Future<void> fontDelete() async{
+    var dir = await getApplicationSupportDirectory();
+    final fontDir = Directory("${dir.path}/fonts/${curFontModel.value!.id}");
+    try {
+      // 删除整个目录（包括目录本身和所有内容）
+      await fontDir.delete(recursive: true);
+      await fontDir.create(recursive: true);
+      await fontDownloadCheck(curFontModel.value!.id);
+      SmartDialog.showToast("已删除${curFontModel.value!.name}字体");
+      Log.d('目录${fontDir.path}已清空并重新创建');
+    } catch (e,s) {
+      Log.e('操作失败: $e', s);
+    }
+  }
+
   void fontReset(){
     if(Platform.isWindows){
       curFontName.value = "Microsoft YaHei";
@@ -60,7 +75,7 @@ class AppStyleSettingController extends GetxController {
   Future<void> onFontSelected(FontModel fontModel) async {
     var fontName = fontModel.id;
     curFontModel.value = fontModel;
-    if (await checkFontDownload(fontName)) {
+    if (await fontDownloadCheck(fontName)) {
       fontState.value = DownloadState.downloaded;
       // 存在则加载并应用
       await loadFont(fontName);
@@ -116,10 +131,10 @@ class AppStyleSettingController extends GetxController {
     var fontName = LocalStorageService.instance
         .getNullValue<String?>(LocalStorageService.kCustomFont, null);
     Log.d('获取当前字体$fontName');
-    if (fontName != null) {
+    if (fontName != null && fontName != "Microsoft YaHei") {
       // 确认本地是否存在此字体
-      if (await checkFontDownload(fontName)) {
-        fontState.value = DownloadState.downloaded;
+      if (await fontDownloadCheck(fontName)) {
+        fontState.value = DownloadState.notDownloaded;
         // 存在则加载并应用
         await loadFont(fontName);
       } else {
@@ -130,7 +145,8 @@ class AppStyleSettingController extends GetxController {
     curFontName.value = fontName;
     if (curFontName.value != null) {
       curFontModel.value = fontMap.keys.firstWhere(
-              (element) => element.id == curFontName.value);
+          (element) => element.id == curFontName.value,
+          orElse: () => fontMap.keys.first);
     } else {
       curFontModel.value = fontMap.keys.first;
     }
@@ -151,7 +167,7 @@ class AppStyleSettingController extends GetxController {
     Log.d('已加载$fontName 词库');
   }
 
-  Future<bool> checkFontDownload(String fontName) async {
+  Future<bool> fontDownloadCheck(String fontName) async {
     final dir = await getApplicationSupportDirectory();
     final fontDir = Directory("${dir.path}/fonts/$fontName");
     bool fontDownload =
