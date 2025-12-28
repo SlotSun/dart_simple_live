@@ -47,7 +47,10 @@ class AppStyleSettingController extends GetxController {
       // 删除整个目录（包括目录本身和所有内容）
       await fontDir.delete(recursive: true);
       await fontDir.create(recursive: true);
-      await fontDownloadCheck(curFontModel.value!.id);
+      var download =  await fontDownloadCheck(curFontModel.value!.id);
+      if(download == false){
+        fontState.value = DownloadState.notDownloaded;
+      }
       SmartDialog.showToast("已删除${curFontModel.value!.name}字体");
       Log.d('目录${fontDir.path}已清空并重新创建');
     } catch (e,s) {
