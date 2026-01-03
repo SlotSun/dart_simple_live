@@ -194,17 +194,6 @@ class FollowService extends GetxService {
     if (toRemove.isNotEmpty) {
       DBService.instance.updateFollowTag(tag);
     }
-    // 标签内排序
-    curTagFollowList.sort(
-      (a, b) {
-        if (a.liveStatus.value != b.liveStatus.value) {
-          return b.liveStatus.value.compareTo(a.liveStatus.value);
-        }
-        return b.watchDuration!
-            .toDuration()
-            .compareTo(a.watchDuration!.toDuration());
-      },
-    );
   }
 
   void updateFollowTagOrder(List<FollowUserTag> userTagList) {
@@ -396,16 +385,6 @@ class FollowService extends GetxService {
   }
 
   void filterData() {
-    followList.sort(
-      (a, b) {
-        if (a.liveStatus.value != b.liveStatus.value) {
-          return b.liveStatus.value.compareTo(a.liveStatus.value);
-        }
-        return b.watchDuration!
-            .toDuration()
-            .compareTo(a.watchDuration!.toDuration());
-      },
-    );
     liveList.assignAll(followList.where((x) => x.liveStatus.value == 2));
     notLiveList.assignAll(followList.where((x) => x.liveStatus.value == 1));
     _updatedListController.add(0);

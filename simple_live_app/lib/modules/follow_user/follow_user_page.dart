@@ -82,7 +82,7 @@ class FollowUserPage extends GetView<FollowUserController> {
               }else if(value == 1){
                 SmartDialog.showToast("此功能暂未开放！敬请期待！");
               }else if(value == 2){
-                SmartDialog.showToast("此功能暂未开放！敬请期待！");
+                controller.showSortDialog();
               }
             },
           ),

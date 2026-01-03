@@ -1,10 +1,13 @@
 // ignore_for_file: invalid_use_of_protected_member
 
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:get/get.dart';
+import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/utils.dart';
+import 'package:simple_live_app/app/utils/duration_2_str_utils.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/services/follow_service.dart';
@@ -23,6 +26,17 @@ class FollowUserController extends BasePageController<FollowUser> {
 
   // 用户自定义标签
   RxList<FollowUserTag> userTagList = <FollowUserTag>[].obs;
+
+  // 用户自定义显示顺序 - default：watchDuration
+  Rx<SortMethod> sortMethod = SortMethod.watchDuration.obs;
+
+  var sortMap = {
+    SortMethod.watchDuration: "观看时长",
+    SortMethod.siteId: "直播平台",
+    SortMethod.recently: "最近添加",
+    SortMethod.userNameASC: "用户名A-Z",
+    SortMethod.userNameDESC: "用户名Z-A",
+  };
 
   @override
   void onInit() {
@@ -86,6 +100,40 @@ class FollowUserController extends BasePageController<FollowUser> {
       FollowService.instance.filterDataByTag(filterMode.value);
       list.assignAll(FollowService.instance.curTagFollowList);
     }
+    listSortByMethod();
+  }
+
+  // 用户自定义顺序dialog
+  Future<void> showSortDialog() async {
+    sortMethod.value = await Utils.showMapOptionDialog(
+            sortMap, sortMethod.value,
+            title: "排序方式") ??
+        SortMethod.watchDuration;
+    listSortByMethod();
+  }
+
+  // 按自定义顺序调整list
+  void listSortByMethod() {
+    // list.sort是非稳定排序
+    list.sort((a, b) {
+      //  或许可以写一个类似Kotlin-thenBy语法糖保证短路执行
+      final liveCmp = b.liveStatus.value.compareTo(a.liveStatus.value);
+      if (liveCmp != 0) return liveCmp;
+      switch (sortMethod.value) {
+        case SortMethod.watchDuration:
+          return b.watchDuration!
+              .toDuration()
+              .compareTo(a.watchDuration!.toDuration());
+        case SortMethod.siteId:
+          return a.siteId.compareTo(b.siteId);
+        case SortMethod.recently:
+          return a.addTime.compareTo(b.addTime);
+        case SortMethod.userNameASC:
+          return a.userName.compareTo(b.userName);
+        case SortMethod.userNameDESC:
+          return b.userName.compareTo(a.userName);
+      }
+    });
   }
 
   void setFilterMode(FollowUserTag tag) {
