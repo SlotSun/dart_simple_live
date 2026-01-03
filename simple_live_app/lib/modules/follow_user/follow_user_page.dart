@@ -32,50 +32,6 @@ class FollowUserPage extends GetView<FollowUserController> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Remix.save_2_line),
-                      AppStyle.hGap12,
-                      Text("导出文件")
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 1,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Remix.folder_open_line),
-                      AppStyle.hGap12,
-                      Text("导入文件")
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 2,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Remix.text),
-                      AppStyle.hGap12,
-                      Text("导出文本"),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 3,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Remix.file_text_line),
-                      AppStyle.hGap12,
-                      Text("导入文本"),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 4,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
                       Icon(Remix.heart_line),
                       AppStyle.hGap12,
                       Text("关注设置"),
@@ -86,14 +42,6 @@ class FollowUserPage extends GetView<FollowUserController> {
             },
             onSelected: (value) {
               if (value == 0) {
-                FollowService.instance.exportFile();
-              } else if (value == 1) {
-                FollowService.instance.inputFile();
-              } else if (value == 2) {
-                FollowService.instance.exportText();
-              } else if (value == 3) {
-                FollowService.instance.inputText();
-              } else if (value == 4) {
                 Get.toNamed(RoutePath.kSettingsFollow);
               }
             },
