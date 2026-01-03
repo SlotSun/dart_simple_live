@@ -51,3 +51,12 @@ enum DownloadState {
   downloading,
   downloaded,
 }
+
+// 排序方法
+enum SortMethod {
+  watchDuration,
+  siteId,
+  recently,
+  userNameASC,
+  userNameDESC,
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
@@ -32,6 +33,39 @@ class FollowUserPage extends GetView<FollowUserController> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      Icon(Remix.trophy_line),
+                      AppStyle.hGap12,
+                      Text("赛事订阅"),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 1,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Remix.blender_line),
+                      AppStyle.hGap12,
+                      Text("模式切换"),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 2,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Remix.sort_asc),
+                      AppStyle.hGap12,
+                      Text("按序排列"),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 4,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                       Icon(Remix.heart_line),
                       AppStyle.hGap12,
                       Text("关注设置"),
@@ -41,8 +75,14 @@ class FollowUserPage extends GetView<FollowUserController> {
               ];
             },
             onSelected: (value) {
-              if (value == 0) {
+              if (value == 4) {
                 Get.toNamed(RoutePath.kSettingsFollow);
+              }else if(value == 0){
+                SmartDialog.showToast("此功能暂未开放！敬请期待！");
+              }else if(value == 1){
+                SmartDialog.showToast("此功能暂未开放！敬请期待！");
+              }else if(value == 2){
+                SmartDialog.showToast("此功能暂未开放！敬请期待！");
               }
             },
           ),
