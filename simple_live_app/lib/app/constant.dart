@@ -60,3 +60,14 @@ enum SortMethod {
   userNameASC,
   userNameDESC,
 }
+
+extension SortMethodStore on SortMethod {
+  String get storeValue => name;
+  static SortMethod fromStore(String? v) {
+    if (v == null) return SortMethod.watchDuration;
+    return SortMethod.values.firstWhere(
+          (e) => e.name == v,
+      orElse: () => SortMethod.watchDuration,
+    );
+  }
+}

@@ -1,4 +1,6 @@
-﻿import 'package:simple_live_app/models/db/follow_user.dart';
+﻿import 'package:simple_live_app/app/constant.dart';
+import 'package:simple_live_app/app/utils/duration_2_str_utils.dart';
+import 'package:simple_live_app/models/db/follow_user.dart';
 
 typedef Cmp<T> = int Function(T a, T b);
 
@@ -36,3 +38,26 @@ Cmp<FollowUser> userNameAsc = (a, b) {
 };
 
 Cmp<FollowUser> userNameDesc = (a, b) => userNameAsc(b, a);
+
+void listSortByMethod(List<FollowUser> list, SortMethod sortMethod) {
+  // list.sort是非稳定排序
+  list.sort((a, b) {
+    //  或许可以写一个类似Kotlin-thenBy语法糖保证短路执行
+    final liveCmp = b.liveStatus.value.compareTo(a.liveStatus.value);
+    if (liveCmp != 0) return liveCmp;
+    switch (sortMethod) {
+      case SortMethod.watchDuration:
+        return b.watchDuration!
+            .toDuration()
+            .compareTo(a.watchDuration!.toDuration());
+      case SortMethod.siteId:
+        return a.siteId.compareTo(b.siteId);
+      case SortMethod.recently:
+        return a.addTime.compareTo(b.addTime);
+      case SortMethod.userNameASC:
+        return userNameAsc(a, b);
+      case SortMethod.userNameDESC:
+        return userNameAsc(b, a);
+    }
+  });
+}

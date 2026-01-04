@@ -15,6 +15,7 @@ import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/app/utils/duration_2_str_utils.dart';
+import 'package:simple_live_app/app/utils/sort.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/models/db/history.dart';
@@ -391,7 +392,12 @@ class FollowService extends GetxService {
   void filterData() {
     liveList.assignAll(followList.where((x) => x.liveStatus.value == 2));
     notLiveList.assignAll(followList.where((x) => x.liveStatus.value == 1));
+    liveListSort();
     _updatedListController.add(0);
+  }
+
+  void liveListSort(){
+    listSortByMethod(liveList, AppSettingsController.instance.followSortMethod.value);
   }
 
   void exportFile() async {

@@ -201,6 +201,12 @@ class LocalStorageService extends GetxService {
 
   static const String kWindowHeight = "WindowHeight";
 
+  /// 关注列表排序方法
+  static const String kFollowSortMethod = "FollowSortMethod";
+
+  /// 关注列表样式
+  static const String kFollowStyle = "FollowStyle";
+
   /// 数据库版本
   static const String kHiveDbVer = "kHiveDbVer";
 

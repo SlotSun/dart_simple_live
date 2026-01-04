@@ -1,12 +1,13 @@
 // ignore_for_file: invalid_use_of_protected_member
 
 import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/constant.dart';
+import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/utils.dart';
-import 'package:simple_live_app/app/utils/duration_2_str_utils.dart';
 import 'package:simple_live_app/app/utils/sort.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
@@ -62,6 +63,8 @@ class FollowUserController extends BasePageController<FollowUser> {
         FollowService.instance.updatedListStream.listen((event) {
       filterData();
     });
+
+    sortMethod = AppSettingsController.instance.followSortMethod;
     super.onInit();
   }
 
@@ -110,7 +113,7 @@ class FollowUserController extends BasePageController<FollowUser> {
       FollowService.instance.filterDataByTag(filterMode.value);
       list.assignAll(FollowService.instance.curTagFollowList);
     }
-    listSortByMethod();
+    listSortByMethod(list, sortMethod.value);
   }
 
   // 用户自定义关注样式
@@ -129,31 +132,9 @@ class FollowUserController extends BasePageController<FollowUser> {
             sortMap, sortMethod.value,
             title: "排序方式") ??
         SortMethod.watchDuration;
-    listSortByMethod();
-  }
-
-  // 按自定义顺序调整list
-  void listSortByMethod() {
-    // list.sort是非稳定排序
-    list.sort((a, b) {
-      //  或许可以写一个类似Kotlin-thenBy语法糖保证短路执行
-      final liveCmp = b.liveStatus.value.compareTo(a.liveStatus.value);
-      if (liveCmp != 0) return liveCmp;
-      switch (sortMethod.value) {
-        case SortMethod.watchDuration:
-          return b.watchDuration!
-              .toDuration()
-              .compareTo(a.watchDuration!.toDuration());
-        case SortMethod.siteId:
-          return a.siteId.compareTo(b.siteId);
-        case SortMethod.recently:
-          return a.addTime.compareTo(b.addTime);
-        case SortMethod.userNameASC:
-          return userNameAsc(a, b);
-        case SortMethod.userNameDESC:
-          return userNameAsc(b, a);
-      }
-    });
+    AppSettingsController.instance.setFollowSortMethod(sortMethod.value);
+    FollowService.instance.liveListSort();
+    filterData();
   }
 
   void setFilterMode(FollowUserTag tag) {

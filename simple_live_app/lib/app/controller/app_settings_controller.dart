@@ -176,6 +176,11 @@ class AppSettingsController extends GetxController {
     dbVer = LocalStorageService.instance
         .getValue(LocalStorageService.kHiveDbVer, 10708);
 
+    followSortMethod.value = SortMethodStore.fromStore(
+        LocalStorageService.instance.getValue(
+            LocalStorageService.kFollowSortMethod,
+            SortMethod.watchDuration.storeValue));
+
     initSiteSort();
     initHomeSort();
 
@@ -595,5 +600,13 @@ class AppSettingsController extends GetxController {
     douyinHlsFirst.value = e;
     LocalStorageService.instance
         .setValue(LocalStorageService.kDouyinHlsFirst, e);
+  }
+
+  var followSortMethod = SortMethod.watchDuration.obs;
+
+  void setFollowSortMethod(SortMethod e) {
+    followSortMethod.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kFollowSortMethod, e.storeValue);
   }
 }
