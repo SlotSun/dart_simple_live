@@ -7,7 +7,8 @@ typedef Cmp<T> = int Function(T a, T b);
 String firstLetterLite(String s) {
   if (s.isEmpty) return '{';
   final c = s.codeUnitAt(0);
-
+  // 0-9
+  if (c >= 48 && c <= 57) return String.fromCharCode(c);
   // A-Z a-z
   if ((c >= 65 && c <= 90) || (c >= 97 && c <= 122)) {
     return String.fromCharCode(c).toUpperCase();
