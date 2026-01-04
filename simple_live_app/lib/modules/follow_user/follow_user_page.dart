@@ -12,7 +12,10 @@ import 'package:simple_live_app/routes/route_path.dart';
 import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/widgets/filter_button.dart';
 import 'package:simple_live_app/widgets/follow_user_item.dart';
+import 'package:simple_live_app/widgets/keep_alive_wrapper.dart';
+import 'package:simple_live_app/widgets/live_room_card.dart';
 import 'package:simple_live_app/widgets/page_grid_view.dart';
+import 'package:simple_live_core/simple_live_core.dart';
 
 class FollowUserPage extends GetView<FollowUserController> {
   const FollowUserPage({super.key});
@@ -21,6 +24,10 @@ class FollowUserPage extends GetView<FollowUserController> {
   Widget build(BuildContext context) {
     var count = MediaQuery.of(context).size.width ~/ 500;
     if (count < 1) count = 1;
+    var c = MediaQuery.of(context).size.width ~/ 200;
+    if (c < 2) {
+      c = 2;
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text("关注用户"),
@@ -80,7 +87,7 @@ class FollowUserPage extends GetView<FollowUserController> {
               }else if(value == 0){
                 SmartDialog.showToast("此功能暂未开放！敬请期待！");
               }else if(value == 1){
-                SmartDialog.showToast("此功能暂未开放！敬请期待！");
+                controller.showFollowStyleDialog();
               }else if(value == 2){
                 controller.showSortDialog();
               }
@@ -138,55 +145,83 @@ class FollowUserPage extends GetView<FollowUserController> {
               ],
             ),
           ),
-          Expanded(
-            child: PageGridView(
-              crossAxisSpacing: 12,
-              crossAxisCount: count,
-              pageController: controller,
-              firstRefresh: true,
-              showPCRefreshButton: false,
-              itemBuilder: (_, i) {
-                var item = controller.list[i];
-                var site = Sites.allSites[item.siteId]!;
-                return FollowUserItem(
-                  item: item,
-                  onRemove: () {
-                    controller.removeFollow(item);
-                  },
-                  onTap: () {
-                    AppNavigator.toLiveRoomDetail(
-                        site: site, roomId: item.roomId);
-                  },
-                  onLongPress: () {
-                    // 长按弹出操作：设置标签或查看详情
-                    Get.bottomSheet(
-                      SafeArea(
-                        child: Wrap(
-                          children: [
-                            ListTile(
-                              leading: const Icon(Remix.price_tag_3_line),
-                              title: const Text('设置标签'),
-                              onTap: () {
-                                Get.back();
-                                setFollowTagDialog(item);
-                              },
-                            ),
-                            ListTile(
-                              leading: const Icon(Remix.information_line),
-                              title: const Text('查看详情'),
-                              onTap: () {
-                                Get.back();
-                                AppNavigator.toFollowInfo(item);
-                              },
-                            ),
-                          ],
-                        ),
+          Obx(
+            () => Expanded(
+              child: controller.isGrid.value
+                  ? PageGridView(
+                      crossAxisSpacing: 12,
+                      crossAxisCount: count,
+                      pageController: controller,
+                      firstRefresh: true,
+                      showPCRefreshButton: false,
+                      itemBuilder: (_, i) {
+                        var item = controller.list[i];
+                        var site = Sites.allSites[item.siteId]!;
+                        return FollowUserItem(
+                          item: item,
+                          onRemove: () {
+                            controller.removeFollow(item);
+                          },
+                          onTap: () {
+                            AppNavigator.toLiveRoomDetail(
+                                site: site, roomId: item.roomId);
+                          },
+                          onLongPress: () {
+                            // 长按弹出操作：设置标签或查看详情
+                            Get.bottomSheet(
+                              SafeArea(
+                                child: Wrap(
+                                  children: [
+                                    ListTile(
+                                      leading:
+                                          const Icon(Remix.price_tag_3_line),
+                                      title: const Text('设置标签'),
+                                      onTap: () {
+                                        Get.back();
+                                        setFollowTagDialog(item);
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading:
+                                          const Icon(Remix.information_line),
+                                      title: const Text('查看详情'),
+                                      onTap: () {
+                                        Get.back();
+                                        AppNavigator.toFollowInfo(item);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              backgroundColor: Theme.of(context).cardColor,
+                            );
+                          },
+                        );
+                      },
+                    )
+                  : KeepAliveWrapper(
+                      child: PageGridView(
+                        pageController: controller,
+                        padding: AppStyle.edgeInsetsA12,
+                        firstRefresh: true,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        crossAxisCount: c,
+                        itemBuilder: (_, i) {
+                          var item = controller.list[i];
+                          // 或许直接继承字段更好，标记工作
+                          LiveRoomItem liveRoomItem = LiveRoomItem(
+                            roomId: item.roomId,
+                            title: item.title.value,
+                            cover: item.cover.value,
+                            userName: item.userName,
+                            online: item.online.value,
+                          );
+                          var site = Sites.allSites[item.siteId]!;
+                          return LiveRoomCard(site, liveRoomItem);
+                        },
                       ),
-                      backgroundColor: Theme.of(context).cardColor,
-                    );
-                  },
-                );
-              },
+                    ),
             ),
           ),
         ],

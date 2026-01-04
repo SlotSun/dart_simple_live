@@ -30,12 +30,22 @@ class FollowUserController extends BasePageController<FollowUser> {
   // 用户自定义显示顺序 - default：watchDuration
   Rx<SortMethod> sortMethod = SortMethod.watchDuration.obs;
 
+  // 用户关注列表样式控制
+  Rx<bool> isGrid = true.obs;
+
+  // 排序方式
   var sortMap = {
     SortMethod.watchDuration: "观看时长",
     SortMethod.siteId: "直播平台",
     SortMethod.recently: "最近添加",
     SortMethod.userNameASC: "用户名A-Z",
     SortMethod.userNameDESC: "用户名Z-A",
+  };
+
+  // 关注列表样式
+  var followStyleMap = {
+    true: "紧凑模式",
+    false: "卡片模式"
   };
 
   @override
@@ -101,6 +111,16 @@ class FollowUserController extends BasePageController<FollowUser> {
       list.assignAll(FollowService.instance.curTagFollowList);
     }
     listSortByMethod();
+  }
+
+  // 用户自定义关注样式
+  Future<void> showFollowStyleDialog() async {
+    isGrid.value = await Utils.showMapOptionDialog(
+          title: "关注样式切换",
+          followStyleMap,
+          isGrid.value,
+        ) ??
+        true;
   }
 
   // 用户自定义顺序dialog

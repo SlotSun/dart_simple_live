@@ -51,6 +51,11 @@ class FollowUser {
   /// 直播封面
   Rx<String> cover = "".obs;
 
+  /// 直播标题
+  Rx<String> title = "".obs;
+
+  Rx<int> online = 0.obs;
+
   factory FollowUser.fromJson(Map<String, dynamic> json) => FollowUser(
       id: json['id'],
       roomId: json['roomId'],

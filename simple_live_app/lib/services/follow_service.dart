@@ -360,18 +360,21 @@ class FollowService extends GetxService {
     var tasks = <Future>[];
 
     for (var user in usersToUpdate) {
-      tasks.add(pool.withResource(() => updateLiveStatusAndCover(user)));
+      tasks.add(pool.withResource(() => updateLiveInformation(user)));
     }
     await Future.wait(tasks);
     await pool.close();
   }
 
-  Future updateLiveStatusAndCover(FollowUser item) async {
+  Future updateLiveInformation(FollowUser item) async {
     try {
       var site = Sites.allSites[item.siteId]!;
-      LiveRoomDetail detail = await site.liveSite.getRoomDetail(roomId: item.roomId);
+      LiveRoomDetail detail =
+          await site.liveSite.getRoomDetail(roomId: item.roomId);
       item.liveStatus.value = detail.status ? 2 : 1;
-      item.cover.value = detail.cover;
+      item.cover.value = detail.status ? detail.cover : "";
+      item.title.value = detail.title;
+      item.online.value = detail.online;
     } catch (e) {
       Log.logPrint(e);
     } finally {
