@@ -7,6 +7,7 @@ import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/app/utils/duration_2_str_utils.dart';
+import 'package:simple_live_app/app/utils/sort.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/services/follow_service.dart';
@@ -148,9 +149,9 @@ class FollowUserController extends BasePageController<FollowUser> {
         case SortMethod.recently:
           return a.addTime.compareTo(b.addTime);
         case SortMethod.userNameASC:
-          return a.userName.compareTo(b.userName);
+          return userNameAsc(a, b);
         case SortMethod.userNameDESC:
-          return b.userName.compareTo(a.userName);
+          return userNameAsc(b, a);
       }
     });
   }
