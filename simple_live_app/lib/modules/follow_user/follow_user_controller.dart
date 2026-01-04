@@ -128,13 +128,15 @@ class FollowUserController extends BasePageController<FollowUser> {
 
   // 用户自定义顺序dialog
   Future<void> showSortDialog() async {
-    sortMethod.value = await Utils.showMapOptionDialog(
-            sortMap, sortMethod.value,
-            title: "排序方式") ??
-        SortMethod.watchDuration;
-    AppSettingsController.instance.setFollowSortMethod(sortMethod.value);
-    FollowService.instance.liveListSort();
-    filterData();
+    var res = await Utils.showMapOptionDialog(
+        sortMap, sortMethod.value,
+        title: "排序方式");
+    if(res !=null){
+      sortMethod.value = res;
+      AppSettingsController.instance.setFollowSortMethod(sortMethod.value);
+      FollowService.instance.liveListSort();
+      filterData();
+    }
   }
 
   void setFilterMode(FollowUserTag tag) {
