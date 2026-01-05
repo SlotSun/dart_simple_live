@@ -1,4 +1,5 @@
 ﻿import 'package:simple_live_app/app/constant.dart';
+import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/utils/duration_2_str_utils.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 
@@ -52,7 +53,10 @@ void listSortByMethod(List<FollowUser> list, SortMethod sortMethod) {
             .toDuration()
             .compareTo(a.watchDuration!.toDuration());
       case SortMethod.siteId:
-        return a.siteId.compareTo(b.siteId);
+        final order = AppSettingsController.instance.siteSort;
+        return order.indexOf(a.siteId).compareTo(
+          order.indexOf(b.siteId),
+        );
       case SortMethod.recently:
         return a.addTime.compareTo(b.addTime);
       case SortMethod.userNameASC:
