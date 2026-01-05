@@ -31,8 +31,6 @@ class FollowUserController extends BasePageController<FollowUser> {
   // 用户自定义显示顺序 - default：watchDuration
   Rx<SortMethod> sortMethod = SortMethod.watchDuration.obs;
 
-  // 用户关注列表样式控制
-  Rx<bool> isGrid = true.obs;
 
   // 排序方式
   var sortMap = {
@@ -118,20 +116,21 @@ class FollowUserController extends BasePageController<FollowUser> {
 
   // 用户自定义关注样式
   Future<void> showFollowStyleDialog() async {
-    isGrid.value = await Utils.showMapOptionDialog(
-          title: "关注样式切换",
-          followStyleMap,
-          isGrid.value,
-        ) ??
-        true;
+    var res = await Utils.showMapOptionDialog(
+      title: "关注样式切换",
+      followStyleMap,
+      AppSettingsController.instance.followStyleNotGrid.value,
+    );
+    if (res != null) {
+      AppSettingsController.instance.setFollowStyleNotGrid(res);
+    }
   }
 
   // 用户自定义顺序dialog
   Future<void> showSortDialog() async {
-    var res = await Utils.showMapOptionDialog(
-        sortMap, sortMethod.value,
+    var res = await Utils.showMapOptionDialog(sortMap, sortMethod.value,
         title: "排序方式");
-    if(res !=null){
+    if (res != null) {
       sortMethod.value = res;
       AppSettingsController.instance.setFollowSortMethod(sortMethod.value);
       FollowService.instance.liveListSort();

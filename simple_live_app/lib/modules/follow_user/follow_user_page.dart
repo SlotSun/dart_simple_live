@@ -3,6 +3,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
@@ -147,7 +148,7 @@ class FollowUserPage extends GetView<FollowUserController> {
           ),
           Obx(
             () => Expanded(
-              child: controller.isGrid.value
+              child: AppSettingsController.instance.followStyleNotGrid.value
                   ? PageGridView(
                       crossAxisSpacing: 12,
                       crossAxisCount: count,

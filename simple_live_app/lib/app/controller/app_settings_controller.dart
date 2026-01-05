@@ -181,6 +181,9 @@ class AppSettingsController extends GetxController {
             LocalStorageService.kFollowSortMethod,
             SortMethod.watchDuration.storeValue));
 
+    followStyleNotGrid.value = LocalStorageService.instance
+        .getValue(LocalStorageService.kFollowStyleNotGrid, true);
+
     initSiteSort();
     initHomeSort();
 
@@ -608,5 +611,12 @@ class AppSettingsController extends GetxController {
     followSortMethod.value = e;
     LocalStorageService.instance
         .setValue(LocalStorageService.kFollowSortMethod, e.storeValue);
+  }
+  // 关注样式是否卡片化
+  var followStyleNotGrid = true.obs;
+
+  void setFollowStyleNotGrid(bool e){
+    followStyleNotGrid.value = e;
+    LocalStorageService.instance.setValue(LocalStorageService.kFollowStyleNotGrid, e);
   }
 }

@@ -205,7 +205,7 @@ class LocalStorageService extends GetxService {
   static const String kFollowSortMethod = "FollowSortMethod";
 
   /// 关注列表样式
-  static const String kFollowStyle = "FollowStyle";
+  static const String kFollowStyleNotGrid = "FollowStyleNotGrid";
 
   /// 数据库版本
   static const String kHiveDbVer = "kHiveDbVer";
