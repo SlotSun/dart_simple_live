@@ -8,7 +8,6 @@ import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/utils.dart';
-import 'package:simple_live_app/app/utils/sort.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/services/follow_service.dart';
@@ -101,6 +100,7 @@ class FollowUserController extends BasePageController<FollowUser> {
   }
 
   void filterData() {
+    FollowService.instance.liveListSort();
     if (filterMode.value.tag == "全部") {
       list.assignAll(FollowService.instance.followList.value);
     } else if (filterMode.value.tag == "直播中") {
@@ -111,7 +111,6 @@ class FollowUserController extends BasePageController<FollowUser> {
       FollowService.instance.filterDataByTag(filterMode.value);
       list.assignAll(FollowService.instance.curTagFollowList);
     }
-    listSortByMethod(list, sortMethod.value);
   }
 
   // 用户自定义关注样式
@@ -133,7 +132,6 @@ class FollowUserController extends BasePageController<FollowUser> {
     if (res != null) {
       sortMethod.value = res;
       AppSettingsController.instance.setFollowSortMethod(sortMethod.value);
-      FollowService.instance.liveListSort();
       filterData();
     }
   }
