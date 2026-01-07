@@ -12,17 +12,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # 打包 Android、iOS、Mac
-  build-mac-ios-android:
-    # https://github.com/actions/runner-images/issues/12541
-    runs-on: macos-15
 
-    permissions:
-      contents: write
+  # packing android on ubuntu, macos slowly
+  build-android:
+    runs-on: ubuntu-latest
+    permissions: write-all
 
     steps:
       # 签出代码
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: dev
 
@@ -39,6 +37,61 @@ jobs:
           echo "storePassword=${{ secrets.STORE_PASSWORD }}" >> simple_live_app/android/key.properties
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> simple_live_app/android/key.properties
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> simple_live_app/android/key.properties
+
+      # 设置 JAVA 环境
+      - uses: actions/setup-java@v5
+        with:
+          distribution: "zulu"
+          java-version: "17"
+          cache: "gradle"
+          cache-dependency-path: |
+            simple_live_app/android/*.gradle*
+            simple_live_app/android/**/gradle-wrapper.properties
+
+      # 设置 Flutter
+      - name: Flutter action
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: simple_live_app/pubspec.yaml
+          cache: true
+
+      # 更新 Flutter 的 packages
+      - name: Restore packages
+        run: |
+          cd simple_live_app
+          flutter pub get
+
+      # 打包 APK
+      - name: Build APK
+        run: |
+          cd simple_live_app
+          flutter build apk --release --split-per-abi
+
+      # 上传 Artifacts
+      - name: Upload APK to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: |
+            simple_live_app/build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            simple_live_app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            simple_live_app/build/app/outputs/flutter-apk/app-x86_64-release.apk
+      
+
+  # 打包iOS、Mac
+  build-mac-ios:
+    # https://github.com/actions/runner-images/issues/12541
+    runs-on: macos-15
+
+    permissions:
+      contents: write
+
+    steps:
+      # 签出代码
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
 
       # 设置 JAVA 环境
       - uses: actions/setup-java@v4
@@ -75,22 +128,6 @@ jobs:
           cd fastforge
           dart pub global activate melos
           melos run activate
-
-      # 打包 APK
-      - name: Build APK
-        run: |
-          cd simple_live_app
-          flutter build apk --release --split-per-abi
-
-      # 上传 Artifacts
-      - name: Upload APK to Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: android
-          path: |
-            simple_live_app/build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
-            simple_live_app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
-            simple_live_app/build/app/outputs/flutter-apk/app-x86_64-release.apk
 
       # 打包 iOS
       - name: Build IPA
@@ -160,7 +197,21 @@ jobs:
       - name: Update apt-get
         run: sudo apt-get update
       - name: Install Dependencies
-        run: sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libmpv-dev mpv libasound2-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake libgtk-3-dev unzip libasound2-dev gcc g++ autoconf automake \
+              debhelper glslang-dev ladspa-sdk xutils-dev libasound2-dev libarchive-dev libbluray-dev \
+              libdav1d-dev libdvdnav-dev libegl1-mesa-dev libepoxy-dev libfontconfig-dev libfreetype6-dev \
+              libfribidi-dev libgl1-mesa-dev libgbm-dev libgme-dev libgsm1-dev libharfbuzz-dev libjpeg-dev \
+              libbrotli-dev liblcms2-dev libmodplug-dev libmp3lame-dev libopenal-dev \
+              libopus-dev libopencore-amrnb-dev libopencore-amrwb-dev libpulse-dev librtmp-dev \
+              libsdl2-dev libsixel-dev libssh-dev libsoxr-dev libspeex-dev libtool \
+              libv4l-dev libva-dev libvdpau-dev libvorbis-dev libvo-amrwbenc-dev \
+              libunwind-dev libvpx-dev libwayland-dev libx11-dev libxext-dev libdrm-dev \
+              libxkbcommon-dev libxrandr-dev libxss-dev libxv-dev libxvidcore-dev \
+              linux-libc-dev nasm ninja-build pkg-config python3 python3-docutils wayland-protocols \
+              x11proto-core-dev zlib1g-dev libfdk-aac-dev libtheora-dev libwebp-dev \
+              unixodbc-dev libpq-dev libxxhash-dev libaom-dev libbs2b-dev libcaca-dev libcdio-paranoia-dev
       # 打开 Linux Desktop 支持
       - name: Enable Flutter Desktop
         run: flutter config --enable-linux-desktop
@@ -238,6 +289,7 @@ jobs:
         run: |
           cd simple_live_app
           fastforge package --platform windows --targets msix,zip,exe --skip-clean
+          cd build/dist/*
           Get-ChildItem "simple_live_app-*" | ForEach-Object {
               $newName = $_.Name -replace '^simple_live_app', 'Slive'
               Rename-Item $_ -NewName $newName
@@ -291,7 +343,7 @@ jobs:
             --install-deps-from=flathub \
             --ccache \
             --disable-rofiles-fuse
-          flatpak build-bundle ${{ matrix.arch }} Slive-${{ matrix.arch }}.flatpak io.github.SlotSun.dart_simple_live
+          flatpak build-bundle ${{ matrix.arch }} Slive-${{ matrix.arch }}.flatpak io.github.SlotSun.Slive
 
       # 上传 Flatpak 包至 Artifacts
       - name: Upload linux flatpak to artifacts

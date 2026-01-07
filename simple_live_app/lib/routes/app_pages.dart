@@ -24,7 +24,7 @@ import 'package:simple_live_app/modules/mine/parse/parse_controller.dart';
 import 'package:simple_live_app/modules/mine/parse/parse_page.dart';
 import 'package:simple_live_app/modules/search/search_controller.dart';
 import 'package:simple_live_app/modules/search/search_page.dart';
-import 'package:simple_live_app/modules/settings/appstyle_setting_page.dart';
+import 'package:simple_live_app/modules/settings/appstyle_settings/appstyle_setting_page.dart';
 import 'package:simple_live_app/modules/settings/auto_exit_settings_page.dart';
 import 'package:simple_live_app/modules/settings/danmu_settings_page.dart';
 import 'package:simple_live_app/modules/settings/danmu_shield/danmu_shield_controller.dart';
@@ -116,7 +116,7 @@ class AppPages {
     //外观设置
     GetPage(
         name: RoutePath.kAppstyleSetting,
-        page: () => const AppstyleSettingPage()),
+        page: () => const AppStyleSettingPage()),
     //播放设置
     GetPage(
       name: RoutePath.kSettingsPlay,

@@ -1,7 +1,10 @@
 // ignore_for_file: invalid_use_of_protected_member
 
 import 'dart:async';
+
 import 'package:get/get.dart';
+import 'package:simple_live_app/app/constant.dart';
+import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/utils.dart';
@@ -24,6 +27,25 @@ class FollowUserController extends BasePageController<FollowUser> {
   // 用户自定义标签
   RxList<FollowUserTag> userTagList = <FollowUserTag>[].obs;
 
+  // 用户自定义显示顺序 - default：watchDuration
+  Rx<SortMethod> sortMethod = SortMethod.watchDuration.obs;
+
+
+  // 排序方式
+  var sortMap = {
+    SortMethod.watchDuration: "观看时长",
+    SortMethod.siteId: "直播平台",
+    SortMethod.recently: "最近添加",
+    SortMethod.userNameASC: "用户名A-Z",
+    SortMethod.userNameDESC: "用户名Z-A",
+  };
+
+  // 关注列表样式
+  var followStyleMap = {
+    true: "紧凑模式",
+    false: "卡片模式"
+  };
+
   @override
   void onInit() {
     onUpdatedIndexedStream = EventBus.instance.listen(
@@ -38,6 +60,8 @@ class FollowUserController extends BasePageController<FollowUser> {
         FollowService.instance.updatedListStream.listen((event) {
       filterData();
     });
+
+    sortMethod = AppSettingsController.instance.followSortMethod;
     super.onInit();
   }
 
@@ -76,6 +100,7 @@ class FollowUserController extends BasePageController<FollowUser> {
   }
 
   void filterData() {
+    FollowService.instance.liveListSort();
     if (filterMode.value.tag == "全部") {
       list.assignAll(FollowService.instance.followList.value);
     } else if (filterMode.value.tag == "直播中") {
@@ -85,6 +110,29 @@ class FollowUserController extends BasePageController<FollowUser> {
     } else {
       FollowService.instance.filterDataByTag(filterMode.value);
       list.assignAll(FollowService.instance.curTagFollowList);
+    }
+  }
+
+  // 用户自定义关注样式
+  Future<void> showFollowStyleDialog() async {
+    var res = await Utils.showMapOptionDialog(
+      title: "关注样式切换",
+      followStyleMap,
+      AppSettingsController.instance.followStyleNotGrid.value,
+    );
+    if (res != null) {
+      AppSettingsController.instance.setFollowStyleNotGrid(res);
+    }
+  }
+
+  // 用户自定义顺序dialog
+  Future<void> showSortDialog() async {
+    var res = await Utils.showMapOptionDialog(sortMap, sortMethod.value,
+        title: "排序方式");
+    if (res != null) {
+      sortMethod.value = res;
+      AppSettingsController.instance.setFollowSortMethod(sortMethod.value);
+      filterData();
     }
   }
 

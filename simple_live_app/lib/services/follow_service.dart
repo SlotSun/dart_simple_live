@@ -194,17 +194,7 @@ class FollowService extends GetxService {
     if (toRemove.isNotEmpty) {
       DBService.instance.updateFollowTag(tag);
     }
-    // 标签内排序
-    curTagFollowList.sort(
-      (a, b) {
-        if (a.liveStatus.value != b.liveStatus.value) {
-          return b.liveStatus.value.compareTo(a.liveStatus.value);
-        }
-        return b.watchDuration!
-            .toDuration()
-            .compareTo(a.watchDuration!.toDuration());
-      },
-    );
+    listSortByMethod(curTagFollowList,  AppSettingsController.instance.followSortMethod.value);
   }
 
   void updateFollowTagOrder(List<FollowUserTag> userTagList) {
@@ -371,17 +361,21 @@ class FollowService extends GetxService {
     var tasks = <Future>[];
 
     for (var user in usersToUpdate) {
-      tasks.add(pool.withResource(() => updateLiveStatus(user)));
+      tasks.add(pool.withResource(() => updateLiveInformation(user)));
     }
     await Future.wait(tasks);
     await pool.close();
   }
 
-  Future updateLiveStatus(FollowUser item) async {
+  Future updateLiveInformation(FollowUser item) async {
     try {
       var site = Sites.allSites[item.siteId]!;
-      item.liveStatus.value =
-          (await site.liveSite.getLiveStatus(roomId: item.roomId)) ? 2 : 1;
+      LiveRoomDetail detail =
+          await site.liveSite.getRoomDetail(roomId: item.roomId);
+      item.liveStatus.value = detail.status ? 2 : 1;
+      item.cover.value = detail.status ? detail.cover : "";
+      item.title.value = detail.title;
+      item.online.value = detail.online;
     } catch (e) {
       Log.logPrint(e);
     } finally {
@@ -396,19 +390,78 @@ class FollowService extends GetxService {
   }
 
   void filterData() {
-    followList.sort(
-      (a, b) {
-        if (a.liveStatus.value != b.liveStatus.value) {
-          return b.liveStatus.value.compareTo(a.liveStatus.value);
-        }
-        return b.watchDuration!
-            .toDuration()
-            .compareTo(a.watchDuration!.toDuration());
-      },
-    );
     liveList.assignAll(followList.where((x) => x.liveStatus.value == 2));
     notLiveList.assignAll(followList.where((x) => x.liveStatus.value == 1));
+    liveListSort();
     _updatedListController.add(0);
+  }
+
+  void liveListSort(){
+    listSortByMethod(followList, AppSettingsController.instance.followSortMethod.value);
+    listSortByMethod(liveList, AppSettingsController.instance.followSortMethod.value);
+    listSortByMethod(notLiveList, AppSettingsController.instance.followSortMethod.value);
+  }
+
+
+  String firstLetterLite(String s) {
+    if (s.isEmpty) return '{';
+    final c = s.codeUnitAt(0);
+    // 0-9
+    if (c >= 48 && c <= 57) return String.fromCharCode(c);
+    // A-Z a-z
+    if ((c >= 65 && c <= 90) || (c >= 97 && c <= 122)) {
+      return String.fromCharCode(c).toUpperCase();
+    }
+
+    // 其他一律 '{'==123,拼音解析消耗性能
+    return '{';
+  }
+
+  String sortText(String? remark, String name) {
+    if (remark != null && remark.trim().isNotEmpty) {
+      return remark.trim();
+    }
+    return name;
+  }
+
+  int userNameAsc(a, b) {
+    final ta = sortText(a.remark, a.userName);
+    final tb = sortText(b.remark, b.userName);
+    final ka = firstLetterLite(ta);
+    final kb = firstLetterLite(tb);
+    final c = ka.compareTo(kb);
+    if (c != 0) return c;
+
+    return a.userName.toLowerCase().compareTo(b.userName.toLowerCase());
+  }
+
+  int userNameDesc(FollowUser a, FollowUser b) {
+    return userNameAsc(b, a);
+  }
+  void listSortByMethod(List<FollowUser> list, SortMethod sortMethod) {
+    // list.sort是非稳定排序
+    list.sort((a, b) {
+      //  或许可以写一个类似Kotlin-thenBy语法糖保证短路执行
+      final liveCmp = b.liveStatus.value.compareTo(a.liveStatus.value);
+      if (liveCmp != 0) return liveCmp;
+      switch (sortMethod) {
+        case SortMethod.watchDuration:
+          return b.watchDuration!
+              .toDuration()
+              .compareTo(a.watchDuration!.toDuration());
+        case SortMethod.siteId:
+          final order = AppSettingsController.instance.siteSort;
+          return order.indexOf(a.siteId).compareTo(
+            order.indexOf(b.siteId),
+          );
+        case SortMethod.recently:
+          return a.addTime.compareTo(b.addTime);
+        case SortMethod.userNameASC:
+          return userNameAsc(a, b);
+        case SortMethod.userNameDESC:
+          return userNameAsc(b, a);
+      }
+    });
   }
 
   void exportFile() async {

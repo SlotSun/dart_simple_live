@@ -35,7 +35,7 @@ class FollowUserItem extends StatelessWidget {
       ),
       title: Text.rich(
         TextSpan(
-          text: item.userName,
+          text: item.remark?.isNotEmpty == true ? item.remark : item.userName,
           children: [
             WidgetSpan(
               alignment: ui.PlaceholderAlignment.middle,

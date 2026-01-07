@@ -1096,7 +1096,7 @@ ${error?.stackTrace}''');
       var height = MediaQuery.of(Get.context!).padding.top;
       Log.d("当前状态栏高度$height");
       Log.d("返回前台");
-      danmakuController?.onResume();
+      danmakuController?.resume;
       isBackground = false;
     }
   }

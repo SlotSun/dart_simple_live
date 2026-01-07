@@ -1,12 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
-import 'package:simple_live_app/app/controller/app_settings_controller.dart';
+import 'package:simple_live_app/app/constant.dart';
+import 'package:simple_live_app/modules/settings/appstyle_settings/appstyle_setting_contorller.dart';
 import 'package:simple_live_app/widgets/settings/settings_card.dart';
+import 'package:simple_live_app/widgets/settings/settings_menu.dart';
 import 'package:simple_live_app/widgets/settings/settings_switch.dart';
 
-class AppstyleSettingPage extends GetView<AppSettingsController> {
-  const AppstyleSettingPage({super.key});
+class AppStyleSettingPage extends GetView<AppStyleSettingController> {
+  const AppStyleSettingPage({super.key});
+
+  Widget trailingBuild({required Widget widget}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Tooltip(
+          message: "重置为默认字体",
+          child: IconButton(
+            onPressed: controller.fontReset,
+            icon: Icon(RemixIcons.reset_right_fill),
+          ),
+        ),
+        AppStyle.hGap4,
+        Visibility(
+          visible: controller.fontState.value == DownloadState.downloaded,
+          child:
+        Tooltip(
+          message: "删除字体",
+          child: IconButton(
+            onPressed: controller.fontDelete,
+            icon: Icon(Icons.delete_outline_outlined),
+          ),
+        ),
+        ),
+        Visibility(
+          visible: controller.fontState.value == DownloadState.downloaded,
+          child: AppStyle.hGap4,
+        ),
+        widget,
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,6 +171,59 @@ class AppstyleSettingPage extends GetView<AppSettingsController> {
                       ),
                     ),
                 ],
+              ),
+            ),
+          ),
+          AppStyle.vGap12,
+          Padding(
+            padding: AppStyle.edgeInsetsA12,
+            child: Text(
+              "字体设置",
+              style: Get.textTheme.titleSmall,
+            ),
+          ),
+          SettingsCard(
+            child: Obx(
+              () => SettingsMenu(
+                title: controller.curFontModel.value!.name,
+                value: controller.curFontModel.value!,
+                valueMap: controller.fontMap,
+                onChanged: (e) {
+                  controller.onFontSelected(e);
+                },
+                trailing: Obx(() {
+                  switch (controller.fontState.value) {
+                    case DownloadState.notDownloaded:
+                      return trailingBuild(
+                        widget: Tooltip(
+                          message: "下载字体",
+                          child: IconButton(
+                            icon: const Icon(Icons.download),
+                            onPressed: () => controller.downloadFont(),
+                          ),
+                        ),
+                      );
+
+                    case DownloadState.downloading:
+                      return trailingBuild(
+                        widget: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      );
+                    case DownloadState.downloaded:
+                      return trailingBuild(
+                        widget: Tooltip(
+                          message: "应用字体",
+                          child: IconButton(
+                            icon: const Icon(Icons.check_circle_outline_outlined),
+                            onPressed: () => controller.changeFontFamily(),
+                          ),
+                        ),
+                      );
+                  }
+                }),
               ),
             ),
           ),

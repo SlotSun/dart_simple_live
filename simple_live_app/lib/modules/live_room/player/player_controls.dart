@@ -11,6 +11,7 @@ import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/modules/live_room/live_room_controller.dart';
+import 'package:simple_live_app/modules/settings/appstyle_settings/appstyle_setting_contorller.dart';
 import 'package:simple_live_app/modules/settings/danmu_settings_page.dart';
 import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/widgets/desktop_refresh_button.dart';
@@ -602,10 +603,11 @@ Widget buildDanmuView(VideoState videoState, LiveRoomController controller) {
     option: DanmakuOption(
       fontSize: AppSettingsController.instance.danmuSize.value,
       area: AppSettingsController.instance.danmuArea.value,
-      duration: AppSettingsController.instance.danmuSpeed.value.toInt(),
+      duration: AppSettingsController.instance.danmuSpeed.value,
       opacity: AppSettingsController.instance.danmuOpacity.value,
-      showStroke: AppSettingsController.instance.danmuStrokeWidth.value > 0,
+      strokeWidth: AppSettingsController.instance.danmuStrokeWidth.value,
       fontWeight: AppSettingsController.instance.danmuFontWeight.value,
+      fontFamily: AppStyleSettingController.instance.curFontName.value,
     ),
   );
   return Positioned.fill(

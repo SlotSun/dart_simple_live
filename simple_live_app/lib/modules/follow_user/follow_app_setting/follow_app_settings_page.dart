@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/modules/follow_user/follow_app_setting/follow_app_settings_controller.dart';
@@ -132,7 +133,44 @@ class FollowSettingsPage extends GetView<FollowAppSettingsController> {
                   ],
                 ),
               ),
+              Padding(
+                padding: AppStyle.edgeInsetsA12.copyWith(top: 24),
+                child: Text(
+                  "关注导入导出",
+                  style: Get.textTheme.titleSmall,
+                ),
+              ),
+              fileImportAndExportBuild(),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget fileImportAndExportBuild() {
+    return SettingsCard(
+      child: Column(
+        children: [
+          SettingsAction(
+            leading: const Icon(Remix.save_2_line),
+            title: "导出文件",
+            onTap: ()=>FollowService.instance.exportFile(),
+          ),
+          SettingsAction(
+            leading: const Icon(Remix.folder_open_line),
+            title: "导入文件",
+            onTap: ()=>FollowService.instance.inputFile(),
+          ),
+          SettingsAction(
+            leading: const Icon(Remix.text),
+            title: "导出文本",
+            onTap: ()=>FollowService.instance.exportText(),
+          ),
+          SettingsAction(
+            leading: const Icon(Remix.file_text_line),
+            title: "导入文本",
+            onTap: ()=>FollowService.instance.inputText(),
           ),
         ],
       ),

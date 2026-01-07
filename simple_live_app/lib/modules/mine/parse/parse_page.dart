@@ -105,9 +105,8 @@ https://www.huya.com/xxxxx
 https://www.douyu.com/xxxxx
 https://www.douyu.com/topic/xxxx
 抖音直播：
-https://v.douyin.com/xxxxx
 https://live.douyin.com/xxxxx
-https://webcast.amemv.com/webcast/reflow/xxxxx
+https://webcast.amemv.com/douyin/webcast/reflow/xxxxx
 ''', style: TextStyle(color: Colors.grey)),
           ),
         ],

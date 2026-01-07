@@ -141,6 +141,9 @@ class LocalStorageService extends GetxService {
   ///动态取色
   static const String kIsDynamic = "kIsDynamic";
 
+  /// 自定义字体
+  static const String kCustomFont = "CustomFont";
+
   /// 提示哔哩哔哩登录
   static const String kBilibiliLoginTip = "BilibiliLoginTip";
 
@@ -198,6 +201,12 @@ class LocalStorageService extends GetxService {
 
   static const String kWindowHeight = "WindowHeight";
 
+  /// 关注列表排序方法
+  static const String kFollowSortMethod = "FollowSortMethod";
+
+  /// 关注列表样式
+  static const String kFollowStyleNotGrid = "FollowStyleNotGrid";
+
   /// 数据库版本
   static const String kHiveDbVer = "kHiveDbVer";
 
@@ -216,6 +225,17 @@ class LocalStorageService extends GetxService {
   T getValue<T>(dynamic key, T defaultValue) {
     try {
       var value = settingsBox.get(key, defaultValue: defaultValue) as T;
+      Log.d("Get LocalStorage：$key\r\n$value");
+      return value;
+    } catch (e) {
+      Log.logPrint(e);
+      return defaultValue;
+    }
+  }
+
+  T? getNullValue<T>(dynamic key, T? defaultValue) {
+    try {
+      var value = settingsBox.get(key, defaultValue: defaultValue) as T?;
       Log.d("Get LocalStorage：$key\r\n$value");
       return value;
     } catch (e) {

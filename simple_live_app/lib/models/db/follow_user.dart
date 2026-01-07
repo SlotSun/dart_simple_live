@@ -13,7 +13,8 @@ class FollowUser {
       required this.face,
       required this.addTime,
       this.watchDuration = "00:00:00",
-      this.tag = "全部"});
+      this.tag = "全部",
+      this.remark = ""});
 
   ///id=siteId_roomId
   @HiveField(0)
@@ -40,9 +41,20 @@ class FollowUser {
   @HiveField(7)
   String tag;
 
+  @HiveField(8)
+  String? remark;
+
   /// 直播状态
   /// 0=未知(加载中) 1=未开播 2=直播中
   Rx<int> liveStatus = 0.obs;
+
+  /// 直播封面
+  Rx<String> cover = "".obs;
+
+  /// 直播标题
+  Rx<String> title = "".obs;
+
+  Rx<int> online = 0.obs;
 
   factory FollowUser.fromJson(Map<String, dynamic> json) => FollowUser(
       id: json['id'],
@@ -52,7 +64,8 @@ class FollowUser {
       face: json['face'],
       addTime: DateTime.parse(json['addTime']),
       watchDuration: json["watchDuration"] ?? "00:00:00",
-      tag: json["tag"] ?? "全部");
+      tag: json["tag"] ?? "全部",
+      remark: json["remark"] ?? "");
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -62,6 +75,7 @@ class FollowUser {
         'face': face,
         'addTime': addTime.toString(),
         "watchDuration": watchDuration ?? "00:00:00",
-        "tag": tag
+        "tag": tag,
+        "remark": remark
       };
 }

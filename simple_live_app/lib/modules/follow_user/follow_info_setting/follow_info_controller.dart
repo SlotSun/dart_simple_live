@@ -79,6 +79,14 @@ class FollowInfoController extends BasePageController<FollowUser> {
     followUser.refresh();
   }
 
+  void updateRemark(String newRemark) {
+    final current = followUser.value;
+    if (current == null) return;
+    current.remark = newRemark;
+    FollowService.instance.addFollow(current);
+    followUser.refresh();
+  }
+
   Future<void> pasteFromClipboard() async {
     final content = await Utils.getClipboard();
     if (content != null) {

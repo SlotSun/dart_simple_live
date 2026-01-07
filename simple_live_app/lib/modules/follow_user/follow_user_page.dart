@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
@@ -11,7 +13,10 @@ import 'package:simple_live_app/routes/route_path.dart';
 import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/widgets/filter_button.dart';
 import 'package:simple_live_app/widgets/follow_user_item.dart';
+import 'package:simple_live_app/widgets/keep_alive_wrapper.dart';
+import 'package:simple_live_app/widgets/live_room_card.dart';
 import 'package:simple_live_app/widgets/page_grid_view.dart';
+import 'package:simple_live_core/simple_live_core.dart';
 
 class FollowUserPage extends GetView<FollowUserController> {
   const FollowUserPage({super.key});
@@ -20,6 +25,10 @@ class FollowUserPage extends GetView<FollowUserController> {
   Widget build(BuildContext context) {
     var count = MediaQuery.of(context).size.width ~/ 500;
     if (count < 1) count = 1;
+    var c = MediaQuery.of(context).size.width ~/ 200;
+    if (c < 2) {
+      c = 2;
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text("关注用户"),
@@ -32,9 +41,9 @@ class FollowUserPage extends GetView<FollowUserController> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Remix.save_2_line),
+                      Icon(Remix.trophy_line),
                       AppStyle.hGap12,
-                      Text("导出文件")
+                      Text("赛事订阅"),
                     ],
                   ),
                 ),
@@ -43,9 +52,9 @@ class FollowUserPage extends GetView<FollowUserController> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Remix.folder_open_line),
+                      Icon(Remix.blender_line),
                       AppStyle.hGap12,
-                      Text("导入文件")
+                      Text("模式切换"),
                     ],
                   ),
                 ),
@@ -54,20 +63,9 @@ class FollowUserPage extends GetView<FollowUserController> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Remix.text),
+                      Icon(Remix.sort_asc),
                       AppStyle.hGap12,
-                      Text("导出文本"),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 3,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Remix.file_text_line),
-                      AppStyle.hGap12,
-                      Text("导入文本"),
+                      Text("按序排列"),
                     ],
                   ),
                 ),
@@ -85,16 +83,14 @@ class FollowUserPage extends GetView<FollowUserController> {
               ];
             },
             onSelected: (value) {
-              if (value == 0) {
-                FollowService.instance.exportFile();
-              } else if (value == 1) {
-                FollowService.instance.inputFile();
-              } else if (value == 2) {
-                FollowService.instance.exportText();
-              } else if (value == 3) {
-                FollowService.instance.inputText();
-              } else if (value == 4) {
+              if (value == 4) {
                 Get.toNamed(RoutePath.kSettingsFollow);
+              }else if(value == 0){
+                SmartDialog.showToast("此功能暂未开放！敬请期待！");
+              }else if(value == 1){
+                controller.showFollowStyleDialog();
+              }else if(value == 2){
+                controller.showSortDialog();
               }
             },
           ),
@@ -150,55 +146,83 @@ class FollowUserPage extends GetView<FollowUserController> {
               ],
             ),
           ),
-          Expanded(
-            child: PageGridView(
-              crossAxisSpacing: 12,
-              crossAxisCount: count,
-              pageController: controller,
-              firstRefresh: true,
-              showPCRefreshButton: false,
-              itemBuilder: (_, i) {
-                var item = controller.list[i];
-                var site = Sites.allSites[item.siteId]!;
-                return FollowUserItem(
-                  item: item,
-                  onRemove: () {
-                    controller.removeFollow(item);
-                  },
-                  onTap: () {
-                    AppNavigator.toLiveRoomDetail(
-                        site: site, roomId: item.roomId);
-                  },
-                  onLongPress: () {
-                    // 长按弹出操作：设置标签或查看详情
-                    Get.bottomSheet(
-                      SafeArea(
-                        child: Wrap(
-                          children: [
-                            ListTile(
-                              leading: const Icon(Remix.price_tag_3_line),
-                              title: const Text('设置标签'),
-                              onTap: () {
-                                Get.back();
-                                setFollowTagDialog(item);
-                              },
-                            ),
-                            ListTile(
-                              leading: const Icon(Remix.information_line),
-                              title: const Text('查看详情'),
-                              onTap: () {
-                                Get.back();
-                                AppNavigator.toFollowInfo(item);
-                              },
-                            ),
-                          ],
-                        ),
+          Obx(
+            () => Expanded(
+              child: AppSettingsController.instance.followStyleNotGrid.value
+                  ? PageGridView(
+                      crossAxisSpacing: 12,
+                      crossAxisCount: count,
+                      pageController: controller,
+                      firstRefresh: true,
+                      showPCRefreshButton: false,
+                      itemBuilder: (_, i) {
+                        var item = controller.list[i];
+                        var site = Sites.allSites[item.siteId]!;
+                        return FollowUserItem(
+                          item: item,
+                          onRemove: () {
+                            controller.removeFollow(item);
+                          },
+                          onTap: () {
+                            AppNavigator.toLiveRoomDetail(
+                                site: site, roomId: item.roomId);
+                          },
+                          onLongPress: () {
+                            // 长按弹出操作：设置标签或查看详情
+                            Get.bottomSheet(
+                              SafeArea(
+                                child: Wrap(
+                                  children: [
+                                    ListTile(
+                                      leading:
+                                          const Icon(Remix.price_tag_3_line),
+                                      title: const Text('设置标签'),
+                                      onTap: () {
+                                        Get.back();
+                                        setFollowTagDialog(item);
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading:
+                                          const Icon(Remix.information_line),
+                                      title: const Text('查看详情'),
+                                      onTap: () {
+                                        Get.back();
+                                        AppNavigator.toFollowInfo(item);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              backgroundColor: Theme.of(context).cardColor,
+                            );
+                          },
+                        );
+                      },
+                    )
+                  : KeepAliveWrapper(
+                      child: PageGridView(
+                        pageController: controller,
+                        padding: AppStyle.edgeInsetsA12,
+                        firstRefresh: true,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        crossAxisCount: c,
+                        itemBuilder: (_, i) {
+                          var item = controller.list[i];
+                          // 或许直接继承字段更好，标记工作
+                          LiveRoomItem liveRoomItem = LiveRoomItem(
+                            roomId: item.roomId,
+                            title: item.title.value,
+                            cover: item.cover.value,
+                            userName: item.userName,
+                            online: item.online.value,
+                          );
+                          var site = Sites.allSites[item.siteId]!;
+                          return LiveRoomCard(site, liveRoomItem);
+                        },
                       ),
-                      backgroundColor: Theme.of(context).cardColor,
-                    );
-                  },
-                );
-              },
+                    ),
             ),
           ),
         ],

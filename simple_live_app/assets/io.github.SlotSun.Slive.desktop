@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Slive
+GenericName=Livestream Player
+Icon=io.github.SlotSun.Slive
+Exec=io.github.SlotSun.Slive %U
+Categories=AudioVideo;Audio;Video;Network
+Keywords=Livestream;Video
+StartupNotify=true

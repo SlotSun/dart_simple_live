@@ -7,6 +7,7 @@ class SettingsMenu<T> extends StatelessWidget {
   final String? subtitle;
   final Map<T, String> valueMap;
   final T value;
+  final Widget? trailing;
 
   final Function(T)? onChanged;
   const SettingsMenu({
@@ -15,6 +16,7 @@ class SettingsMenu<T> extends StatelessWidget {
     required this.valueMap,
     this.subtitle,
     this.onChanged,
+    this.trailing,
     super.key,
   });
 
@@ -36,7 +38,7 @@ class SettingsMenu<T> extends StatelessWidget {
               subtitle!,
               style: Get.textTheme.bodySmall!.copyWith(color: Colors.grey),
             ),
-      trailing: Row(
+      trailing: trailing ?? Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(

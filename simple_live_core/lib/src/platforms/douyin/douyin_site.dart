@@ -3,8 +3,8 @@ import 'dart:math';
 
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/convert_helper.dart';
-import 'package:simple_live_core/src/platforms/douyin/douyin_utils.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
+import 'package:simple_live_core/src/platforms/douyin/douyin_utils.dart';
 import 'douyin_request_params.dart';
 
 class DouyinSite implements LiveSite {
@@ -227,12 +227,24 @@ class DouyinSite implements LiveSite {
     // webRid是固定的，用户每次开播都是同一个webRid
     // webRid一般长度为11-12位，例如：416144012050
     // 这里简单进行判断，如果roomId长度小于15，则认为是webRid
-    if (roomId.length <= 16) {
-      var webRid = roomId;
-      return await getRoomDetailByWebRid(webRid);
+    var webRid = roomId;
+    if (roomId.length > 16) {
+      webRid = await _getWebRid(roomId);
     }
+    return await getRoomDetailByWebRid(webRid);
+  }
 
-    return await getRoomDetailByRoomId(roomId);
+  /// 非webRid转webRid
+  Future<String> _getWebRid(String roomId) async {
+    var baseUrl = "https://webcast.amemv.com/douyin/webcast/reflow/";
+    var response = await HttpClient.instance.getText(
+      "$baseUrl$roomId",
+    );
+    final reg = RegExp(
+        r'mysteryMan\\":1,\\\"webRid\\\":\\\"([^\\"]+)\\\",\\\"desensitizedNickname'
+    );
+    var webRid = reg.firstMatch(response)?.group(1) ?? "";
+    return webRid.isEmpty ? roomId : webRid;
   }
 
   /// 通过roomId获取直播间信息

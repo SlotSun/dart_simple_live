@@ -411,6 +411,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
   }
 
   Future saveScreenshot() async {
+    final imageSaver = ImageGallerySaver();
     try {
       SmartDialog.showLoading(msg: "正在保存截图");
       //检查相册权限,仅iOS需要
@@ -429,7 +430,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
       }
 
       if (Platform.isIOS || Platform.isAndroid) {
-        await FlutterImageGallerySaver.saveImage(
+        await imageSaver.saveImage(
           imageData,
         );
         SmartDialog.showToast("已保存截图至相册");
@@ -778,7 +779,8 @@ class PlayerController extends BaseController
   }
 
   void mediaError(String error) {
-    WakelockPlus.disable();
+   // 弱网调整：用户自责
+   // WakelockPlus.disable();
   }
 
   Future<void> toggleOSDStats() async {
