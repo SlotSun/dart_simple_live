@@ -674,6 +674,25 @@ mixin PlayerGestureControlMixin
     }
   }
 
+  Timer? _hideGestureTipTimer;
+
+  void onScrollVolume(double dy) {
+    double currentVolume = AppSettingsController.instance.playerVolume.value;
+    double change = dy > 0 ? -5.0 : 5.0;
+    double newVolume = (currentVolume + change).clamp(0.0, 100.0);
+
+    player.setVolume(newVolume);
+    AppSettingsController.instance.setPlayerVolume(newVolume);
+
+    gestureTipText.value = "音量 ${newVolume.toInt()}%";
+    showGestureTip.value = true;
+
+    _hideGestureTipTimer?.cancel();
+    _hideGestureTipTimer = Timer(const Duration(milliseconds: 800), () {
+      showGestureTip.value = false;
+    });
+  }
+
   /// 竖向手势完成
   void onVerticalDragEnd(DragEndDetails details) async {
     if (lockControlsState.value && fullScreenState.value) {
