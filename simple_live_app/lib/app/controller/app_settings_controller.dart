@@ -75,6 +75,12 @@ class AppSettingsController extends GetxController {
     roomAutoExitDuration.value = LocalStorageService.instance
         .getValue(LocalStorageService.kRoomAutoExitDuration, 60);
 
+    userActivityCheckEnable.value = LocalStorageService.instance
+        .getValue(LocalStorageService.kUserActivityCheckEnable, false);
+
+    userActivityTimeout.value = LocalStorageService.instance
+        .getValue(LocalStorageService.kUserActivityTimeout, 30);
+
     playerCompatMode.value = LocalStorageService.instance
         .getValue(LocalStorageService.kPlayerCompatMode, false);
 
@@ -359,6 +365,7 @@ class AppSettingsController extends GetxController {
         .setValue(LocalStorageService.kAutoExitDuration, e);
   }
 
+  /// 房间内定时关闭时间
   var roomAutoExitDuration = 60.obs;
 
   void setRoomAutoExitDuration(int e) {
@@ -367,6 +374,25 @@ class AppSettingsController extends GetxController {
         .setValue(LocalStorageService.kRoomAutoExitDuration, e);
   }
 
+  /// 开启用户活跃检测
+  var userActivityCheckEnable = false.obs;
+
+  void setUserActivityCheckEnable(bool e) {
+    userActivityCheckEnable.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kUserActivityCheckEnable, e);
+  }
+
+  /// 用户活跃超时时间（分钟）
+  var userActivityTimeout = 30.obs;
+
+  void setUserActivityTimeout(int e) {
+    userActivityTimeout.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kUserActivityTimeout, e);
+  }
+
+  /// 播放器兼容模式
   var playerCompatMode = false.obs;
 
   void setPlayerCompatMode(bool e) {

@@ -210,6 +210,12 @@ class LocalStorageService extends GetxService {
   /// 数据库版本
   static const String kHiveDbVer = "kHiveDbVer";
 
+  /// 开启用户活跃检测
+  static const String kUserActivityCheckEnable = "UserActivityCheckEnable";
+
+  /// 用户活跃超时时间（分钟）
+  static const String kUserActivityTimeout = "UserActivityTimeout";
+
   late Box settingsBox;
   late Box<String> shieldBox;
 

@@ -53,6 +53,42 @@ class AutoExitSettingsPage extends GetView<AppSettingsController> {
               ],
             ),
           ),
+          const SizedBox(height: 12),
+          SettingsCard(
+            child: Column(
+              children: [
+                Obx(
+                  () => SettingsSwitch(
+                    value: controller.userActivityCheckEnable.value,
+                    title: "启用用户活跃检测",
+                    subtitle: "长时间未操作将自动关闭程序",
+                    onChanged: (e) {
+                      controller.setUserActivityCheckEnable(e);
+                    },
+                  ),
+                ),
+                Obx(
+                  () => Visibility(
+                    visible: controller.userActivityCheckEnable.value,
+                    child: AppStyle.divider,
+                  ),
+                ),
+                Obx(
+                  () => Visibility(
+                    visible: controller.userActivityCheckEnable.value,
+                    child: SettingsAction(
+                      title: "超时时间",
+                      value:
+                          "${controller.userActivityTimeout.value ~/ 60}小时${controller.userActivityTimeout.value % 60}分钟",
+                      onTap: () {
+                        setActivityTimer(context);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -80,5 +116,29 @@ class AutoExitSettingsPage extends GetView<AppSettingsController> {
     }
     var duration = Duration(hours: value.hour, minutes: value.minute);
     controller.setAutoExitDuration(duration.inMinutes);
+  }
+
+  void setActivityTimer(BuildContext context) async {
+    var value = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(
+        hour: controller.userActivityTimeout.value ~/ 60,
+        minute: controller.userActivityTimeout.value % 60,
+      ),
+      initialEntryMode: TimePickerEntryMode.inputOnly,
+      builder: (_, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            alwaysUse24HourFormat: true,
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (value == null || (value.hour == 0 && value.minute == 0)) {
+      return;
+    }
+    var duration = Duration(hours: value.hour, minutes: value.minute);
+    controller.setUserActivityTimeout(duration.inMinutes);
   }
 }
