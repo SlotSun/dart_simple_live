@@ -154,6 +154,12 @@ mixin PlayerStateMixin on PlayerMixin {
   /// 自动隐藏控制器计时器
   Timer? hideControlsTimer;
 
+  /// 鼠标隐藏计时器
+  Timer? _hideMouseTimer;
+
+  /// 鼠标指针可见性
+  RxBool isMouseVisible = true.obs;
+
   /// 自动隐藏提示计时器
   Timer? hideSeekTipTimer;
 
@@ -197,6 +203,48 @@ mixin PlayerStateMixin on PlayerMixin {
       ),
       hideControls,
     );
+  }
+
+  /// 鼠标进入播放区域
+  void onMouseEnter(PointerEnterEvent event) {
+    isMouseVisible.value = true;
+    _resetHideMouseTimer();
+    // 同时触发控制器显示
+    if (!showControlsState.value) {
+      showControls();
+    }
+  }
+
+  /// 鼠标离开播放区域
+  void onMouseExit(PointerExitEvent event) {
+    isMouseVisible.value = true;
+    _hideMouseTimer?.cancel();
+    if (showControlsState.value) {
+      hideControls();
+    }
+  }
+
+  /// 鼠标移动/操作
+  void onMouseHover(PointerHoverEvent event, BuildContext context) {
+    isMouseVisible.value = true;
+    _resetHideMouseTimer();
+    
+    final screenHeight = MediaQuery.of(context).size.height;
+    final targetPosition = screenHeight * 0.25; // 计算屏幕顶部25%的位置
+    if (event.position.dy <= targetPosition ||
+        event.position.dy >= targetPosition * 3) {
+      if (!showControlsState.value) {
+        showControls();
+      }
+    }
+  }
+
+  /// 重置鼠标隐藏计时器
+  void _resetHideMouseTimer() {
+    _hideMouseTimer?.cancel();
+    _hideMouseTimer = Timer(const Duration(seconds: 5), () {
+      isMouseVisible.value = false;
+    });
   }
 
   void updateScaleMode() {
@@ -530,26 +578,15 @@ mixin PlayerGestureControlMixin
 
   //桌面端操控
   void onEnter(PointerEnterEvent event) {
-    if (!showControlsState.value) {
-      showControls();
-    }
+    onMouseEnter(event);
   }
 
   void onExit(PointerExitEvent event) {
-    if (showControlsState.value) {
-      hideControls();
-    }
+    onMouseExit(event);
   }
 
   void onHover(PointerHoverEvent event, BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final targetPosition = screenHeight * 0.25; // 计算屏幕顶部25%的位置
-    if (event.position.dy <= targetPosition ||
-        event.position.dy >= targetPosition * 3) {
-      if (!showControlsState.value) {
-        showControls();
-      }
-    }
+    onMouseHover(event, context);
   }
 
   /// 双击全屏/退出全屏
