@@ -45,10 +45,10 @@ packages:
     dependency: "direct main"
     description:
       name: auto_orientation_v2
-      sha256: "96a72a00b367e1aebef4be55f4804c0369197dc65a0dffd039d4c2f72f59d955"
+      sha256: b246e1658b752ac3a882fb8bb1192309ef587e6ffeefa80bf414283fbcd4e2e3
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.6"
+    version: "2.3.7"
   boolean_selector:
     dependency: transitive
     description:
@@ -349,10 +349,10 @@ packages:
     dependency: "direct main"
     description:
       name: file_picker
-      sha256: f8f4ea435f791ab1f817b4e338ed958cb3d04ba43d6736ffc39958d950754967
+      sha256: d974b6ba2606371ac71dd94254beefb6fa81185bde0b59bdc1df09885da85fde
       url: "https://pub.dev"
     source: hosted
-    version: "10.3.6"
+    version: "10.3.8"
   fixnum:
     dependency: transitive
     description:
@@ -1696,4 +1696,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.9.0 <4.0.0"
-  flutter: ">=3.38.4"
+  flutter: ">=3.38.6"
