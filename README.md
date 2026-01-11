@@ -25,19 +25,22 @@
 
 ## APP支持平台
 
-- [x] Android 
-- [x] iOS `自测`
-- [x] Windows 
-- [x] MacOS `自测`
+- [x] Android
+- [x] Windows
 - [x] Linux
+- [x] iOS `自测`
+- [x] MacOS `自测`
 - [ ] Android TV `请自行打包` [说明](https://github.com/SlotSun/dart_simple_live/issues/89)
+
+#### Arch Linux: 
+```bash 
+  yay -S slive
+  yay -S slive-bin
+```
 
 只保证Android, Linux和Windows可用性
 
 请到[Releases](https://github.com/slotsun/dart_simple_live/releases)下载最新版本，iOS请到上游或者action下载体验
-
-Arch Linux: ```yay -S slive```
-
 
 如果想体验最新功能，可前往[Actions](https://github.com/slotsun/dart_simple_live/actions)下载自动打包的开发版本
 
@@ -53,7 +56,7 @@ Windows建议下载UWP版[聚合直播](https://www.microsoft.com/store/apps/9N1
 
 ## 环境
 
-flutter 3.38.4
+flutter 3.38.6
 
 ## 参考及引用
 
@@ -72,8 +75,6 @@ flutter 3.38.4
 [5ime/Tiktok_Signature](https://github.com/5ime/Tiktok_Signature)
 
 [biliup](https://github.com/biliup/biliup)
-
-[stream-rec](https://github.com/stream-rec/stream-rec)
 
 ## 声明
 
