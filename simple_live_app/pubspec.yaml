@@ -27,6 +27,7 @@ dependencies:
   logger: ^2.0.2 # 日志
   firebase_analytics: ^12.1.0
   firebase_crashlytics: ^5.0.6 # firebase
+  firebase_core: ^4.3.0
   intl: ^0.20.2 # 国际化
   qr_flutter: ^4.1.0 # 二维码生成
   dynamic_color: ^1.8.1 # 动态颜色
