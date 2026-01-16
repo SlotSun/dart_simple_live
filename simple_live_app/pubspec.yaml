@@ -99,7 +99,6 @@ dependencies:
     path: rust_builder
   flutter_rust_bridge: 2.11.1
   firebase_analytics: ^12.1.0
-  firebase_core: ^4.3.0
   firebase_crashlytics: ^5.0.6
 
 dependency_overrides:

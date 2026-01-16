@@ -210,7 +210,7 @@ class MyApp extends StatelessWidget {
           //debugShowCheckedModeBanner: false,
           navigatorObservers: [
             FlutterSmartDialog.observer,
-            AppAnalyticsObserver.observer
+            if (Platform.isAndroid) AppAnalyticsObserver.observer
           ],
           builder: FlutterSmartDialog.init(
             loadingBuilder: ((msg) => const AppLoaddingWidget()),
