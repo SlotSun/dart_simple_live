@@ -1,5 +1,5 @@
 name: simple_live_app
-version: 1.8.5+10805
+version: 1.8.6+10806
 publish_to: none
 description: "Slive APP"
 environment: 
@@ -25,6 +25,8 @@ dependencies:
   hive: 2.2.3 # 持久化存储
   hive_flutter: 1.1.0 # 持久化存储
   logger: ^2.0.2 # 日志
+  firebase_analytics: ^12.1.0
+  firebase_crashlytics: ^5.0.6 # firebase
   intl: ^0.20.2 # 国际化
   qr_flutter: ^4.1.0 # 二维码生成
   dynamic_color: ^1.8.1 # 动态颜色
@@ -34,6 +36,12 @@ dependencies:
   synchronized: ^3.3.1 # 线程安全
   collection: ^1.18.0
   pool: ^1.5.2 #并发控制器
+  romanize: ^0.0.3 # 文字罗马化
+
+  # ffi
+  rust_lib_simple_live_app:
+    path: rust_builder
+  flutter_rust_bridge: 2.11.1
 
   # Widget
   flutter_staggered_grid_view: ^0.7.0 # 瀑布流 / GridView
@@ -95,11 +103,6 @@ dependencies:
       url: https://github.com/Predidit/media-kit.git
       ref: 66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f
       path: ./libs/universal/media_kit_libs_video
-  rust_lib_simple_live_app:
-    path: rust_builder
-  flutter_rust_bridge: 2.11.1
-  firebase_analytics: ^12.1.0
-  firebase_crashlytics: ^5.0.6
 
 dependency_overrides:
   media_kit_libs_linux:

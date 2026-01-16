@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:romanize/romanize.dart';
 import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
@@ -83,6 +84,7 @@ class FollowInfoController extends BasePageController<FollowUser> {
     final current = followUser.value;
     if (current == null) return;
     current.remark = newRemark;
+    current.romanName = TextRomanizer.romanize(newRemark);
     FollowService.instance.addFollow(current);
     followUser.refresh();
   }

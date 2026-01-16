@@ -2,12 +2,14 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:romanize/romanize.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/services/db_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
+import 'package:simple_live_app/app/utils/string_normalizer.dart';
 
 class MigrationService {
   /// 将Hive数据迁移到Application Support
@@ -76,6 +78,21 @@ class MigrationService {
             break;
           }
         }
+      }
+    }
+    // transfer follow.name or follow.remark to follow.romanName
+    // logic: remark first
+    if (curDBVer <= 10805) {
+      var followList = DBService.instance.followBox.values.toList();
+      for (FollowUser follow in followList) {
+        if (follow.remark != null && follow.remark!.isNotEmpty) {
+          var roman = TextRomanizer.romanize(follow.remark!).normalize();
+          follow.romanName = roman;
+        } else {
+          follow.romanName =
+              TextRomanizer.romanize(follow.userName).normalize();
+        }
+        DBService.instance.addFollow(follow);
       }
     }
     LocalStorageService.instance.settingsBox

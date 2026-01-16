@@ -15,6 +15,7 @@ import 'package:logger/logger.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:romanize/romanize.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/event_bus.dart';
@@ -50,6 +51,7 @@ void main() async {
   // window(first)->migration->media_kit->Hive->services->start
   // window(second)->open
   await firstOpen();
+  await TextRomanizer.ensureInitialized();
   await RustLib.init();
   await MigrationService.migrateData();
   MediaKit.ensureInitialized();
