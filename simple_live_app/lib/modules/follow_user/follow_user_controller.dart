@@ -100,7 +100,6 @@ class FollowUserController extends BasePageController<FollowUser> {
   }
 
   void filterData() {
-    FollowService.instance.liveListSort();
     if (filterMode.value.tag == "全部") {
       list.assignAll(FollowService.instance.followList.value);
     } else if (filterMode.value.tag == "直播中") {
@@ -132,6 +131,11 @@ class FollowUserController extends BasePageController<FollowUser> {
     if (res != null) {
       sortMethod.value = res;
       AppSettingsController.instance.setFollowSortMethod(sortMethod.value);
+      if (filterMode.value.tag == "未开播" ||
+          filterMode.value.tag == "全部" ||
+          filterMode.value.tag == "直播中") {
+        FollowService.instance.liveListSort();
+      }
       filterData();
     }
   }

@@ -2,14 +2,14 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:romanize/romanize.dart';
+import 'package:pinyin/pinyin.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
+import 'package:simple_live_app/app/utils/string_normalizer.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/services/db_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
-import 'package:simple_live_app/app/utils/string_normalizer.dart';
 
 class MigrationService {
   /// 将Hive数据迁移到Application Support
@@ -58,6 +58,7 @@ class MigrationService {
     int curAppVer = Utils.parseVersion(Utils.packageInfo.version);
     int curDBVer = LocalStorageService.instance
         .getValue(LocalStorageService.kHiveDbVer, 10708);
+    Log.i("curDBVer: $curDBVer, curAppVer: $curAppVer");
     if (curDBVer <= 10708) {
       LocalStorageService.instance.settingsBox
           .delete(LocalStorageService.kWebDAVLastUploadTime);
@@ -86,14 +87,14 @@ class MigrationService {
       var followList = DBService.instance.followBox.values.toList();
       for (FollowUser follow in followList) {
         if (follow.remark != null && follow.remark!.isNotEmpty) {
-          var roman = TextRomanizer.romanize(follow.remark!).normalize();
+          var roman = PinyinHelper.getShortPinyin(follow.remark!).normalize();
           follow.romanName = roman;
         } else {
-          follow.romanName =
-              TextRomanizer.romanize(follow.userName).normalize();
+          follow.romanName = PinyinHelper.getShortPinyin(follow.userName).normalize();
         }
         DBService.instance.addFollow(follow);
       }
+      Log.i("transfer follow.name to roman is down!");
     }
     LocalStorageService.instance.settingsBox
         .put(LocalStorageService.kHiveDbVer, curAppVer);

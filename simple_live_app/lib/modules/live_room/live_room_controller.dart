@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:romanize/romanize.dart';
+import 'package:pinyin/pinyin.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/constant.dart';
@@ -618,7 +618,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     var id = "${site.id}_$roomId";
     var historyDuration =
         HistoryService.instance.getHistoryDuration(followUserId: id);
-    var romanName = TextRomanizer.romanize(detail.value?.userName ?? "").normalize();
+    var romanName =  PinyinHelper.getShortPinyin(detail.value?.userName ?? "").normalize();
     FollowService.instance.addFollow(
       FollowUser(
         id: id,

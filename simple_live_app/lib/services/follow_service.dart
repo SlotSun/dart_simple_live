@@ -391,16 +391,16 @@ class FollowService extends GetxService {
   }
 
   void filterData() {
+    liveListSort();
     liveList.assignAll(followList.where((x) => x.liveStatus.value == 2));
     notLiveList.assignAll(followList.where((x) => x.liveStatus.value == 1));
-    liveListSort();
     _updatedListController.add(0);
   }
 
   void liveListSort(){
     listSortByMethod(followList, AppSettingsController.instance.followSortMethod.value);
-    listSortByMethod(liveList, AppSettingsController.instance.followSortMethod.value);
-    listSortByMethod(notLiveList, AppSettingsController.instance.followSortMethod.value);
+    liveList.assignAll(followList.where((x) => x.liveStatus.value == 2));
+    notLiveList.assignAll(followList.where((x) => x.liveStatus.value == 1));
   }
 
   void listSortByMethod(List<FollowUser> list, SortMethod sortMethod) {
