@@ -407,13 +407,13 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       liveStatus.value = detail.value!.status || detail.value!.isRecord;
       if (liveStatus.value) {
         getPlayQualites();
+        addSysMsg("开始连接弹幕服务器");
+        initDanmau();
+        liveDanmaku.start(detail.value?.danmakuData);
       }
       if (detail.value!.isRecord) {
         addSysMsg("当前主播未开播，正在轮播录像");
       }
-      addSysMsg("开始连接弹幕服务器");
-      initDanmau();
-      liveDanmaku.start(detail.value?.danmakuData);
     } catch (e) {
       Log.logPrint(e);
       //SmartDialog.showToast(e.toString());
