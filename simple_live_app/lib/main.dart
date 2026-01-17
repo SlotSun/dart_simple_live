@@ -121,7 +121,10 @@ Future initServices() async {
 
   Get.put(HistoryService());
 
-  Get.put(WindowService());
+  // 移动平台不使用 windowManager
+  if(!Platform.isAndroid && !Platform.isIOS){
+    Get.put(WindowService());
+  }
 
   // only android use firebase
   if(Platform.isAndroid){
