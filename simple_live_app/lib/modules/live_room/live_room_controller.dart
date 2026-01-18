@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:pinyin/pinyin.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/constant.dart';
@@ -18,7 +17,6 @@ import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/app/utils/sandbox.dart';
-import 'package:simple_live_app/app/utils/string_normalizer.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/history.dart';
 import 'package:simple_live_app/modules/live_room/player/player_controller.dart';
@@ -618,14 +616,12 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     var id = "${site.id}_$roomId";
     var historyDuration =
         HistoryService.instance.getHistoryDuration(followUserId: id);
-    var romanName =  PinyinHelper.getShortPinyin(detail.value?.userName ?? "").normalize();
     FollowService.instance.addFollow(
       FollowUser(
         id: id,
         roomId: roomId,
         siteId: site.id,
         userName: detail.value?.userName ?? "",
-        romanName: romanName,
         face: detail.value?.userAvatar ?? "",
         addTime: DateTime.now(),
         watchDuration: historyDuration,

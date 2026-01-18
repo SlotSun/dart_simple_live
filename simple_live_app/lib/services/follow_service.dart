@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pinyin/pinyin.dart';
 import 'package:pool/pool.dart';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
@@ -16,6 +17,7 @@ import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/app/utils/duration_2_str_utils.dart';
 import 'package:simple_live_app/app/utils/dynamic_sort.dart';
+import 'package:simple_live_app/app/utils/string_normalizer.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/models/db/history.dart';
@@ -204,6 +206,15 @@ class FollowService extends GetxService {
 
   // 添加关注
   void addFollow(FollowUser follow) {
+    // follow变动过程中romanName统一变化
+    String romanName = "";
+    if(follow.remark !=null && follow.remark!.isNotEmpty){
+      romanName = PinyinHelper.getShortPinyin(follow.romanName!);
+    }else{
+      romanName = PinyinHelper.getShortPinyin(follow.userName);
+    }
+    follow.romanName = romanName.normalize();
+
     DBService.instance.addFollow(follow);
   }
 
