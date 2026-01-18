@@ -34,7 +34,9 @@ class HistoryService extends GetxService {
     _updateHistory();
     _stopwatch.reset();
     History? history = DBService.instance.getHistory(roomId);
-    _loadHistory(history!);
+    if(history != null){
+      _loadHistory(history);
+    }
   }
 
   // 停止计时
