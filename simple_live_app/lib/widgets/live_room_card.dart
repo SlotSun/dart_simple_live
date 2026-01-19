@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
@@ -11,7 +10,8 @@ import 'package:simple_live_core/simple_live_core.dart';
 class LiveRoomCard extends StatelessWidget {
   final Site site;
   final LiveRoomItem item;
-  const LiveRoomCard(this.site, this.item, {super.key});
+  final Function()? onLongPress;
+  const LiveRoomCard(this.site, this.item, {super.key, this.onLongPress});
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +19,7 @@ class LiveRoomCard extends StatelessWidget {
       onTap: () {
         AppNavigator.toLiveRoomDetail(site: site, roomId: item.roomId);
       },
+      onLongPress: onLongPress,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -58,11 +59,7 @@ class LiveRoomCard extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      const Icon(
-                        Remix.fire_fill,
-                        color: Colors.white,
-                        size: 14,
-                      ),
+                      site.icon,
                       AppStyle.hGap4,
                       Text(
                         Utils.onlineToString(item.online),

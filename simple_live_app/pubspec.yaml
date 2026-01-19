@@ -156,6 +156,10 @@ flutter_launcher_icons:
     image_path: "assets/logo.png"
 
 flutter: 
+  fonts:
+    - family: iconfont
+      fonts:
+        - asset: assets/iconfont/live_icons.ttf
   uses-material-design: true
   assets:
     - assets/statement.txt
