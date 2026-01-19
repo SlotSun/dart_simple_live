@@ -184,7 +184,7 @@ flutter build apk --release --split-per-abi
 
 可选，指明改动的模块：
 - `platfrom` - 直播平台
-- `windows/Linux/Andoird` - 用户平台
+- `Windows/Linux/Android` - 用户平台
 - `ui` - 用户界面
 - `ci` - 构建系统
 - `docs` - 文档
