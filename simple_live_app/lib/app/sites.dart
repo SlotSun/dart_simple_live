@@ -23,7 +23,7 @@ class Sites {
     ),
     Constant.kHuya: Site(
       id: Constant.kHuya,
-      iconData: LiveIcons.huya,,
+      iconData: LiveIcons.huya,
       logo: "assets/images/huya.png",
       name: "虎牙直播",
       liveSite: HuyaSite(),
