@@ -59,7 +59,11 @@ class LiveRoomCard extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      site.icon,
+                      Icon(
+                        site.iconData,
+                        color: Colors.white,
+                        size: 14,
+                      ),
                       AppStyle.hGap4,
                       Text(
                         Utils.onlineToString(item.online),

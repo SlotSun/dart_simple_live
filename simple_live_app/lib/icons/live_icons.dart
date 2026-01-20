@@ -21,7 +21,7 @@ class _PreviewIcon {
 }
 
 class LiveIconsPreview extends StatelessWidget {
-  const LiveIconsPreview({Key? key}) : super(key: key);
+  const LiveIconsPreview({super.key});
 
   static const iconList = <_PreviewIcon>[
     _PreviewIcon(LiveIcons.douyu, "douyu", "douyu"),
