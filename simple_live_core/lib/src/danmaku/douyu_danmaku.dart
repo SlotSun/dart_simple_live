@@ -129,7 +129,7 @@ class DouyuDanmaku implements LiveDanmaku {
             int.parse(scData["etime"]) * 1000,
           ),
           face: "https://${scData["uat"][1]}",
-          message: jsonData["content"].toString(),
+          message: scData["content"].toString(),
           price: int.parse(scData["realPrice"]) ~/ 100,
           startTime: DateTime.fromMillisecondsSinceEpoch(
             int.parse(scData["acptime"]) * 1000,
