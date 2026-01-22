@@ -1,0 +1,35 @@
+{
+  "danmuShowSwitch": 1,
+  "mtype": 2,
+  "totalNum": 0,
+  "type": "voice_trlt",
+  "isShow": 1,
+  "list": [
+    {
+      "vrId": 2013689846161235968,
+      "vocUrl": [
+        "https:",
+        "sta-op.douyucdn.cn/voice-synthesis/2026/01/21/b60a87c6e63c6cc62f693a737c06af96.mp3"
+      ],
+      "uat": [
+        "https:",
+        "apic.douyucdn.cn/upload/avatar_v3/202210/e9729aa3d86347ddb294e4231f67356f_big.jpg"
+      ],
+      "stime": 120,
+      "etimeV2": 1768936192,
+      "content": "天天玩个马尔斯拿矛清兵poke，每次开大矛都没有，技能全是乱的，经常一波全送了",
+      "vocNickUrl": [
+        "https:",
+        "sta-op.douyucdn.cn/voice-synthesis/2026/01/21/c540975c0880655ebadb767622b6395b.mp3"
+      ],
+      "uid": 464434107,
+      "price": 5000,
+      "etime": 1768936192,
+      "acptime": 1768936072,
+      "un": "cej35",
+      "mf": 0,
+      "isVoc": 1,
+      "realPrice": 5000
+    }
+  ]
+}

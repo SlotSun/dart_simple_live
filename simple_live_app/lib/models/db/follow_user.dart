@@ -82,7 +82,8 @@ class FollowUser implements Mappable {
         'addTime': addTime.toString(),
         "watchDuration": watchDuration ?? "00:00:00",
         "tag": tag,
-        "remark": remark
+        "remark": remark,
+        "romanName": romanName
       };
 
   @override
