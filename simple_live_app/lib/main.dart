@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_single_instance/flutter_single_instance.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -43,12 +42,12 @@ import 'package:simple_live_app/services/window_service.dart';
 import 'package:simple_live_app/src/rust/frb_generated.dart';
 import 'package:simple_live_app/widgets/status/app_loadding_widget.dart';
 import 'package:simple_live_core/simple_live_core.dart';
+import 'package:window_manager/window_manager.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // init-queue:
   // window(first)->migration->media_kit->Hive->services->start
   // window(second)->open
-  await firstOpen();
   await RustLib.init();
   await MigrationService.migrateData();
   MediaKit.ensureInitialized();
@@ -71,20 +70,6 @@ void main() async {
   );
   SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
   runApp(const MyApp());
-}
-
-Future firstOpen() async {
-  // 判定程序是否启动-- windows 交给原生
-  if (Platform.isWindows == false) {
-    if (!await FlutterSingleInstance().isFirstInstance()) {
-      Log.i("App is already running");
-      final err = await FlutterSingleInstance().focus();
-      if (err != null) {
-        Log.e("Error focusing running instance: $err", StackTrace.current);
-      }
-      exit(0);
-    }
-  }
 }
 
 Future initWindow() async {

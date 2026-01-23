@@ -77,7 +77,6 @@ dependencies:
       path: flutter_inappwebview
       ref: sbi_fx_pc/v6.2.0-beta.3
   connectivity_plus: ^7.0.0 # 网络状态
-  flutter_single_instance: ^1.7.0 # 应用启动检测
   qr_code_scanner_plus: ^2.0.14 # 二维码扫描
 
   # 网络相关
