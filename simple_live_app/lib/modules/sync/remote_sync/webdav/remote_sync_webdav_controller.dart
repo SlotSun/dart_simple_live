@@ -62,6 +62,12 @@ class RemoteSyncWebDAVController extends BaseController {
     if (newDirectory == webDavBackupDirectory.value) {
       return;
     }
+    // 防呆
+    final filePathCheck = RegExp(r'^/[^/]+$');
+    if (!filePathCheck.hasMatch(newDirectory)) {
+      SmartDialog.showToast("请输入正确的文件路径");
+      return;
+    }
     webDavBackupDirectory.value = newDirectory;
     LocalStorageService.instance.setValue(
       LocalStorageService.kWebDAVDirectory,
@@ -269,7 +275,15 @@ class RemoteSyncWebDAVController extends BaseController {
   // webDAV恢复到本地
   void doWebDAVRecovery() async {
     SmartDialog.showLoading(msg: "正在恢复到本地");
-    final data = await davClient.recovery();
+    List<int> data;
+    try{
+      data = await davClient.recovery();
+    }catch(e,s){
+      Log.e("WebDAV恢复失败：$e", s);
+      SmartDialog.dismiss();
+      SmartDialog.showToast('同步失败');
+      return;
+    }
     final archive = await Isolate.run<Archive>(() {
       final zipDecoder = ZipDecoder();
       return zipDecoder.decodeBytes(data);

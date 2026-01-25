@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:simple_live_app/app/log.dart';
 import 'package:webdav_client/webdav_client.dart';
 
 class DAVClient {
@@ -41,8 +42,13 @@ class DAVClient {
   String get backupFile => "$root/backup.zip";
 
   Future<bool> backup(Uint8List data) async {
-    await client.mkdir(root);
-    await client.write(backupFile, data);
+    try {
+      await client.mkdir(root);
+      await client.write(backupFile, data);
+    } catch (e, s) {
+      Log.e("WebDAV上传失败: $e", s);
+      return false;
+    }
     return true;
   }
 
