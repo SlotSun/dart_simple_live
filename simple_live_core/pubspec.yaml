@@ -11,14 +11,14 @@ dependencies:
     sdk: flutter
   dio: ^5.5.0+1
   logger: ^2.4.0
-  web_socket_channel: ^3.0.1
+  web_socket_channel: ^3.0.3
   html_unescape: ^2.0.0
-  protobuf: ^4.1.0
-  crypto: ^3.0.3
+  protobuf: ^6.0.0
+  crypto: ^3.0.7
   brotli: ^0.6.0
   tars_dart:
     path: ./packages/tars_dart
-  fixnum: ^1.1.0
+  fixnum: ^1.1.1
   flutter_qjs:
     git:
       url: https://github.com/wgh136/flutter_qjs.git
@@ -27,7 +27,7 @@ dependencies:
 
 dev_dependencies: 
   lints: ^6.0.0
-  test: ^1.21.0
+  test: ^1.29.0
 
 flutter:
   assets:
