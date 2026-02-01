@@ -449,7 +449,7 @@ class HuyaSite implements LiveSite {
       }
 
       var roomItem = LiveRoomItem(
-        roomId: item["game_privateHost"].toString(),
+        roomId: "yy/${item["yyid"]}",
         title: title,
         cover: cover,
         userName: item["game_nick"].toString(),
