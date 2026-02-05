@@ -143,6 +143,7 @@ class DouyuDanmaku implements LiveDanmaku {
           color: LiveMessageColor.white,
           data: sc2,
         );
+      } else if (type != "uenter") {
       }
       if (liveMsg != null) {
         onMessage?.call(liveMsg);

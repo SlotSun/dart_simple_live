@@ -610,6 +610,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fractional_indexing_dart:
+    dependency: "direct main"
+    description:
+      name: fractional_indexing_dart
+      sha256: "05d11e1124922b78c64ed2e616b29e0dc01c53646bc15a26a31d538ad198ac7d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.7"
   frontend_server_client:
     dependency: transitive
     description:
@@ -1583,7 +1591,7 @@ packages:
     source: hosted
     version: "3.1.5"
   uuid:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: uuid
       sha256: a11b666489b1954e01d992f3d601b1804a33937b5a8fe677bd26b8a9f96f96e8

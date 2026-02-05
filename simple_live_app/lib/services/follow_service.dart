@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:fractional_indexing_dart/fractional_indexing_dart.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pinyin/pinyin.dart';
@@ -200,8 +201,10 @@ class FollowService extends GetxService {
     listSortByMethod(curTagFollowList,  AppSettingsController.instance.followSortMethod.value);
   }
 
-  void updateFollowTagOrder(List<FollowUserTag> userTagList) {
-    DBService.instance.updateFollowTagOrder(userTagList);
+  Future<void> updateFollowTagOrder(FollowUserTag oldTag,FollowUserTag newTag) async {
+    await DBService.instance.deleteFollowTag(oldTag.id);
+    await DBService.instance.updateFollowTag(newTag);
+    loadData(updateStatus: false);
   }
 
   // 添加关注
@@ -271,9 +274,11 @@ class FollowService extends GetxService {
       _updatedListController.add(0);
       return;
     }
-    followList.assignAll(list);
     if (updateStatus) {
+      followList.assignAll(list);
       startUpdateStatus(cycle: cycle);
+    }else{
+      _updatedListController.add(0);
     }
   }
 
@@ -448,7 +453,7 @@ class FollowService extends GetxService {
       case SortMethod.siteId:
         list.dynamicSort([liveCondition, siteIdCondition]);
       case SortMethod.recently:
-        list.dynamicSort([liveCondition,recentlyCondition]);
+        list.dynamicSort([liveCondition, recentlyCondition]);
       case SortMethod.userNameASC:
         list.dynamicSort([liveCondition, userNameASCCondition]);
       case SortMethod.userNameDESC:
@@ -614,6 +619,8 @@ class FollowService extends GetxService {
             "face": item.face,
             "watchDuration": item.watchDuration,
             "addTime": item.addTime.toString(),
+            "remark": item.remark,
+            "romanName": item.romanName,
             "tag": item.tag
           },
         )
@@ -626,16 +633,46 @@ class FollowService extends GetxService {
 
     for (var item in data) {
       var follow = FollowUser.fromJson(item);
-      // 导入关注列表同时导入标签列表 此方法可优化为所有导入逻辑
-      if (follow.tag != "全部") {
-        // logic: 尝试添加，存在则返回已存在的对象
-        var tag = await DBService.instance.addFollowTag(follow.tag);
-        // 更新tag
-        tag.userId.addIf(!tag.userId.contains(follow.id), follow.id);
-        DBService.instance.updateFollowTag(tag);
-      }
       await DBService.instance.addFollow(follow);
     }
+
+    await followUserAllDataCheck();
+  }
+
+  // 数据校对
+  // 核心关注数据有几种错乱情况，需要进行校对，需要一定时间复核代码
+  // 1：未关注，但标签包含关注
+  // 2: 已关注，且设置标签，但标签不包含
+  // 3: 已关注，且设置标签，但标签不存在
+  // 4: 标签重复
+  // 校对思路，followList是基础数据源，tagList为索引数据，重建数据即可
+  // 根据此思路，可以重写文件导入导出以及webdav恢复逻辑
+  Future<void> followUserAllDataCheck() async {
+    var followUserListTemp = DBService.instance.getFollowList();
+    var oldTagList = DBService.instance.getFollowTagList();
+    final Map<String, List<String>> tagMap = {
+      for (var tag in oldTagList) tag.tag: <String>[],
+    };
+    for (var follow in followUserListTemp) {
+      if(follow.tag!="全部"){
+        tagMap.putIfAbsent(follow.tag, () => <String>[]).add(follow.id);
+      }
+    }
+    // 落库
+    final Map<String, FollowUserTag> res = {};
+    String? lastKey;
+    for (var entry in tagMap.entries) {
+      lastKey = FractionalIndexing.generateKeyBetween(lastKey, null);
+      final followUserTag = FollowUserTag(
+        id: lastKey,
+        tag: entry.key,
+        userId: entry.value,
+      );
+      res[followUserTag.id] = followUserTag;
+    }
+    await DBService.instance.tagBox.clear();
+    await DBService.instance.tagBox.putAll(res);
+    Log.i("Follow-Service: data check down，follows:${followUserListTemp.length}，tags:${tagMap.length}");
   }
 
   @override

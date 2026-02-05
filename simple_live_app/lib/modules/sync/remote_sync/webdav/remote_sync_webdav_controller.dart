@@ -23,6 +23,7 @@ import 'package:simple_live_app/requests/webdav_client.dart';
 import 'package:simple_live_app/services/bilibili_account_service.dart';
 import 'package:simple_live_app/services/db_service.dart';
 import 'package:simple_live_app/services/douyin_account_service.dart';
+import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
 import 'package:simple_live_app/services/migration_service.dart';
 
@@ -252,8 +253,10 @@ class RemoteSyncWebDAVController extends BaseController {
       // 全量备份用户设置，为修改包名无痛迁移数据做准备
       // v1.8.3 修改为按平台备份/恢复用户设置
       var settingList = LocalStorageService.instance.settingsBox.toMap();
+      settingList.remove(LocalStorageService.kHiveDbVer);
       var dataSettingListMap = {
         "data": {
+          LocalStorageService.kHiveDbVer: AppSettingsController.instance.dbVer,
           Platform.operatingSystem: settingList,
         },
       };
@@ -366,6 +369,13 @@ class RemoteSyncWebDAVController extends BaseController {
           } else {
             Log.i("缺少$platform对应平台用户设置备份");
           }
+          // 低于v1.8.6需要升级数据
+          LocalStorageService.instance.setValue(
+            LocalStorageService.kHiveDbVer,
+            jsonData.containsKey(LocalStorageService.kHiveDbVer)
+                ? jsonData[LocalStorageService.kHiveDbVer]
+                : "10806",
+          );
           Log.i('已同步用户设置');
         } catch (e) {
           Log.e("同步用户设置失败：$e", StackTrace.current);
@@ -374,7 +384,7 @@ class RemoteSyncWebDAVController extends BaseController {
         try {
           // 标签功能和关注具有依赖关系，必须同时同步
           // 清空本地标签列表
-          await DBService.instance.tagBox.clear();
+          await DBService.instance.clearFollowTag();
           for (var item in jsonData) {
             var tag = FollowUserTag.fromJson(item);
             await DBService.instance.tagBox.put(tag.id, tag);
@@ -382,6 +392,8 @@ class RemoteSyncWebDAVController extends BaseController {
             var insertedTag = DBService.instance.tagBox.get(tag.id);
             Log.i('Inserted tag: ${insertedTag?.tag}');
           }
+          // 数据校准
+          await FollowService.instance.followUserAllDataCheck();
           Log.i('已同步用户自定义标签');
           // 确保tag同步完成后，更新关注列表
           EventBus.instance.emit(Constant.kUpdateFollow, 0);

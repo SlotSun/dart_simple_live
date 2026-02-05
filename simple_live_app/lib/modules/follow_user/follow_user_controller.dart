@@ -55,10 +55,12 @@ class FollowUserController extends BasePageController<FollowUser> {
         }
       },
     );
-    onUpdatedListStream =
-        FollowService.instance.updatedListStream.listen((event) {
-      filterData();
-    });
+    onUpdatedListStream = FollowService.instance.updatedListStream.listen(
+      (event) {
+        updateTagList();
+        filterData();
+      },
+    );
 
     sortMethod = AppSettingsController.instance.followSortMethod;
     super.onInit();

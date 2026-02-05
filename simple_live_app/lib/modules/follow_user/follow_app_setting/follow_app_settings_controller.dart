@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:fractional_indexing_dart/fractional_indexing_dart.dart';
 import 'package:get/get.dart' hide Condition;
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/constant.dart';
@@ -66,11 +67,20 @@ class FollowAppSettingsController extends BaseController {
     updateTagList();
   }
 
-  void updateTagOrder(int oldIndex, int newIndex) {
+  Future<void> updateTagOrder(int oldIndex, int newIndex) async {
     if (newIndex > oldIndex) newIndex -= 1; // 处理索引调整
     final item = userTagList.removeAt(oldIndex);
-    userTagList.insert(newIndex, item);
-    FollowService.instance.updateFollowTagOrder(userTagList);
+    String newTagKey = FractionalIndexing.generateKeyBetween(
+        newIndex > 0 ? userTagList[newIndex - 1].id : null,
+        newIndex < userTagList.length ? userTagList[newIndex].id : null);
+    final newTag = FollowUserTag(id: newTagKey, tag: item.tag, userId: item.userId);
+    userTagList.insert(newIndex, newTag);
+    await FollowService.instance.updateFollowTagOrder(item, newTag);
+  }
+
+  Future<void> followDataCheck() async {
+    await FollowService.instance.followUserAllDataCheck();
+    SmartDialog.showToast("数据校准完成");
   }
 
   // 标签管理弹窗

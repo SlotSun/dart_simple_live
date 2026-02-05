@@ -9,6 +9,7 @@ import 'package:simple_live_app/app/utils/string_normalizer.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/services/db_service.dart';
+import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
 
 class MigrationService {
@@ -54,7 +55,7 @@ class MigrationService {
   }
 
   /// 数据迁移根据版本：from 1.7.8
-  static void migrateDataByVersion() {
+  static Future<void> migrateDataByVersion() async {
     int curAppVer = Utils.parseVersion(Utils.packageInfo.version);
     int curDBVer = LocalStorageService.instance
         .getValue(LocalStorageService.kHiveDbVer, 10708);
@@ -95,6 +96,11 @@ class MigrationService {
         DBService.instance.addFollow(follow);
       }
       Log.i("transfer follow.name to roman is down!");
+    }
+
+    // sortkey
+    if (curDBVer <= 10806) {
+       await FollowService.instance.followUserAllDataCheck();
     }
     LocalStorageService.instance.settingsBox
         .put(LocalStorageService.kHiveDbVer, curAppVer);

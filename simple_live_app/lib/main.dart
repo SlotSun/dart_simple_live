@@ -60,7 +60,7 @@ void main() async {
   await initServices();
   await initWindow();
 
-  MigrationService.migrateDataByVersion();
+  await MigrationService.migrateDataByVersion();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   //设置状态栏为透明
   SystemUiOverlayStyle systemUiOverlayStyle = const SystemUiOverlayStyle(
