@@ -39,13 +39,14 @@
     </screenshot>
   </screenshots>
   <releases>
-    <release version="1.8.4" date="2025-12-18">
+    <release version="1.8.7" date="2026-02-06">
       <description>
-        <p>### 已修改包名slotsun.slive,相关事宜请查看 #93 </p>
-        <p>- fix：huya </p>
-        <p>- 优化弹幕去重功能 </p>
-        <p>- 关于linux的一系列修复 @pugaizai</p>
-        <p>- fix: 一些代码和逻辑错误</p>
+        <p>- 一个非常重要的过渡版本 </p>
+        <p>- 修复huya搜索 @GH4NG </p>
+        <p>- 引入Firebase </p>
+        <p>- 大量数据错误和潜在问题修复 </p>
+        <p>- 一些细节调整  </p>
+        <p>- 关于linux的一系列修复 @pugaizai </p>
         <p>- tips: ios和macos用户请到action更新测试或者下载上游仓库版本</p>
       </description>
     </release>
