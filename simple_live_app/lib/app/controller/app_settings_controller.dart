@@ -152,7 +152,7 @@ class AppSettingsController extends GetxController {
 
     videoDoubleBuffering.value = LocalStorageService.instance.getValue(
       LocalStorageService.kVideoDoubleBuffering,
-      Platform.isLinux ? true : false,
+      false,
     );
 
     autoUpdateFollowEnable.value = LocalStorageService.instance
