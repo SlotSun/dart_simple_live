@@ -405,18 +405,20 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       liveStatus.value = detail.value!.status || detail.value!.isRecord;
       if (liveStatus.value) {
         getPlayQualites();
+        addSysMsg("开始连接弹幕服务器");
+        initDanmau();
+        liveDanmaku.start(detail.value?.danmakuData);
       }
       if (detail.value!.isRecord) {
         addSysMsg("当前主播未开播，正在轮播录像");
       }
-      addSysMsg("开始连接弹幕服务器");
-      initDanmau();
-      liveDanmaku.start(detail.value?.danmakuData);
     } catch (e) {
       Log.logPrint(e);
       //SmartDialog.showToast(e.toString());
       loadError.value = true;
-      error = e as Error;
+      if(e is Error){
+        error = e;
+      }
     } finally {
       SmartDialog.dismiss(status: SmartStatus.loading);
     }
@@ -586,9 +588,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   /// 移除掉已到期的SC
   void removeSuperChats() async {
     var now = DateTime.now().millisecondsSinceEpoch;
-    superChats.value = superChats
-        .where((x) => x.endTime.millisecondsSinceEpoch > now)
-        .toList();
+    superChats.removeWhere((x) => x.endTime.millisecondsSinceEpoch < now);
   }
 
   /// 添加历史记录

@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_single_instance/flutter_single_instance.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -20,17 +20,20 @@ import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/app/utils/listen_fourth_button.dart';
+import 'package:simple_live_app/firebase_options.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/models/db/history.dart';
 import 'package:simple_live_app/modules/other/debug_log_page.dart';
 import 'package:simple_live_app/modules/settings/appstyle_settings/appstyle_setting_contorller.dart';
+import 'package:simple_live_app/routes/app_analytics_observer.dart';
 import 'package:simple_live_app/routes/app_pages.dart';
 import 'package:simple_live_app/routes/route_path.dart';
 import 'package:simple_live_app/services/bilibili_account_service.dart';
 import 'package:simple_live_app/services/db_service.dart';
-import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/services/douyin_account_service.dart';
+import 'package:simple_live_app/services/firebase_service.dart';
+import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/services/history_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
 import 'package:simple_live_app/services/migration_service.dart';
@@ -39,13 +42,12 @@ import 'package:simple_live_app/services/window_service.dart';
 import 'package:simple_live_app/src/rust/frb_generated.dart';
 import 'package:simple_live_app/widgets/status/app_loadding_widget.dart';
 import 'package:simple_live_core/simple_live_core.dart';
-
+import 'package:window_manager/window_manager.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // init-queue:
   // window(first)->migration->media_kit->Hive->services->start
   // window(second)->open
-  await firstOpen();
   await RustLib.init();
   await MigrationService.migrateData();
   MediaKit.ensureInitialized();
@@ -58,7 +60,7 @@ void main() async {
   await initServices();
   await initWindow();
 
-  MigrationService.migrateDataByVersion();
+  await MigrationService.migrateDataByVersion();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   //设置状态栏为透明
   SystemUiOverlayStyle systemUiOverlayStyle = const SystemUiOverlayStyle(
@@ -68,20 +70,6 @@ void main() async {
   );
   SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
   runApp(const MyApp());
-}
-
-Future firstOpen() async {
-  // 判定程序是否启动-- windows 交给原生
-  if (Platform.isWindows == false) {
-    if (!await FlutterSingleInstance().isFirstInstance()) {
-      Log.i("App is already running");
-      final err = await FlutterSingleInstance().focus();
-      if (err != null) {
-        Log.e("Error focusing running instance: $err", StackTrace.current);
-      }
-      exit(0);
-    }
-  }
 }
 
 Future initWindow() async {
@@ -118,7 +106,18 @@ Future initServices() async {
 
   Get.put(HistoryService());
 
-  Get.put(WindowService());
+  // 移动平台不使用 windowManager
+  if(!Platform.isAndroid && !Platform.isIOS){
+    Get.put(WindowService());
+  }
+
+  // only android use firebase
+  if(Platform.isAndroid){
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    Get.put(FirebaseService());
+  }
 
   initCoreLog();
 }
@@ -196,7 +195,10 @@ class MyApp extends StatelessWidget {
             Log.writeLog(text, (isError ?? false) ? Level.error : Level.info);
           },
           //debugShowCheckedModeBanner: false,
-          navigatorObservers: [FlutterSmartDialog.observer],
+          navigatorObservers: [
+            FlutterSmartDialog.observer,
+            if (Platform.isAndroid) AppAnalyticsObserver.observer
+          ],
           builder: FlutterSmartDialog.init(
             loadingBuilder: ((msg) => const AppLoaddingWidget()),
             //字体大小不跟随系统变化

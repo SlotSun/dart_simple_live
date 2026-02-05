@@ -50,45 +50,6 @@ class SyncPage extends StatelessWidget {
             child: Column(
               children: [
                 ListTile(
-                  title: const Text("创建房间"),
-                  leading: const Icon(Remix.home_wifi_line),
-                  subtitle: const Text("其他设备可以通过房间号加入"),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Get.toNamed(RoutePath.kRemoteSyncRoom);
-                  },
-                ),
-                AppStyle.divider,
-                ListTile(
-                  title: const Text("加入房间"),
-                  leading: const Icon(Remix.add_circle_line),
-                  subtitle: const Text("加入其他设备创建的房间"),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () async {
-                    var input = await Utils.showEditTextDialog(
-                      "",
-                      title: "加入房间",
-                      hintText: "请输入房间号,不区分大小写",
-                      validate: (text) {
-                        if (text.isEmpty) {
-                          SmartDialog.showToast("房间号不能为空");
-                          return false;
-                        }
-                        if (text.length != 5) {
-                          SmartDialog.showToast("请输入5位房间号");
-                          return false;
-                        }
-                        return true;
-                      },
-                    );
-                    if (input != null && input.isNotEmpty) {
-                      Get.toNamed(RoutePath.kRemoteSyncRoom,
-                          arguments: input.toUpperCase());
-                    }
-                  },
-                ),
-                AppStyle.divider,
-                ListTile(
                   title: const Text("WebDAV"),
                   leading: const Icon(Icons.cloud_upload_outlined),
                   subtitle: const Text("通过WebDAV同步数据"),

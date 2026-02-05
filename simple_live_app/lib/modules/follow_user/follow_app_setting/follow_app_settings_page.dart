@@ -141,6 +141,25 @@ class FollowSettingsPage extends GetView<FollowAppSettingsController> {
                 ),
               ),
               fileImportAndExportBuild(),
+              Padding(
+                padding: AppStyle.edgeInsetsA12.copyWith(top: 24),
+                child: Text(
+                  "数据校准",
+                  style: Get.textTheme.titleSmall,
+                ),
+              ),
+              SettingsCard(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SettingsAction(
+                      title: "数据校准",
+                      subtitle: '关注以及标签数据错乱可以点击此功能进行校准，请勿重复点击',
+                      onTap: controller.followDataCheck,
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ],

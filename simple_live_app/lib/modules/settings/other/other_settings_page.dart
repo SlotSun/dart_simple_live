@@ -168,6 +168,17 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
                     onChanged: controller.setLogEnable,
                   ),
                 ),
+                Visibility(
+                  visible: Platform.isAndroid,
+                  child: Obx(
+                    () => SettingsSwitch(
+                      value: AppSettingsController.instance.firebaseEnable.value,
+                      title: "开启崩溃分析",
+                      subtitle: "开启后应用崩溃时自动上传脱敏崩溃日志给开发者用于排查问题",
+                      onChanged: controller.setFirebaseEnable,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

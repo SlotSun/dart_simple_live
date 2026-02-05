@@ -26,7 +26,8 @@ class AppStyle {
       appBarTheme: AppBarTheme(
         //elevation: 0,
         centerTitle: true,
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
+          fontFamily: fontFamily,
           fontSize: 16,
           color: AppColors.black333,
         ),
@@ -52,7 +53,8 @@ class AppStyle {
         //elevation: 0,
 
         centerTitle: true,
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
+          fontFamily: fontFamily,
           fontSize: 16,
           color: Colors.white,
         ),

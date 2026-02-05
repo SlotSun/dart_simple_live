@@ -9,6 +9,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "67.0.0"
+  _flutterfire_internals:
+    dependency: transitive
+    description:
+      name: _flutterfire_internals
+      sha256: e4a1b612fd2955908e26116075b3a4baf10c353418ca645b4deae231c82bf144
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.65"
   analyzer:
     dependency: transitive
     description:
@@ -45,10 +53,10 @@ packages:
     dependency: "direct main"
     description:
       name: auto_orientation_v2
-      sha256: "96a72a00b367e1aebef4be55f4804c0369197dc65a0dffd039d4c2f72f59d955"
+      sha256: b246e1658b752ac3a882fb8bb1192309ef587e6ffeefa80bf414283fbcd4e2e3
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.6"
+    version: "2.3.7"
   boolean_selector:
     dependency: transitive
     description:
@@ -349,10 +357,74 @@ packages:
     dependency: "direct main"
     description:
       name: file_picker
-      sha256: f8f4ea435f791ab1f817b4e338ed958cb3d04ba43d6736ffc39958d950754967
+      sha256: d974b6ba2606371ac71dd94254beefb6fa81185bde0b59bdc1df09885da85fde
       url: "https://pub.dev"
     source: hosted
-    version: "10.3.6"
+    version: "10.3.8"
+  firebase_analytics:
+    dependency: "direct main"
+    description:
+      name: firebase_analytics
+      sha256: "8ca4832c7a6d145ce987fd07d6dfbb8c91d9058178342f20de6305fb77b1b40d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "12.1.0"
+  firebase_analytics_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_analytics_platform_interface
+      sha256: d00234716f415f89eb5c2cefb1238d7fd2f3120275d71414b84ae434dcdb7a19
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.5"
+  firebase_analytics_web:
+    dependency: transitive
+    description:
+      name: firebase_analytics_web
+      sha256: e42b294e51aedb4bd4b761a886c8d6b473c44b44aa4c0b47cab06b2c66ac3fba
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.1+1"
+  firebase_core:
+    dependency: "direct main"
+    description:
+      name: firebase_core
+      sha256: "29cfa93c771d8105484acac340b5ea0835be371672c91405a300303986f4eba9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.3.0"
+  firebase_core_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_core_platform_interface
+      sha256: cccb4f572325dc14904c02fcc7db6323ad62ba02536833dddb5c02cac7341c64
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.2"
+  firebase_core_web:
+    dependency: transitive
+    description:
+      name: firebase_core_web
+      sha256: a631bbfbfa26963d68046aed949df80b228964020e9155b086eff94f462bbf1f
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.3.1"
+  firebase_crashlytics:
+    dependency: "direct main"
+    description:
+      name: firebase_crashlytics
+      sha256: "8d52022ee6fdd224e92c042f297d1fd0ec277195c49f39fa61b8cc500a639f00"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.6"
+  firebase_crashlytics_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_crashlytics_platform_interface
+      sha256: "97c6a97b35e3d3dafe38fb053a65086a1efb125022d292161405848527cc25a4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.8.16"
   fixnum:
     dependency: transitive
     description:
@@ -512,14 +584,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.1"
-  flutter_single_instance:
-    dependency: "direct main"
-    description:
-      name: flutter_single_instance
-      sha256: "91c8a3dd16c5fc9ad8d8afc533c2f6b6318ca4905faf44f945b620f268eb094b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.7.0"
   flutter_smart_dialog:
     dependency: "direct main"
     description:
@@ -546,14 +610,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  freezed_annotation:
-    dependency: transitive
+  fractional_indexing_dart:
+    dependency: "direct main"
     description:
-      name: freezed_annotation
-      sha256: "7294967ff0a6d98638e7acb774aac3af2550777accd8149c90af5b014e6d44d8"
+      name: fractional_indexing_dart
+      sha256: "05d11e1124922b78c64ed2e616b29e0dc01c53646bc15a26a31d538ad198ac7d"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "1.0.7"
   frontend_server_client:
     dependency: transitive
     description:
@@ -583,22 +647,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.3"
-  google_identity_services_web:
-    dependency: transitive
-    description:
-      name: google_identity_services_web
-      sha256: "5d187c46dc59e02646e10fe82665fc3884a9b71bc1c90c2b8b749316d33ee454"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.3+1"
-  googleapis_auth:
-    dependency: transitive
-    description:
-      name: googleapis_auth
-      sha256: b81fe352cc4a330b3710d2b7ad258d9bcef6f909bb759b306bf42973a7d046db
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
   graphs:
     dependency: transitive
     description:
@@ -607,14 +655,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
-  grpc:
-    dependency: transitive
-    description:
-      name: grpc
-      sha256: "15227eeed339bd0ef5afe515cb791b2e4bec0711ab56f37cc44257bcfaedc4bf"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.2.0"
   hive:
     dependency: "direct main"
     description:
@@ -655,14 +695,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.6.0"
-  http2:
-    dependency: transitive
-    description:
-      name: http2
-      sha256: "382d3aefc5bd6dc68c6b892d7664f29b5beb3251611ae946a98d35158a82bbfa"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.1"
   http_client_helper:
     dependency: transitive
     description:
@@ -816,8 +848,8 @@ packages:
     dependency: "direct main"
     description:
       path: media_kit
-      ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
-      resolved-ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
+      ref: "7b248251fc274f986635876946130f2afc78c959"
+      resolved-ref: "7b248251fc274f986635876946130f2afc78c959"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.1.11"
@@ -825,8 +857,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "libs/android/media_kit_libs_android_video"
-      ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
-      resolved-ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
+      ref: "7b248251fc274f986635876946130f2afc78c959"
+      resolved-ref: "7b248251fc274f986635876946130f2afc78c959"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.3.6"
@@ -834,8 +866,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "libs/ios/media_kit_libs_ios_video"
-      ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
-      resolved-ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
+      ref: "7b248251fc274f986635876946130f2afc78c959"
+      resolved-ref: "7b248251fc274f986635876946130f2afc78c959"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.1.4"
@@ -843,8 +875,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "libs/linux/media_kit_libs_linux"
-      ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
-      resolved-ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
+      ref: "7b248251fc274f986635876946130f2afc78c959"
+      resolved-ref: "7b248251fc274f986635876946130f2afc78c959"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.1.3"
@@ -852,8 +884,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "libs/macos/media_kit_libs_macos_video"
-      ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
-      resolved-ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
+      ref: "7b248251fc274f986635876946130f2afc78c959"
+      resolved-ref: "7b248251fc274f986635876946130f2afc78c959"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.1.4"
@@ -861,8 +893,8 @@ packages:
     dependency: "direct main"
     description:
       path: "libs/universal/media_kit_libs_video"
-      ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
-      resolved-ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
+      ref: "7b248251fc274f986635876946130f2afc78c959"
+      resolved-ref: "7b248251fc274f986635876946130f2afc78c959"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.0.5"
@@ -870,8 +902,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "libs/windows/media_kit_libs_windows_video"
-      ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
-      resolved-ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
+      ref: "7b248251fc274f986635876946130f2afc78c959"
+      resolved-ref: "7b248251fc274f986635876946130f2afc78c959"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.0.10"
@@ -879,8 +911,8 @@ packages:
     dependency: "direct main"
     description:
       path: media_kit_video
-      ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
-      resolved-ref: "66d46c3d77ee15684e0c5c6ed51ac78d819d5e6f"
+      ref: "7b248251fc274f986635876946130f2afc78c959"
+      resolved-ref: "7b248251fc274f986635876946130f2afc78c959"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.2.5"
@@ -1052,6 +1084,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
+  pinyin:
+    dependency: "direct main"
+    description:
+      name: pinyin
+      sha256: "240f271a3c71af20c8d2757756b5ee8e9d79a955d37abad4b3568fd406b22411"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.3.0"
   platform:
     dependency: transitive
     description:
@@ -1096,10 +1136,10 @@ packages:
     dependency: transitive
     description:
       name: protobuf
-      sha256: de9c9eb2c33f8e933a42932fe1dc504800ca45ebc3d673e6ed7f39754ee4053e
+      sha256: "75ec242d22e950bdcc79ee38dd520ce4ee0bc491d7fadc4ea47694604d22bf06"
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.0"
+    version: "6.0.0"
   pub_semver:
     dependency: transitive
     description:
@@ -1551,7 +1591,7 @@ packages:
     source: hosted
     version: "3.1.5"
   uuid:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: uuid
       sha256: a11b666489b1954e01d992f3d601b1804a33937b5a8fe677bd26b8a9f96f96e8
@@ -1696,4 +1736,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.9.0 <4.0.0"
-  flutter: ">=3.38.4"
+  flutter: ">=3.38.6"

@@ -54,7 +54,7 @@ jobs:
       - name: Build APK
         run: |
           cd simple_live_app
-          flutter build apk
+          flutter build apk --debug
 
       - name: Build IPA
         run: |

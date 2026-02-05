@@ -14,8 +14,6 @@ jobs:
     steps:
       # 签出代码
       - uses: actions/checkout@v6
-        with:
-          ref: dev
 
       # APK 签名设置
       - name: Download Android keystore
@@ -26,6 +24,8 @@ jobs:
           encodedString: ${{ secrets.KEYSTORE_BASE64 }}
       - name: Create key.properties
         run: |
+          echo "${{ secrets.FIREBASE_JSON }}" | base64 --decode > simple_live_app/android/app/google-services.json
+          echo "${{ secrets.FIREBASE_OPTIONS_DART }}" | base64 --decode > simple_live_app/lib/firebase_options.dart
           echo "storeFile=${{ steps.android_keystore.outputs.filePath }}" > simple_live_app/android/key.properties
           echo "storePassword=${{ secrets.STORE_PASSWORD }}" >> simple_live_app/android/key.properties
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> simple_live_app/android/key.properties

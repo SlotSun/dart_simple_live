@@ -28,7 +28,7 @@ class HuyaSite implements LiveSite {
   static const String AYYUID_REGEX = r'"yyid":"?(\d+)"?';
 
   static const String HYSDK_UA =
-      "HYSDK(Windows, 30000002)_APP(pc_exe&7060000&official)_SDK(trans&2.32.3.5646)";
+      "HYSDK(Windows,30000002)_APP(pc_exe&7070000&official)_SDK(trans&2.33.0.5678)";
 
   static Map<String, String> get requestHeaders {
     return {
@@ -449,7 +449,7 @@ class HuyaSite implements LiveSite {
       }
 
       var roomItem = LiveRoomItem(
-        roomId: item["room_id"].toString(),
+        roomId: "yy/${item["yyid"]}",
         title: title,
         cover: cover,
         userName: item["game_nick"].toString(),

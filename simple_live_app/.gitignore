@@ -52,4 +52,6 @@ app.*.map.json
 /ios/Podfile.lock
 
 .fvm/
-.fvmrc
+
+# firebase
+firebase.json

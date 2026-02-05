@@ -5,8 +5,10 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:fractional_indexing_dart/fractional_indexing_dart.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pinyin/pinyin.dart';
 import 'package:pool/pool.dart';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
@@ -15,6 +17,8 @@ import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/app/utils/duration_2_str_utils.dart';
+import 'package:simple_live_app/app/utils/dynamic_sort.dart';
+import 'package:simple_live_app/app/utils/string_normalizer.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/models/db/history.dart';
@@ -197,12 +201,23 @@ class FollowService extends GetxService {
     listSortByMethod(curTagFollowList,  AppSettingsController.instance.followSortMethod.value);
   }
 
-  void updateFollowTagOrder(List<FollowUserTag> userTagList) {
-    DBService.instance.updateFollowTagOrder(userTagList);
+  Future<void> updateFollowTagOrder(FollowUserTag oldTag,FollowUserTag newTag) async {
+    await DBService.instance.deleteFollowTag(oldTag.id);
+    await DBService.instance.updateFollowTag(newTag);
+    loadData(updateStatus: false);
   }
 
   // 添加关注
   void addFollow(FollowUser follow) {
+    // follow变动过程中romanName统一变化
+    String romanName = "";
+    if(follow.remark !=null && follow.remark!.isNotEmpty){
+      romanName = PinyinHelper.getShortPinyin(follow.romanName!);
+    }else{
+      romanName = PinyinHelper.getShortPinyin(follow.userName);
+    }
+    follow.romanName = romanName.normalize();
+
     DBService.instance.addFollow(follow);
   }
 
@@ -259,9 +274,11 @@ class FollowService extends GetxService {
       _updatedListController.add(0);
       return;
     }
-    followList.assignAll(list);
     if (updateStatus) {
+      followList.assignAll(list);
       startUpdateStatus(cycle: cycle);
+    }else{
+      _updatedListController.add(0);
     }
   }
 
@@ -390,78 +407,58 @@ class FollowService extends GetxService {
   }
 
   void filterData() {
+    liveListSort();
     liveList.assignAll(followList.where((x) => x.liveStatus.value == 2));
     notLiveList.assignAll(followList.where((x) => x.liveStatus.value == 1));
-    liveListSort();
     _updatedListController.add(0);
   }
 
   void liveListSort(){
     listSortByMethod(followList, AppSettingsController.instance.followSortMethod.value);
-    listSortByMethod(liveList, AppSettingsController.instance.followSortMethod.value);
-    listSortByMethod(notLiveList, AppSettingsController.instance.followSortMethod.value);
+    liveList.assignAll(followList.where((x) => x.liveStatus.value == 2));
+    notLiveList.assignAll(followList.where((x) => x.liveStatus.value == 1));
   }
 
-
-  String firstLetterLite(String s) {
-    if (s.isEmpty) return '{';
-    final c = s.codeUnitAt(0);
-    // 0-9
-    if (c >= 48 && c <= 57) return String.fromCharCode(c);
-    // A-Z a-z
-    if ((c >= 65 && c <= 90) || (c >= 97 && c <= 122)) {
-      return String.fromCharCode(c).toUpperCase();
-    }
-
-    // 其他一律 '{'==123,拼音解析消耗性能
-    return '{';
-  }
-
-  String sortText(String? remark, String name) {
-    if (remark != null && remark.trim().isNotEmpty) {
-      return remark.trim();
-    }
-    return name;
-  }
-
-  int userNameAsc(a, b) {
-    final ta = sortText(a.remark, a.userName);
-    final tb = sortText(b.remark, b.userName);
-    final ka = firstLetterLite(ta);
-    final kb = firstLetterLite(tb);
-    final c = ka.compareTo(kb);
-    if (c != 0) return c;
-
-    return a.userName.toLowerCase().compareTo(b.userName.toLowerCase());
-  }
-
-  int userNameDesc(FollowUser a, FollowUser b) {
-    return userNameAsc(b, a);
-  }
   void listSortByMethod(List<FollowUser> list, SortMethod sortMethod) {
-    // list.sort是非稳定排序
-    list.sort((a, b) {
-      //  或许可以写一个类似Kotlin-thenBy语法糖保证短路执行
-      final liveCmp = b.liveStatus.value.compareTo(a.liveStatus.value);
-      if (liveCmp != 0) return liveCmp;
-      switch (sortMethod) {
-        case SortMethod.watchDuration:
-          return b.watchDuration!
-              .toDuration()
-              .compareTo(a.watchDuration!.toDuration());
-        case SortMethod.siteId:
-          final order = AppSettingsController.instance.siteSort;
-          return order.indexOf(a.siteId).compareTo(
-            order.indexOf(b.siteId),
-          );
-        case SortMethod.recently:
-          return a.addTime.compareTo(b.addTime);
-        case SortMethod.userNameASC:
-          return userNameAsc(a, b);
-        case SortMethod.userNameDESC:
-          return userNameAsc(b, a);
-      }
-    });
+    var liveCondition = SortCondition<FollowUser>(
+      valueGetter: (item) => item.liveStatus.value, // Rx<int>
+      ascending: false,
+    );
+    var watchDurationCondition = SortCondition<FollowUser>(
+      valueGetter: (item) => item.watchDuration?.toDuration() ?? Duration.zero,
+      ascending: false,
+    );
+    var siteIdCondition = SortCondition<FollowUser>(
+      valueGetter: (item) {
+        final order = AppSettingsController.instance.siteSort;
+        // 返回索引作为 Comparable
+        return order.indexOf(item.siteId);
+      },
+    );
+    var recentlyCondition = SortCondition<FollowUser>(
+      valueGetter: (item) => item.addTime,
+      ascending: false,
+    );
+    var userNameASCCondition = SortCondition<FollowUser>(
+      valueGetter: (item) => item.romanName ?? "",
+      ascending: true,
+    );
+    var userNameDESCCondition = SortCondition<FollowUser>(
+      valueGetter: (item) => item.romanName ?? "",
+      ascending: false,
+    );
+    switch (sortMethod) {
+      case SortMethod.watchDuration:
+        list.dynamicSort([liveCondition, watchDurationCondition]);
+      case SortMethod.siteId:
+        list.dynamicSort([liveCondition, siteIdCondition]);
+      case SortMethod.recently:
+        list.dynamicSort([liveCondition, recentlyCondition]);
+      case SortMethod.userNameASC:
+        list.dynamicSort([liveCondition, userNameASCCondition]);
+      case SortMethod.userNameDESC:
+        list.dynamicSort([liveCondition, userNameDESCCondition]);
+    }
   }
 
   void exportFile() async {
@@ -622,6 +619,8 @@ class FollowService extends GetxService {
             "face": item.face,
             "watchDuration": item.watchDuration,
             "addTime": item.addTime.toString(),
+            "remark": item.remark,
+            "romanName": item.romanName,
             "tag": item.tag
           },
         )
@@ -634,16 +633,46 @@ class FollowService extends GetxService {
 
     for (var item in data) {
       var follow = FollowUser.fromJson(item);
-      // 导入关注列表同时导入标签列表 此方法可优化为所有导入逻辑
-      if (follow.tag != "全部") {
-        // logic: 尝试添加，存在则返回已存在的对象
-        var tag = await DBService.instance.addFollowTag(follow.tag);
-        // 更新tag
-        tag.userId.addIf(!tag.userId.contains(follow.id), follow.id);
-        DBService.instance.updateFollowTag(tag);
-      }
       await DBService.instance.addFollow(follow);
     }
+
+    await followUserAllDataCheck();
+  }
+
+  // 数据校对
+  // 核心关注数据有几种错乱情况，需要进行校对，需要一定时间复核代码
+  // 1：未关注，但标签包含关注
+  // 2: 已关注，且设置标签，但标签不包含
+  // 3: 已关注，且设置标签，但标签不存在
+  // 4: 标签重复
+  // 校对思路，followList是基础数据源，tagList为索引数据，重建数据即可
+  // 根据此思路，可以重写文件导入导出以及webdav恢复逻辑
+  Future<void> followUserAllDataCheck() async {
+    var followUserListTemp = DBService.instance.getFollowList();
+    var oldTagList = DBService.instance.getFollowTagList();
+    final Map<String, List<String>> tagMap = {
+      for (var tag in oldTagList) tag.tag: <String>[],
+    };
+    for (var follow in followUserListTemp) {
+      if(follow.tag!="全部"){
+        tagMap.putIfAbsent(follow.tag, () => <String>[]).add(follow.id);
+      }
+    }
+    // 落库
+    final Map<String, FollowUserTag> res = {};
+    String? lastKey;
+    for (var entry in tagMap.entries) {
+      lastKey = FractionalIndexing.generateKeyBetween(lastKey, null);
+      final followUserTag = FollowUserTag(
+        id: lastKey,
+        tag: entry.key,
+        userId: entry.value,
+      );
+      res[followUserTag.id] = followUserTag;
+    }
+    await DBService.instance.tagBox.clear();
+    await DBService.instance.tagBox.putAll(res);
+    Log.i("Follow-Service: data check down，follows:${followUserListTemp.length}，tags:${tagMap.length}");
   }
 
   @override

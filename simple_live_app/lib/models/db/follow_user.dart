@@ -1,10 +1,11 @@
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:simple_live_app/app/utils/dynamic_filter.dart';
 
 part 'follow_user.g.dart';
 
 @HiveType(typeId: 1)
-class FollowUser {
+class FollowUser implements Mappable {
   FollowUser(
       {required this.id,
       required this.roomId,
@@ -14,7 +15,8 @@ class FollowUser {
       required this.addTime,
       this.watchDuration = "00:00:00",
       this.tag = "全部",
-      this.remark = ""});
+      this.remark = "",
+      this.romanName = ""});
 
   ///id=siteId_roomId
   @HiveField(0)
@@ -44,6 +46,9 @@ class FollowUser {
   @HiveField(8)
   String? remark;
 
+  @HiveField(9)
+  String? romanName;
+
   /// 直播状态
   /// 0=未知(加载中) 1=未开播 2=直播中
   Rx<int> liveStatus = 0.obs;
@@ -65,7 +70,8 @@ class FollowUser {
       addTime: DateTime.parse(json['addTime']),
       watchDuration: json["watchDuration"] ?? "00:00:00",
       tag: json["tag"] ?? "全部",
-      remark: json["remark"] ?? "");
+      remark: json["remark"] ?? "",
+      romanName: json["romanName"] ?? "");
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -76,6 +82,10 @@ class FollowUser {
         'addTime': addTime.toString(),
         "watchDuration": watchDuration ?? "00:00:00",
         "tag": tag,
-        "remark": remark
+        "remark": remark,
+        "romanName": romanName
       };
+
+  @override
+  Map<String, dynamic> toMap() => toJson();
 }

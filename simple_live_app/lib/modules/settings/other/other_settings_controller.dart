@@ -12,6 +12,7 @@ import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:path/path.dart' as p;
 import 'package:simple_live_app/app/utils.dart';
+import 'package:simple_live_app/services/firebase_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
 
 class OtherSettingsController extends BaseController {
@@ -88,6 +89,11 @@ class OtherSettingsController extends BaseController {
   void onInit() {
     loadLogFiles();
     super.onInit();
+  }
+
+  void setFirebaseEnable(bool e){
+    AppSettingsController.instance.setFirebaseEnable(e);
+    FirebaseService.setCrashlytics(e);
   }
 
   void setLogEnable(bool e) {

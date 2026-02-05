@@ -79,62 +79,24 @@ class DouyuDanmaku implements LiveDanmaku {
       //斗鱼好像不会返回人气值
       //有些直播间存在阴间弹幕，不知道什么情况
       //只显示粉丝发言
+      LiveMessage? liveMsg;
       if (type == "chatmsg" && fans == '1') {
         var col = int.tryParse(jsonData["col"].toString()) ?? 0;
-        var liveMsg = LiveMessage(
+        liveMsg = LiveMessage(
           type: LiveMessageType.chat,
           userName: jsonData["nn"].toString(),
           message: jsonData["txt"].toString(),
           color: getColor(col),
         );
-
-        onMessage?.call(liveMsg);
       } else if (type == "comm_chatmsg") {
-        // {
-        //   "type": "comm_chatmsg",
-        //   "tick": null,
-        //   "res": null,
-        //   "cmdEnum": null,
-        //   "cmd": "comm_chatmsg",
-        //   "vrid": "1856171486511906816",
-        //   "btype": "voiceDanmu",
-        //   "chatmsg": {
-        //     "nn": "King彡吖西",
-        //     "level": "14",
-        //     "type": "chatmsg",
-        //     "rid": "1126960",
-        //     "gag": "0",
-        //     "uid": "16751345",
-        //     "txt": "c桑又在赞elo了，上分给你玩明白了",
-        //     "hidenick": "0",
-        //     "nc": "0",
-        //     "ic": ["avatar", "016", "75", "13", "45_avatar"],
-        //     "nl": "0",
-        //     "tbid": "0",
-        //     "tbl": "0",
-        //     "tbvip": "0"
-        //   },
-        //   "range": "2",
-        //   "cprice": "3000",
-        //   "cmgType": "1",
-        //   "rid": "1126960",
-        //   "gbtemp": "2",
-        //   "uid": "16751345",
-        //   "crealPrice": "3000",
-        //   "cet": "60",
-        //   "now": "1731380814042",
-        //   "csuperScreen": "0",
-        //   "danmucr": "1"
-        // }
         DateTime curTimestamp = DateTime.fromMillisecondsSinceEpoch(
           int.parse(jsonData["now"]),
         );
-        //
         var face = "";
-        try{
+        try {
           // 疑似换接口了
-          face = (jsonData["chatmsg"]["ic"] as List<dynamic>).cast<String>().join("/");
-        }catch(e){
+          face = jsonData["chatmsg"]["ic"];
+        } catch (e) {
           CoreLog.error("DouyuSuperChat-face:$e");
         }
         LiveSuperChatMessage sc = LiveSuperChatMessage(
@@ -143,20 +105,47 @@ class DouyuDanmaku implements LiveDanmaku {
           backgroundColor: "#c1c1ff",
           endTime:
               curTimestamp.add(Duration(seconds: int.parse(jsonData["cet"]))),
-          face:
-              "https://apic.douyucdn.cn/upload/${face}_small.jpg",
+          face: "https://apic.douyucdn.cn/upload/${face}_small.jpg",
           message: jsonData["chatmsg"]["txt"].toString(),
           price: int.parse(jsonData["cprice"]) ~/ 100,
           startTime: curTimestamp,
           userName: jsonData["chatmsg"]["nn"].toString(),
         );
-        var liveMsg = LiveMessage(
+        liveMsg = LiveMessage(
           type: LiveMessageType.superChat,
           userName: "SUPER_CHAT_MESSAGE",
           message: "SUPER_CHAT_MESSAGE",
           color: LiveMessageColor.white,
           data: sc,
         );
+      } else if (type == "voice_trlt") {
+        // 高能弹幕2
+        var scData = jsonData["list"][0];
+        LiveSuperChatMessage sc2 = LiveSuperChatMessage(
+          // 斗鱼没有颜色 调整配色方案
+          backgroundBottomColor: "#246488",
+          backgroundColor: "#ffffff",
+          endTime: DateTime.fromMillisecondsSinceEpoch(
+            int.parse(scData["etime"]) * 1000,
+          ),
+          face: "https://${scData["uat"][1]}",
+          message: scData["content"].toString(),
+          price: int.parse(scData["realPrice"]) ~/ 100,
+          startTime: DateTime.fromMillisecondsSinceEpoch(
+            int.parse(scData["acptime"]) * 1000,
+          ),
+          userName: scData["un"].toString(),
+        );
+        liveMsg = LiveMessage(
+          type: LiveMessageType.superChat,
+          userName: "SUPER_CHAT_MESSAGE",
+          message: "SUPER_CHAT_MESSAGE",
+          color: LiveMessageColor.white,
+          data: sc2,
+        );
+      } else if (type != "uenter") {
+      }
+      if (liveMsg != null) {
         onMessage?.call(liveMsg);
       }
     } catch (e) {

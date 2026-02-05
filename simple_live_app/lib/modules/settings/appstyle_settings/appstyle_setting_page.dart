@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/modules/settings/appstyle_settings/appstyle_setting_contorller.dart';
@@ -19,7 +18,7 @@ class AppStyleSettingPage extends GetView<AppStyleSettingController> {
           message: "重置为默认字体",
           child: IconButton(
             onPressed: controller.fontReset,
-            icon: Icon(RemixIcons.reset_right_fill),
+            icon: Icon(Icons.settings_backup_restore_outlined),
           ),
         ),
         AppStyle.hGap4,
@@ -198,7 +197,7 @@ class AppStyleSettingPage extends GetView<AppStyleSettingController> {
                         widget: Tooltip(
                           message: "下载字体",
                           child: IconButton(
-                            icon: const Icon(Icons.download),
+                            icon: const Icon(Icons.download_outlined),
                             onPressed: () => controller.downloadFont(),
                           ),
                         ),

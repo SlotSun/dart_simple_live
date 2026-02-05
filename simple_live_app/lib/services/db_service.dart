@@ -1,11 +1,11 @@
 import 'dart:async';
 
+import 'package:fractional_indexing_dart/fractional_indexing_dart.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/models/db/history.dart';
-import 'package:uuid/uuid.dart';
 import 'package:collection/collection.dart';
 
 class DBService extends GetxService {
@@ -13,12 +13,15 @@ class DBService extends GetxService {
   late Box<History> historyBox;
   late Box<FollowUser> followBox;
   late Box<FollowUserTag> tagBox;
-  final Uuid uuid = const Uuid();
 
   Future init() async {
     historyBox = await Hive.openBox("History");
     followBox = await Hive.openBox("FollowUser");
     tagBox = await Hive.openBox("FollowUserTag");
+  }
+
+  Future<void> clearFollowTag() async {
+    await tagBox.clear();
   }
 
   bool getFollowTagExist(String id) {
@@ -33,20 +36,13 @@ class DBService extends GetxService {
     await tagBox.put(followTag.id, followTag);
   }
 
-  Future updateFollowTagOrder(List<FollowUserTag> userTagList) async {
-    final Map<int, FollowUserTag> updatedMap = {
-      for (int i = 0; i < userTagList.length; i++) i: userTagList[i]
-    };
-    await tagBox.clear();
-    await tagBox.putAll(updatedMap);
-  }
-
   Future<FollowUserTag> addFollowTag(String tag) async {
     // 查找数据库中是否已存在 存在则直接返回
     if (getFollowTagExistByTag(tag)) {
       return getFollowTag(tag)!;
     }
-    final String uniqueId = uuid.v4();
+    String? lastKey = tagBox.keys.lastOrNull;
+    final String uniqueId =  FractionalIndexing.generateKeyBetween(lastKey, null);
     final followUserTag = FollowUserTag(id: uniqueId, tag: tag, userId: []);
     await tagBox.put(uniqueId, followUserTag);
     return followUserTag;
