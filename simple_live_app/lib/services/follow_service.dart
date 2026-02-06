@@ -645,6 +645,7 @@ class FollowService extends GetxService {
   // 2: 已关注，且设置标签，但标签不包含
   // 3: 已关注，且设置标签，但标签不存在
   // 4: 标签重复
+  // 5: webdav同步导致的数据错乱
   // 校对思路，followList是基础数据源，tagList为索引数据，重建数据即可
   // 根据此思路，可以重写文件导入导出以及webdav恢复逻辑
   Future<void> followUserAllDataCheck() async {
@@ -653,6 +654,17 @@ class FollowService extends GetxService {
     final Map<String, List<String>> tagMap = {
       for (var tag in oldTagList) tag.tag: <String>[],
     };
+    // 手动添加罗马音
+    for (FollowUser follow in followUserListTemp) {
+      if (follow.remark != null && follow.remark!.isNotEmpty) {
+        var roman = PinyinHelper.getShortPinyin(follow.remark!).normalize();
+        follow.romanName = roman;
+      } else {
+        follow.romanName = PinyinHelper.getShortPinyin(follow.userName).normalize();
+      }
+      await DBService.instance.addFollow(follow);
+    }
+    Log.i("transfer follow.name to roman is down!");
     for (var follow in followUserListTemp) {
       if(follow.tag!="全部"){
         tagMap.putIfAbsent(follow.tag, () => <String>[]).add(follow.id);

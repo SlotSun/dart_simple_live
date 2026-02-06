@@ -2,10 +2,8 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:pinyin/pinyin.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
-import 'package:simple_live_app/app/utils/string_normalizer.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/services/db_service.dart';
@@ -82,24 +80,8 @@ class MigrationService {
         }
       }
     }
-    // transfer follow.name or follow.remark to follow.romanName
-    // logic: remark first
+    // sortkey-romanName
     if (curDBVer <= 10805) {
-      var followList = DBService.instance.followBox.values.toList();
-      for (FollowUser follow in followList) {
-        if (follow.remark != null && follow.remark!.isNotEmpty) {
-          var roman = PinyinHelper.getShortPinyin(follow.remark!).normalize();
-          follow.romanName = roman;
-        } else {
-          follow.romanName = PinyinHelper.getShortPinyin(follow.userName).normalize();
-        }
-        DBService.instance.addFollow(follow);
-      }
-      Log.i("transfer follow.name to roman is down!");
-    }
-
-    // sortkey
-    if (curDBVer <= 10806) {
        await FollowService.instance.followUserAllDataCheck();
     }
     LocalStorageService.instance.settingsBox
