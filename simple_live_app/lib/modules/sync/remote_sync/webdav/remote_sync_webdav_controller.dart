@@ -369,12 +369,12 @@ class RemoteSyncWebDAVController extends BaseController {
           } else {
             Log.i("缺少$platform对应平台用户设置备份");
           }
-          // 低于v1.8.6需要升级数据
+          // 低于v1.8.5需要升级数据
           LocalStorageService.instance.setValue(
             LocalStorageService.kHiveDbVer,
-            jsonData.containsKey(LocalStorageService.kHiveDbVer)
+            (jsonData as Map).containsKey(LocalStorageService.kHiveDbVer)
                 ? jsonData[LocalStorageService.kHiveDbVer]
-                : "10806",
+                : "10805",
           );
           Log.i('已同步用户设置');
         } catch (e) {
