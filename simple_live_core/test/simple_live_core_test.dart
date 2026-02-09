@@ -152,8 +152,8 @@ void testSite(LiveSite site) async {
 void main() {
   CoreLog.requestLogType = RequestLogType.short;
 
-  group('huya tests', () {
-    testSite(HuyaSite());
+  group('douyin tests', () {
+    testSite(DouyinSite());
   });
 }
 

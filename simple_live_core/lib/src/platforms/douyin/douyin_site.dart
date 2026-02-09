@@ -91,7 +91,7 @@ class DouyinSite implements LiveSite {
     );
 
     var renderData =
-        RegExp(r'\{\\"pathname\\":\\"\/\\",\\"categoryData.*?\]\\n')
+        RegExp(r'\{\\"pathname\\":\\"\/\\",\\"categoryData.*?\],')
                 .firstMatch(result)
                 ?.group(0) ??
             "";
@@ -99,7 +99,7 @@ class DouyinSite implements LiveSite {
         .trim()
         .replaceAll('\\"', '"')
         .replaceAll(r"\\", r"\")
-        .replaceAll(']\\n', ""));
+        .replaceAll('],', ""));
 
     for (var item in renderDataJson["categoryData"]) {
       List<LiveSubCategory> subs = [];
