@@ -4,7 +4,7 @@ publish_to: none
 description: "Slive APP"
 environment: 
   sdk: '>=3.0.5 <4.0.0'
-  flutter: 3.38.6
+  flutter: 3.41.0
 
 dependencies: 
   flutter: 
@@ -24,10 +24,10 @@ dependencies:
   dio: ^5.4.3+1 # 网络请求
   hive: 2.2.3 # 持久化存储
   hive_flutter: 1.1.0 # 持久化存储
-  logger: ^2.0.2 # 日志
-  firebase_analytics: ^12.1.0
-  firebase_crashlytics: ^5.0.6 # firebase
-  firebase_core: ^4.3.0
+  logger: ^2.6.2 # 日志
+  firebase_analytics: ^12.1.2
+  firebase_crashlytics: ^5.0.7 # firebase
+  firebase_core: ^4.4.0
   intl: ^0.20.2 # 国际化
   pinyin: ^3.3.0
   qr_flutter: ^4.1.0 # 二维码生成
@@ -55,8 +55,8 @@ dependencies:
 
   # 系统交互
   package_info_plus: ^8.3.1 # 包信息
-  device_info_plus: ^12.2.0 # 设备信息
-  url_launcher: ^6.3.1 # 打开链接
+  device_info_plus: ^12.3.0 # 设备信息
+  url_launcher: ^6.3.2 # 打开链接
   share_plus: ^12.0.1 # 分享
   path_provider: ^2.1.5 # 常用路径
   cross_file: ^0.3.5+1 # 跨平台文件

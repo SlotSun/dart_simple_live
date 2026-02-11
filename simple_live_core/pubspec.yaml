@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   dio: ^5.5.0+1
-  logger: ^2.4.0
+  logger: ^2.6.2
   web_socket_channel: ^3.0.3
   html_unescape: ^2.0.0
   protobuf: ^6.0.0
