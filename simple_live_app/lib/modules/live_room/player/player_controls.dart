@@ -37,13 +37,21 @@ Widget playerControls(
   });
 }
 
+Widget buildDragToMoveArea({required Widget child}) {
+  return (!Platform.isAndroid && !Platform.isIOS)
+      ? DragToMoveArea(
+          child: child,
+        )
+      : child;
+}
+
 Widget buildFullControls(
   VideoState videoState,
   LiveRoomController controller,
 ) {
   var padding = MediaQuery.of(videoState.context).padding;
   GlobalKey volumeButtonkey = GlobalKey();
-  return DragToMoveArea(
+  return buildDragToMoveArea(
     child: Stack(
       children: [
         Container(),
