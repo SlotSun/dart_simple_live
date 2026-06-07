@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:hive_ce/hive_ce.dart';
 import 'package:simple_live_app/app/utils/dynamic_filter.dart';
+import 'package:simple_live_app/models/db/follow_snapshot.dart';
 
 part 'follow_user.g.dart';
 
@@ -116,4 +117,19 @@ class FollowUser implements Mappable {
 
   @override
   Map<String, dynamic> toMap() => toJson();
+
+  FollowSnapshotItem toSnapshot() => FollowSnapshotItem(
+        id: id,
+        liveStatus: liveStatus.value,
+        cover: cover.value,
+        title: title.value,
+        online: online.value,
+      );
+
+  void applySnapshot(FollowSnapshotItem snapshot) {
+    liveStatus.value = snapshot.liveStatus;
+    cover.value = snapshot.cover;
+    title.value = snapshot.title;
+    online.value = snapshot.online;
+  }
 }
