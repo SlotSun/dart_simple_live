@@ -107,6 +107,16 @@ class FollowSettingsPage extends GetView<FollowAppSettingsController> {
                         },
                       ),
                     ),
+                    Obx(
+                      () => SettingsSwitch(
+                        value: controller.appC.followSnapshotEnable.value,
+                        title: "直播状态快照",
+                        subtitle: "恢复短时间内直播状态，降低风控风险",
+                        onChanged: (e) {
+                          controller.appC.setFollowSnapshotEnable(e);
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),

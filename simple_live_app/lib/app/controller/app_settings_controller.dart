@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/sites.dart';
+import 'package:simple_live_app/models/db/follow_snapshot.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
 
 class AppSettingsController extends GetxController {
@@ -162,6 +163,9 @@ class AppSettingsController extends GetxController {
     updateFollowThreadCount.value = LocalStorageService.instance
         .getValue(LocalStorageService.kUpdateFollowThreadCount, 4);
 
+    followSnapshotEnable.value = LocalStorageService.instance
+        .getValue(LocalStorageService.kFollowSnapshotEnable, false);
+
     // danmaku-去重参数
     danmuFrequencyControl.value = LocalStorageService.instance
         .getValue(LocalStorageService.kDanmuFrequencyControl, false);
@@ -190,6 +194,9 @@ class AppSettingsController extends GetxController {
 
     hideRemoveFollowButton.value = LocalStorageService.instance
         .getValue(LocalStorageService.kHideRemoveFollow, true);
+
+    followSnapshot = LocalStorageService.instance
+        .getNullValue(LocalStorageService.kFollowSnapshot, null);
 
     initSiteSort();
     initHomeSort();
@@ -600,6 +607,14 @@ class AppSettingsController extends GetxController {
         .setValue(LocalStorageService.kUpdateFollowThreadCount, e);
   }
 
+  var followSnapshotEnable = false.obs;
+
+  void setFollowSnapshotEnable(bool e) {
+    followSnapshotEnable.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kFollowSnapshotEnable, e);
+  }
+
   var playerForceHttps = false.obs;
 
   void setPlayerForceHttps(bool e) {
@@ -649,5 +664,13 @@ class AppSettingsController extends GetxController {
     hideRemoveFollowButton.value = e;
     LocalStorageService.instance
         .setValue(LocalStorageService.kHideRemoveFollow, e);
+  }
+
+  /// 保存关注列表快照
+  FollowSnapshot? followSnapshot;
+
+  Future setFollowSnapshot(FollowSnapshot followSnapshot) {
+    return LocalStorageService.instance
+        .setValue(LocalStorageService.kFollowSnapshot, followSnapshot);
   }
 }

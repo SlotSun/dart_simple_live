@@ -20,6 +20,7 @@ import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/app/utils/duration_2_str_utils.dart';
 import 'package:simple_live_app/app/utils/dynamic_sort.dart';
 import 'package:simple_live_app/app/utils/string_normalizer.dart';
+import 'package:simple_live_app/models/db/follow_snapshot.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/models/db/history.dart';
@@ -66,8 +67,10 @@ class FollowService extends GetxService {
 
   int _refreshCycle = 0;
 
+  bool _snap = false;
+
   @override
-  void onInit() {
+  Future<void> onInit() async {
     subscription = EventBus.instance.listen(Constant.kUpdateFollow, (data) {
       if (data is History) {
         updateFollowHistory(data);
@@ -75,6 +78,7 @@ class FollowService extends GetxService {
         loadData(updateStatus: false);
       }
     });
+    await initFollowList();
     initTimer();
     cleanupTombstones();
     super.onInit();
@@ -295,7 +299,12 @@ class FollowService extends GetxService {
                 AppSettingsController.instance.autoUpdateFollowDuration.value),
         (timer) {
           CoreLog.i("Update Follow Timer - Cycle: $_refreshCycle");
-          loadData(updateStatus: true, cycle: _refreshCycle);
+          // if _snap skip first refresh
+          if(!_snap){
+            loadData(updateStatus: true, cycle: _refreshCycle);
+          }else{
+            _snap = false;
+          }
           _refreshCycle = (_refreshCycle + 1) % 2; // 2-cycle rotation
         },
       );
@@ -304,10 +313,10 @@ class FollowService extends GetxService {
     }
   }
 
-  Future<void> loadData({bool updateStatus = true, int? cycle}) async {
-    // todo: 此操作只在初始化时调用一次
-    var list = DBService.instance.getFollowList();
-    getAllTagList();
+  // 此操作只在初始化时调用一次
+  Future<void> initFollowList() async {
+    List<FollowUser> list = DBService.instance.getFollowList();
+
     if (list.isEmpty) {
       updating.value = false;
       followList.assignAll(list);
@@ -316,8 +325,29 @@ class FollowService extends GetxService {
       _updatedListController.add(0);
       return;
     }
+    var followSnapshot = AppSettingsController.instance.followSnapshot;
+    // whether to recover snapshot depends on expireAt
+    if (followSnapshot != null &&
+        followSnapshot.expireAt > DateTime.now().microsecondsSinceEpoch) {
+      final snapshotMap = {
+        for (var item in followSnapshot.followSnapshotItems) item.id: item
+      };
+      for (var item in list) {
+        final resItem = snapshotMap[item.id];
+        if (resItem != null) {
+          item.applySnapshot(resItem);
+        }
+      }
+      _snap = true;
+      Log.i("FollowService: follow-snapshot has recovered, expireAt: ${followSnapshot.expireAt}");
+    }
+    followList.assignAll(list);
+    filterData();
+    getAllTagList();
+  }
+
+  Future<void> loadData({bool updateStatus = true, int? cycle}) async {
     if (updateStatus) {
-      followList.assignAll(list);
       startUpdateStatus(cycle: cycle);
     } else {
       _updatedListController.add(0);
@@ -424,6 +454,17 @@ class FollowService extends GetxService {
     }
     await Future.wait(tasks);
     await pool.close();
+
+    // frequency of snapshot-saving and expireAt calculation depend on user-setting: auto-update
+    final minutes = AppSettingsController.instance.autoUpdateFollowDuration.value;
+    final expireAt = DateTime.now().add(Duration(minutes: minutes)).microsecondsSinceEpoch;
+    AppSettingsController.instance.setFollowSnapshot(
+      FollowSnapshot(
+        expireAt: expireAt,
+        followSnapshotItems: followList.map((e) => e.toSnapshot()).toList(),
+      ),
+    );
+    Log.i("FollowService: follow-snapshot has saved, time: ${DateTime.now()}");
   }
 
   Future updateLiveInformation(FollowUser item) async {

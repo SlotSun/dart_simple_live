@@ -222,6 +222,12 @@ class LocalStorageService extends GetxService {
   /// 虎牙自定义 HYSDK_UA
   static const String kHuyaSdkUa = "HuyaSdkUa";
 
+  /// 关注列表快照（直播状态缓存）
+  static const String kFollowSnapshot = "FollowSnapshot";
+
+  /// 开启关注列表快照
+  static const String kFollowSnapshotEnable = "FollowSnapshotEnable";
+
   late Box settingsBox;
   late Box<String> shieldBox;
 

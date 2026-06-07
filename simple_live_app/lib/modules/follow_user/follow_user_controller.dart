@@ -61,7 +61,11 @@ class FollowUserController extends BasePageController<FollowUser> {
         filterData();
       },
     );
-
+    // todo: 静态调用,以后优化
+    // await FollowService.instance.initFollowList(); --> event back
+    // other...
+    updateTagList();
+    filterData();
     sortMethod = AppSettingsController.instance.followSortMethod;
     super.onInit();
   }

@@ -152,14 +152,15 @@ class FollowUserPage extends GetView<FollowUserController> {
               ],
             ),
           ),
-          Obx(
-            () => Expanded(
+          Obx(() {
+            final snapshot = AppSettingsController.instance.followSnapshotEnable.value;
+            return Expanded(
               child: AppSettingsController.instance.followStyleNotGrid.value
                   ? PageGridView(
                       crossAxisSpacing: 12,
                       crossAxisCount: count,
                       pageController: controller,
-                      firstRefresh: true,
+                      firstRefresh: !snapshot,
                       showPCRefreshButton: false,
                       itemBuilder: (_, i) {
                         var item = controller.list[i];
@@ -189,7 +190,7 @@ class FollowUserPage extends GetView<FollowUserController> {
                           return PageGridView(
                             pageController: controller,
                             padding: AppStyle.edgeInsetsA12,
-                            firstRefresh: true,
+                            firstRefresh: !snapshot,
                             mainAxisSpacing: 12,
                             crossAxisSpacing: 12,
                             crossAxisCount: c,
@@ -219,8 +220,8 @@ class FollowUserPage extends GetView<FollowUserController> {
                         },
                       ),
                     ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );
