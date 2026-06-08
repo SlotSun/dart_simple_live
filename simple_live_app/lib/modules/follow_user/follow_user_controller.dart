@@ -59,14 +59,13 @@ class FollowUserController extends BasePageController<FollowUser> {
       (event) {
         updateTagList();
         list.assignAll(filterData());
+        pageEmpty.value = list.isEmpty;
       },
     );
     sortMethod = AppSettingsController.instance.followSortMethod;
     super.onInit();
   }
 
-  // 数据流re ： refresh->service.loadData(snap ready or)
-  // ->getData-> list.assignAll()[initData] -> list.add(null)[onload]
   @override
   Future refreshData() async {
     await FollowService.instance.loadData();
@@ -75,25 +74,14 @@ class FollowUserController extends BasePageController<FollowUser> {
   }
 
   @override
-  Future loadData() async {
-    try {
-      if (loadding) return;
-      loadding = true;
-      pageError.value = false;
-      pageEmpty.value = false;
-      notLogin.value = false;
-      pageLoadding.value = currentPage == 1;
-
-      list.assignAll(filterData());
-      pageEmpty.value = list.isEmpty;
-      canLoadMore.value = false;
-    } catch (e) {
-      handleError(e, showPageError: currentPage == 1);
-    } finally {
-      loadding = false;
-      pageLoadding.value = false;
+  Future<List<FollowUser>> getData(int page, int pageSize) async {
+    if (page > 1) {
+      return Future.value([]);
     }
+    // todo: bug-> snapshot 会二次加载数据 需要更细致的数据管理
+    return filterData();
   }
+
 
   void updateTagList() {
     userTagList.assignAll(FollowService.instance.followTagList);
