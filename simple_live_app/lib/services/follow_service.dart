@@ -299,12 +299,7 @@ class FollowService extends GetxService {
                 AppSettingsController.instance.autoUpdateFollowDuration.value),
         (timer) {
           CoreLog.i("Update Follow Timer - Cycle: $_refreshCycle");
-          // if _snap skip first refresh
-          if(!_snap){
-            loadData(updateStatus: true, cycle: _refreshCycle);
-          }else{
-            _snap = false;
-          }
+          loadData(updateStatus: true, cycle: _refreshCycle);
           _refreshCycle = (_refreshCycle + 1) % 2; // 2-cycle rotation
         },
       );
@@ -342,7 +337,11 @@ class FollowService extends GetxService {
       Log.i("FollowService: follow-snapshot has recovered, expireAt: ${followSnapshot.expireAt}");
     }
     followList.assignAll(list);
-    filterData();
+    // no snapshot-> updateStatus
+    if (!_snap) {
+      await loadData(updateStatus: true, cycle: 0);
+    }
+    liveListSort();
     getAllTagList();
   }
 
