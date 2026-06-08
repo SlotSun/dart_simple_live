@@ -321,9 +321,11 @@ class FollowService extends GetxService {
       return;
     }
     var followSnapshot = AppSettingsController.instance.followSnapshot;
+    bool followSnapshotEnable = AppSettingsController.instance.followSnapshotEnable.value;
     // whether to recover snapshot depends on expireAt
     if (followSnapshot != null &&
-        followSnapshot.expireAt > DateTime.now().microsecondsSinceEpoch) {
+        followSnapshot.expireAt > DateTime.now().microsecondsSinceEpoch &&
+        followSnapshotEnable) {
       final snapshotMap = {
         for (var item in followSnapshot.followSnapshotItems) item.id: item
       };
@@ -337,15 +339,18 @@ class FollowService extends GetxService {
       Log.i("FollowService: follow-snapshot has recovered, expireAt: ${followSnapshot.expireAt}");
     }
     followList.assignAll(list);
-    // no snapshot-> updateStatus
-    if (!_snap) {
-      await loadData(updateStatus: true, cycle: 0);
+    if(_snap){
+      liveListSort();
     }
-    liveListSort();
     getAllTagList();
   }
 
   Future<void> loadData({bool updateStatus = true, int? cycle}) async {
+    // snapshot 恢复跳过第一次状态更新
+    if(_snap){
+      _snap = false;
+      return;
+    }
     if (updateStatus) {
       startUpdateStatus(cycle: cycle);
     } else {

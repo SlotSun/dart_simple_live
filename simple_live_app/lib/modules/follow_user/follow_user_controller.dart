@@ -58,19 +58,15 @@ class FollowUserController extends BasePageController<FollowUser> {
     onUpdatedListStream = FollowService.instance.updatedListStream.listen(
       (event) {
         updateTagList();
-        filterData();
+        list.assignAll(filterData());
       },
     );
-    // todo: 静态调用,以后优化
-    // await FollowService.instance.initFollowList(); --> event back
-    // other...
-    // todo: data-flow rewrite is needed
-    updateTagList();
-    filterData();
     sortMethod = AppSettingsController.instance.followSortMethod;
     super.onInit();
   }
 
+  // 数据流re ： refresh->service.loadData(snap ready or)
+  // ->getData-> list.assignAll()[initData] -> list.add(null)[onload]
   @override
   Future refreshData() async {
     await FollowService.instance.loadData();
@@ -79,19 +75,23 @@ class FollowUserController extends BasePageController<FollowUser> {
   }
 
   @override
-  Future<List<FollowUser>> getData(int page, int pageSize) async {
-    if (page > 1) {
-      return Future.value([]);
-    }
-    if (filterMode.value.tag == "全部") {
-      return FollowService.instance.followList.value;
-    } else if (filterMode.value.tag == "直播中") {
-      return FollowService.instance.liveList.value;
-    } else if (filterMode.value.tag == "未开播") {
-      return FollowService.instance.notLiveList.value;
-    } else {
-      FollowService.instance.filterDataByTag(filterMode.value);
-      return FollowService.instance.curTagFollowList.value;
+  Future loadData() async {
+    try {
+      if (loadding) return;
+      loadding = true;
+      pageError.value = false;
+      pageEmpty.value = false;
+      notLogin.value = false;
+      pageLoadding.value = currentPage == 1;
+
+      list.assignAll(filterData());
+      pageEmpty.value = list.isEmpty;
+      canLoadMore.value = false;
+    } catch (e) {
+      handleError(e, showPageError: currentPage == 1);
+    } finally {
+      loadding = false;
+      pageLoadding.value = false;
     }
   }
 
@@ -105,23 +105,25 @@ class FollowUserController extends BasePageController<FollowUser> {
     }
   }
 
-  void filterData() {
+  List<FollowUser> filterData() {
     bool hideOffline = AppSettingsController.instance.hideOfflineFollow.value;
+    List<FollowUser> res = [];
 
     if (filterMode.value.tag == "全部") {
-      list.assignAll(FollowService.instance.followList.value);
+      res.assignAll(FollowService.instance.followList.value);
     } else if (filterMode.value.tag == "直播中") {
-      list.assignAll(FollowService.instance.liveList.value);
+      res.assignAll(FollowService.instance.liveList.value);
     } else if (filterMode.value.tag == "未开播") {
-      list.assignAll(FollowService.instance.notLiveList.value);
+      res.assignAll(FollowService.instance.notLiveList.value);
     } else {
       FollowService.instance.filterDataByTag(filterMode.value);
-      list.assignAll(FollowService.instance.curTagFollowList);
+      res.assignAll(FollowService.instance.curTagFollowList);
     }
 
     if (hideOffline && filterMode.value.tag != "未开播") {
-      list.retainWhere((user) => user.liveStatus.value == 2);
+      res.retainWhere((user) => user.liveStatus.value == 2);
     }
+    return res;
   }
 
   // 用户自定义关注样式
@@ -148,13 +150,13 @@ class FollowUserController extends BasePageController<FollowUser> {
           filterMode.value.tag == "直播中") {
         FollowService.instance.liveListSort();
       }
-      filterData();
+      list.assignAll(filterData());
     }
   }
 
   void setFilterMode(FollowUserTag tag) {
     filterMode.value = tag;
-    filterData();
+    list.assignAll(filterData());
   }
 
   void removeFollow(FollowUser follow) async {
@@ -172,7 +174,7 @@ class FollowUserController extends BasePageController<FollowUser> {
       }
     }
     await FollowService.instance.removeFollowUser(follow.id);
-    filterData();
+    list.assignAll(filterData());
   }
 
   Future<void> updateFollow(FollowUser follow) async {
@@ -181,7 +183,7 @@ class FollowUserController extends BasePageController<FollowUser> {
 
   void setFollowTag(FollowUser follow, FollowUserTag targetTag) {
     FollowService.instance.setFollowTag(follow, targetTag);
-    filterData();
+    list.assignAll(filterData());
   }
 
   Future<void> updateTag(FollowUserTag followUserTag) async {
