@@ -89,6 +89,11 @@ mixin PlayerMixin {
     //  icc-cache-dir = "~~/cache/icc";
     //  gpu-shader-cache-dir = "~~/cache/shader"
     //  watch-later-dir = "~~/cache/watch_later"
+    // NVIDIA RTX VSR 支持 (Windows 平台)
+    if (Platform.isWindows && AppSettingsController.instance.enableRtxVsr.value) {
+      await pp.setProperty('hwdec', 'd3d11va');
+      await pp.setProperty('vf', 'd3d11vpp=scale=2:scaling-mode=nvidia');
+    }
   }
 
   /// 视频控制器

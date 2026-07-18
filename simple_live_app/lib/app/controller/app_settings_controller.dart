@@ -175,6 +175,11 @@ class AppSettingsController extends GetxController {
       false,
     );
 
+    enableRtxVsr.value = LocalStorageService.instance.getValue(
+      LocalStorageService.kEnableRtxVsr,
+      false,
+    );
+
     autoUpdateFollowEnable.value = LocalStorageService.instance
         .getValue(LocalStorageService.kAutoUpdateFollowEnable, true);
 
@@ -626,6 +631,14 @@ class AppSettingsController extends GetxController {
     videoDoubleBuffering.value = e;
     LocalStorageService.instance
         .setValue(LocalStorageService.kVideoDoubleBuffering, e);
+  }
+
+  var enableRtxVsr = false.obs;
+
+  void setEnableRtxVsr(bool e) {
+    enableRtxVsr.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kEnableRtxVsr, e);
   }
 
   var autoUpdateFollowEnable = false.obs;

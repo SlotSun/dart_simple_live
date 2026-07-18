@@ -177,6 +177,9 @@ class LocalStorageService extends GetxService {
   /// 视频硬件解码器
   static const String kVideoDoubleBuffering = "VideoDoubleBuffering";
 
+  /// NVIDIA RTX Video Super Resolution
+  static const String kEnableRtxVsr = "EnableRtxVsr";
+
   /// 开启自动更新关注
   static const String kAutoUpdateFollowEnable = "AutoUpdateFollowEnable";
 
