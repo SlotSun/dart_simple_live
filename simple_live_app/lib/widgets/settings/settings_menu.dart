@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/widgets/settings/settings_tile.dart';
 
 class SettingsMenu<T> extends StatelessWidget {
   final String title;
@@ -8,8 +8,8 @@ class SettingsMenu<T> extends StatelessWidget {
   final Map<T, String> valueMap;
   final T value;
   final Widget? trailing;
-
   final Function(T)? onChanged;
+
   const SettingsMenu({
     required this.title,
     required this.value,
@@ -22,39 +22,10 @@ class SettingsMenu<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      visualDensity: VisualDensity.compact,
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.bodyLarge,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: AppStyle.radius8,
-      ),
-      contentPadding: AppStyle.edgeInsetsL16.copyWith(right: 8),
-      subtitle: subtitle == null
-          ? null
-          : Text(
-              subtitle!,
-              style: Get.textTheme.bodySmall!.copyWith(color: Colors.grey),
-            ),
-      trailing: trailing ?? Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            valueMap[value]!.tr,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium!
-                .copyWith(color: Colors.grey),
-          ),
-          AppStyle.hGap4,
-          const Icon(
-            Icons.chevron_right,
-            color: Colors.grey,
-          ),
-        ],
-      ),
+    return SettingsTile(
+      title: title,
+      subtitle: subtitle,
+      trailing: trailing ?? SettingsValueIndicator(value: valueMap[value]!.tr),
       onTap: () => openMenu(context),
     );
   }
@@ -63,26 +34,24 @@ class SettingsMenu<T> extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
-      useSafeArea: true, //useSafeArea似乎无效
+      useSafeArea: true,
       builder: (_) => SafeArea(
         top: false,
         child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 8),
           child: RadioGroup(
             groupValue: value,
-            onChanged: (e) {
+            onChanged: (selectedValue) {
               Get.back();
-              onChanged?.call(e as T);
+              onChanged?.call(selectedValue as T);
             },
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: valueMap.keys
                   .map(
-                    (e) => RadioListTile(
-                      value: e,
-                      title: Text(
-                        (valueMap[e]?.tr) ?? "???",
-                        style: Get.textTheme.bodyMedium,
-                      ),
+                    (menuValue) => RadioListTile(
+                      value: menuValue,
+                      title: Text((valueMap[menuValue]?.tr) ?? '???'),
                     ),
                   )
                   .toList(),

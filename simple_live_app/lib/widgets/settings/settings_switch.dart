@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/app/design_system/app_design_tokens.dart';
+import 'package:simple_live_app/app/design_system/app_theme_extension.dart';
 
 class SettingsSwitch extends StatelessWidget {
   final bool value;
   final String title;
   final String? subtitle;
   final Function(bool) onChanged;
+
   const SettingsSwitch({
     required this.value,
     required this.title,
@@ -16,26 +18,33 @@ class SettingsSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final semantic = context.appTheme;
+    final theme = Theme.of(context);
+
     return SwitchListTile(
+      visualDensity: VisualDensity.compact,
       title: Text(
         title,
-        style: Theme.of(context).textTheme.bodyLarge,
+        style: theme.textTheme.titleSmall?.copyWith(
+          color: semantic.textPrimary,
+          fontWeight: FontWeight.w600,
+        ),
       ),
+      subtitle: subtitle == null
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                subtitle!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: semantic.textSecondary,
+                ),
+              ),
+            ),
       shape: RoundedRectangleBorder(
-        borderRadius: AppStyle.radius8,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radius12),
       ),
-      trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
-      //visualDensity: VisualDensity.compact,
-      contentPadding: AppStyle.edgeInsetsL16.copyWith(right: 8),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle!,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall!
-                  .copyWith(color: Colors.grey),
-            )
-          : null,
+      contentPadding: const EdgeInsets.only(left: 16, right: 8),
       value: value,
       onChanged: onChanged,
     );

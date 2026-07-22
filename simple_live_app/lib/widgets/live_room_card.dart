@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/app/design_system/app_theme_extension.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/routes/app_navigation.dart';
@@ -13,10 +14,20 @@ class LiveRoomCard extends StatelessWidget {
   final LiveRoomItem item;
   final Function()? onLongPress;
   final Function()? onFollowRemove;
-  const LiveRoomCard(this.site, this.item, {super.key, this.onLongPress, this.onFollowRemove});
+
+  const LiveRoomCard(
+    this.site,
+    this.item, {
+    super.key,
+    this.onLongPress,
+    this.onFollowRemove,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final semantic = context.appTheme;
+
     return ShadowCard(
       onTap: () {
         AppNavigator.toLiveRoomDetail(site: site, roomId: item.roomId);
@@ -25,67 +36,65 @@ class LiveRoomCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(8),
-                  topRight: Radius.circular(8),
-                ),
-                child: NetImage(
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                NetImage(
                   item.cover,
                   fit: BoxFit.cover,
-                  height: 110,
-                  width: double.infinity,
                 ),
-              ),
-              Positioned(
-                right: 0,
-                left: 0,
-                bottom: 0,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 8,
-                  ),
-                  decoration: const BoxDecoration(
+                const DecoratedBox(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                      colors: [
-                        Colors.black87,
-                        Colors.transparent,
-                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: [0.48, 1],
+                      colors: [Colors.transparent, Color(0xCC000000)],
                     ),
                   ),
+                ),
+                Positioned(
+                  left: 10,
+                  right: 10,
+                  bottom: 8,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Icon(
-                        site.iconData,
+                      Icon(site.iconData, color: Colors.white, size: 14),
+                      AppStyle.hGap4,
+                      Expanded(
+                        child: Text(
+                          site.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const Icon(
+                        Icons.visibility_outlined,
                         color: Colors.white,
                         size: 14,
                       ),
                       AppStyle.hGap4,
                       Text(
                         Utils.onlineToString(item.online),
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: theme.textTheme.labelSmall?.copyWith(
                           color: Colors.white,
+                          fontWeight: FontWeight.w600,
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-          // like ListTitle, but listTile is oversized
-          Padding(
-            padding: AppStyle.edgeInsetsH8.copyWith(
-              top: 8,
-              bottom: 8,
+              ],
             ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -96,36 +105,42 @@ class LiveRoomCard extends StatelessWidget {
                     children: [
                       Text(
                         item.title,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: semantic.textPrimary,
+                          fontWeight: FontWeight.w700,
+                          height: 1.25,
+                        ),
                       ),
-                      const SizedBox(height: 2),
+                      AppStyle.vGap4,
                       Text(
                         item.userName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          height: 1.4,
-                          fontSize: 12,
-                          color: Colors.grey,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: semantic.textSecondary,
+                          height: 1.2,
                         ),
                       ),
                     ],
                   ),
                 ),
                 if (onFollowRemove != null) ...[
-                  const SizedBox(width: 4),
+                  AppStyle.hGap4,
                   IconButton(
                     onPressed: onFollowRemove,
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: const Icon(Remix.dislike_line),
-                  )
-                ]
+                    tooltip: '取消关注',
+                    constraints: const BoxConstraints(
+                      minWidth: 44,
+                      minHeight: 44,
+                    ),
+                    icon: const Icon(Remix.dislike_line, size: 20),
+                  ),
+                ],
               ],
             ),
-          )
+          ),
         ],
       ),
     );

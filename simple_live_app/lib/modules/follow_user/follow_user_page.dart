@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
-import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/app/design_system/app_design_tokens.dart';
+import 'package:simple_live_app/app/design_system/app_theme_extension.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/modules/follow_user/follow_user_controller.dart';
@@ -21,76 +22,63 @@ class FollowUserPage extends GetView<FollowUserController> {
 
   @override
   Widget build(BuildContext context) {
-    var count = MediaQuery
-        .of(context)
-        .size
-        .width ~/ 500;
-    if (count < 1) count = 1;
-    var c = MediaQuery
-        .of(context)
-        .size
-        .width ~/ 200;
-    if (c < 2) {
-      c = 2;
-    }
+    final theme = Theme.of(context);
+    final semantic = context.appTheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("关注用户"),
+        centerTitle: false,
+        titleSpacing: AppDesignTokens.space24,
+        toolbarHeight: 68,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '关注用户',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: semantic.textPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text(
+              '实时状态与分组',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: semantic.textTertiary,
+              ),
+            ),
+          ],
+        ),
         actions: [
-          PopupMenuButton(
-            itemBuilder: (context) {
-              return const [
-                PopupMenuItem(
-                  value: 0,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Remix.trophy_line),
-                      AppStyle.hGap12,
-                      Text("赛事订阅"),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 1,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Remix.blender_line),
-                      AppStyle.hGap12,
-                      Text("模式切换"),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 2,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Remix.sort_asc),
-                      AppStyle.hGap12,
-                      Text("按序排列"),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 4,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Remix.heart_line),
-                      AppStyle.hGap12,
-                      Text("关注设置"),
-                    ],
-                  ),
-                ),
-              ];
-            },
+          PopupMenuButton<int>(
+            tooltip: '关注菜单',
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: 0,
+                child: _MenuItem(icon: Remix.trophy_line, label: '赛事订阅'),
+              ),
+              PopupMenuItem(
+                value: 1,
+                child: _MenuItem(icon: Remix.blender_line, label: '模式切换'),
+              ),
+              PopupMenuItem(
+                value: 2,
+                child: _MenuItem(icon: Remix.sort_asc, label: '按序排列'),
+              ),
+              PopupMenuItem(
+                value: 4,
+                child: _MenuItem(icon: Remix.heart_line, label: '关注设置'),
+              ),
+            ],
             onSelected: (value) {
               if (value == 4) {
                 Get.toNamed(RoutePath.kSettingsFollow);
               } else if (value == 0) {
-                SmartDialog.showToast("此功能暂未开放！敬请期待！");
+                SmartDialog.showToast('此功能暂未开放！敬请期待！');
               } else if (value == 1) {
                 controller.showFollowStyleDialog();
               } else if (value == 2) {
@@ -98,131 +86,187 @@ class FollowUserPage extends GetView<FollowUserController> {
               }
             },
           ),
+          const SizedBox(width: AppDesignTokens.space8),
         ],
         leading: Obx(
           () => FollowService.instance.updating.value
               ? const IconButton(
                   onPressed: null,
+                  tooltip: '正在刷新',
                   icon: SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                 )
               : IconButton(
-                  onPressed: () {
-                    controller.refreshData();
-                  },
-                  icon: const Icon(Icons.refresh),
+                  onPressed: controller.refreshData,
+                  tooltip: '刷新关注状态',
+                  icon: const Icon(Icons.refresh_rounded),
                 ),
         ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: AppStyle.edgeInsetsL8,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Obx(
-                        () =>
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Wrap(
-                            spacing: 12,
-                            children: controller.tagList.map(
-                                  (option) {
-                                return FilterButton(
-                                  text: option.tag,
-                                  selected: controller.filterMode.value ==
-                                      option,
-                                  onTap: () {
-                                    controller.setFilterMode(option);
-                                  },
-                                );
-                              },
-                            ).toList(),
-                          ),
-                        ),
-                  ),
-                ),
-              ],
+          DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: semantic.divider)),
             ),
-          ),
-          Obx(
-            () => Expanded(
-              child: AppSettingsController.instance.followStyleNotGrid.value
-                  ? PageGridView(
-                      crossAxisSpacing: 12,
-                      crossAxisCount: count,
-                      pageController: controller,
-                      firstRefresh: true,
-                      showPCRefreshButton: false,
-                      itemBuilder: (_, i) {
-                        var item = controller.list[i];
-                        var site = Sites.allSites[item.siteId]!;
-                        return FollowUserItem(
-                          item: item,
-                          onRemove: () {
-                            controller.removeFollow(item);
-                          },
-                          onTap: () {
-                            AppNavigator.toLiveRoomDetail(
-                                site: site, roomId: item.roomId);
-                          },
-                          onLongPress: () {
-                            // 长按弹出操作：设置标签或查看详情
-                            controller.showBottomMenu(item);
-                          },
+            child: Align(
+              alignment: Alignment.center,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1280),
+                child: SizedBox(
+                  height: 54,
+                  child: Obx(
+                    () => ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppDesignTokens.space16,
+                        vertical: AppDesignTokens.space8,
+                      ),
+                      itemCount: controller.tagList.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(width: AppDesignTokens.space8),
+                      itemBuilder: (_, index) {
+                        final option = controller.tagList[index];
+                        return FilterButton(
+                          text: option.tag,
+                          selected: controller.filterMode.value == option,
+                          onTap: () => controller.setFilterMode(option),
                         );
                       },
-                    )
-                  : KeepAliveWrapper(
-                      child: Obx(
-                        () {
-                          // temp
-                          final hide = AppSettingsController
-                              .instance.hideRemoveFollowButton.value;
-                          return PageGridView(
-                            pageController: controller,
-                            padding: AppStyle.edgeInsetsA12,
-                            firstRefresh: true,
-                            mainAxisSpacing: 12,
-                            crossAxisSpacing: 12,
-                            crossAxisCount: c,
-                            itemBuilder: (_, i) {
-                              var item = controller.list[i];
-                              // 或许直接继承字段更好，标记工作
-                              LiveRoomItem liveRoomItem = LiveRoomItem(
-                                roomId: item.roomId,
-                                title: item.title.value,
-                                cover: item.cover.value,
-                                userName: item.userName,
-                                online: item.online.value,
-                              );
-                              var site = Sites.allSites[item.siteId]!;
-                              return LiveRoomCard(
-                                site,
-                                liveRoomItem,
-                                onFollowRemove: hide
-                                    ? null
-                                    : () => controller.removeFollow(item),
-                                onLongPress: () {
-                                  controller.showBottomMenu(item);
-                                },
-                              );
-                            },
-                          );
-                        },
-                      ),
                     ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final viewportWidth = constraints.maxWidth > 1280
+                    ? 1280.0
+                    : constraints.maxWidth;
+                final availableWidth = viewportWidth - 32;
+                var listColumns = (availableWidth / 460).floor();
+                if (listColumns < 1) listColumns = 1;
+                if (listColumns > 2) listColumns = 2;
+                var cardColumns = (availableWidth / 260).floor();
+                if (cardColumns < 2) cardColumns = 2;
+                if (cardColumns > 5) cardColumns = 5;
+
+                return Obx(
+                  () => Align(
+                    alignment: Alignment.topCenter,
+                    child: SizedBox(
+                      width: viewportWidth,
+                      child: AppSettingsController
+                              .instance.followStyleNotGrid.value
+                          ? PageGridView(
+                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                              mainAxisSpacing: AppDesignTokens.space8,
+                              crossAxisSpacing: AppDesignTokens.space8,
+                              crossAxisCount: listColumns,
+                              pageController: controller,
+                              firstRefresh: true,
+                              showPCRefreshButton: false,
+                              itemBuilder: (_, i) {
+                                final item = controller.list[i];
+                                final site = Sites.allSites[item.siteId]!;
+                                return DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: semantic.secondarySurface,
+                                    borderRadius: BorderRadius.circular(
+                                      AppDesignTokens.radius12,
+                                    ),
+                                    border: Border.all(color: semantic.border),
+                                  ),
+                                  child: FollowUserItem(
+                                    item: item,
+                                    onRemove: () =>
+                                        controller.removeFollow(item),
+                                    onTap: () {
+                                      AppNavigator.toLiveRoomDetail(
+                                        site: site,
+                                        roomId: item.roomId,
+                                      );
+                                    },
+                                    onLongPress: () =>
+                                        controller.showBottomMenu(item),
+                                  ),
+                                );
+                              },
+                            )
+                          : KeepAliveWrapper(
+                              child: Obx(
+                                () {
+                                  final hide = AppSettingsController.instance
+                                      .hideRemoveFollowButton.value;
+                                  return PageGridView(
+                                    pageController: controller,
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      16,
+                                      16,
+                                      24,
+                                    ),
+                                    firstRefresh: true,
+                                    mainAxisSpacing: AppDesignTokens.space16,
+                                    crossAxisSpacing: AppDesignTokens.space16,
+                                    crossAxisCount: cardColumns,
+                                    itemBuilder: (_, i) {
+                                      final item = controller.list[i];
+                                      final liveRoomItem = LiveRoomItem(
+                                        roomId: item.roomId,
+                                        title: item.title.value,
+                                        cover: item.cover.value,
+                                        userName: item.userName,
+                                        online: item.online.value,
+                                      );
+                                      final site = Sites.allSites[item.siteId]!;
+                                      return LiveRoomCard(
+                                        site,
+                                        liveRoomItem,
+                                        onFollowRemove: hide
+                                            ? null
+                                            : () => controller.removeFollow(item),
+                                        onLongPress: () =>
+                                            controller.showBottomMenu(item),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _MenuItem extends StatelessWidget {
+  const _MenuItem({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 20),
+        const SizedBox(width: AppDesignTokens.space12),
+        Text(label),
+      ],
     );
   }
 }

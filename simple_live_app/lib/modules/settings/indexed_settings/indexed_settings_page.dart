@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/constant.dart';
+import 'package:simple_live_app/app/design_system/app_design_tokens.dart';
+import 'package:simple_live_app/app/design_system/app_theme_extension.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/modules/settings/indexed_settings/indexed_settings_controller.dart';
 import 'package:simple_live_app/widgets/settings/settings_card.dart';
@@ -12,72 +13,135 @@ class IndexedSettingsPage extends GetView<IndexedSettingsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("主页设置"),
+      appBar: AppBar(title: const Text('主页设置')),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+            children: [
+              const _SectionHeading(
+                title: '主页排序',
+                subtitle: '长按拖动排序，重启后生效',
+              ),
+              SettingsCard(
+                child: Obx(
+                  () => ReorderableListView(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    onReorder: controller.updateHomeSort,
+                    children: controller.homeSort.map((key) {
+                      final item = Constant.allHomePages[key]!;
+                      return _ReorderTile(
+                        key: ValueKey(item.title),
+                        title: item.title,
+                        leading: Icon(item.iconData),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              const _SectionHeading(
+                title: '平台排序',
+                subtitle: '长按拖动排序，重启后生效',
+                top: 24,
+              ),
+              SettingsCard(
+                child: Obx(
+                  () => ReorderableListView(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    onReorder: controller.updateSiteSort,
+                    children: controller.siteSort
+                        .where((key) => Sites.allSites[key]?.name != 'Twitch')
+                        .map((key) {
+                      final item = Sites.allSites[key]!;
+                      return _ReorderTile(
+                        key: ValueKey(item.id),
+                        title: item.name,
+                        leading: Image.asset(
+                          item.logo,
+                          width: 24,
+                          height: 24,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
-      body: ListView(
-        padding: AppStyle.edgeInsetsA12,
+    );
+  }
+}
+
+class _ReorderTile extends StatelessWidget {
+  const _ReorderTile({
+    required super.key,
+    required this.title,
+    required this.leading,
+  });
+
+  final String title;
+  final Widget leading;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final semantic = context.appTheme;
+    return ListTile(
+      visualDensity: VisualDensity.compact,
+      contentPadding: const EdgeInsets.only(left: 16, right: 12),
+      leading: leading,
+      title: Text(
+        title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.titleSmall?.copyWith(
+          color: semantic.textPrimary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      trailing: Icon(Icons.drag_handle_rounded, color: semantic.textTertiary),
+    );
+  }
+}
+
+class _SectionHeading extends StatelessWidget {
+  const _SectionHeading({
+    required this.title,
+    required this.subtitle,
+    this.top = 0,
+  });
+
+  final String title;
+  final String subtitle;
+  final double top;
+
+  @override
+  Widget build(BuildContext context) {
+    final semantic = context.appTheme;
+    final theme = Theme.of(context);
+    return Padding(
+      padding: EdgeInsets.fromLTRB(4, top, 4, AppDesignTokens.space8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: AppStyle.edgeInsetsA12.copyWith(top: 0),
-            child: Text(
-              "主页排序 (长按拖动排序，重启后生效)",
-              style: Get.textTheme.titleSmall,
+          Text(
+            title,
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: semantic.textSecondary,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          SettingsCard(
-            child: Obx(
-              () => ReorderableListView(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                onReorder: controller.updateHomeSort,
-                children: controller.homeSort.map(
-                  (key) {
-                    var e = Constant.allHomePages[key]!;
-                    return ListTile(
-                      key: ValueKey(e.title),
-                      title: Text(e.title),
-                      visualDensity: VisualDensity.compact,
-                      leading: Icon(e.iconData),
-                      trailing: const Icon(Icons.drag_handle),
-                    );
-                  },
-                ).toList(),
-              ),
-            ),
-          ),
-          Padding(
-            padding: AppStyle.edgeInsetsA12.copyWith(top: 24),
-            child: Text(
-              "平台排序 (长按拖动排序，重启后生效)",
-              style: Get.textTheme.titleSmall,
-            ),
-          ),
-          SettingsCard(
-            child: Obx(
-              () => ReorderableListView(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                onReorder: controller.updateSiteSort,
-                children: controller.siteSort
-                    .where((key) => Sites.allSites[key]?.name != 'Twitch')
-                    .map(
-                  (key) {
-                    var e = Sites.allSites[key]!;
-                    return ListTile(
-                      key: ValueKey(e.id),
-                      visualDensity: VisualDensity.compact,
-                      title: Text(e.name),
-                      leading: Image.asset(
-                        e.logo,
-                        width: 24,
-                        height: 24,
-                      ),
-                      trailing: const Icon(Icons.drag_handle),
-                    );
-                  },
-                ).toList(),
-              ),
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: semantic.textTertiary,
             ),
           ),
         ],

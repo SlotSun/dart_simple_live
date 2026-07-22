@@ -154,8 +154,8 @@ class MyApp extends StatelessWidget {
         Color(AppStyleSettingController.instance.styleColor.value);
     return DynamicColorBuilder(
         builder: ((ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-      ColorScheme? lightColorScheme;
-      ColorScheme? darkColorScheme;
+      final ColorScheme lightColorScheme;
+      final ColorScheme darkColorScheme;
       if (lightDynamic != null && darkDynamic != null && isDynamicColor) {
         lightColorScheme = lightDynamic;
         darkColorScheme = darkDynamic;
@@ -165,17 +165,21 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.light,
         );
         darkColorScheme = ColorScheme.fromSeed(
-            seedColor: styleColor, brightness: Brightness.dark);
+          seedColor: styleColor,
+          brightness: Brightness.dark,
+        );
       }
       return Obx(
         () => GetMaterialApp(
           title: "Slive",
           theme: AppStyle.light(
+            colorScheme: lightColorScheme,
             fontFamily: AppStyleSettingController.instance.curFontName.value,
-          ).copyWith(colorScheme: lightColorScheme),
+          ),
           darkTheme: AppStyle.darkTheme(
+            colorScheme: darkColorScheme,
             fontFamily: AppStyleSettingController.instance.curFontName.value,
-          ).copyWith(colorScheme: darkColorScheme),
+          ),
           themeMode: ThemeMode
               .values[Get.find<AppSettingsController>().themeMode.value],
           initialRoute: RoutePath.kIndex,

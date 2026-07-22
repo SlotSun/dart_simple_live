@@ -1,30 +1,76 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:simple_live_app/main.dart';
+import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/app/design_system/app_design_tokens.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  ThemeData buildTheme(Brightness brightness) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: AppDesignTokens.defaultSeedColor,
+      brightness: brightness,
+    );
+    return brightness == Brightness.dark
+        ? AppStyle.darkTheme(colorScheme: colorScheme)
+        : AppStyle.light(colorScheme: colorScheme);
+  }
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('app visual system smoke renders in light and dark themes',
+      (tester) async {
+    for (final brightness in Brightness.values) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildTheme(brightness),
+          home: Scaffold(
+            appBar: AppBar(title: const Text('Slive')),
+            body: const Center(child: Text('visual smoke')),
+          ),
+        ),
+      );
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+      expect(find.byType(Scaffold), findsOneWidget);
+      expect(find.text('Slive'), findsOneWidget);
+      expect(find.text('visual smoke'), findsOneWidget);
+    }
+  });
+
+  testWidgets('navigation destinations keep touchable labels and icons',
+      (tester) async {
+    var selected = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildTheme(Brightness.light),
+        home: StatefulBuilder(
+          builder: (context, setState) {
+            return Scaffold(
+              bottomNavigationBar: NavigationBar(
+                selectedIndex: selected,
+                onDestinationSelected: (value) {
+                  setState(() => selected = value);
+                },
+                destinations: const [
+                  NavigationDestination(
+                    icon: Icon(Icons.home_outlined),
+                    selectedIcon: Icon(Icons.home),
+                    label: '首页',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.favorite_border),
+                    selectedIcon: Icon(Icons.favorite),
+                    label: '关注',
+                  ),
+                ],
+              ),
+              body: Center(child: Text('selected:$selected')),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('selected:0'), findsOneWidget);
+    await tester.tap(find.text('关注'));
     await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('selected:1'), findsOneWidget);
   });
 }

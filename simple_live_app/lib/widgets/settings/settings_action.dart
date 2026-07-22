@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/widgets/settings/settings_tile.dart';
 
 class SettingsAction extends StatelessWidget {
   final String title;
@@ -20,41 +19,11 @@ class SettingsAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      // visualDensity: VisualDensity.compact,
+    return SettingsTile(
+      title: title,
+      subtitle: subtitle,
       leading: leading,
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.bodyLarge,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: AppStyle.radius8,
-      ),
-      contentPadding: AppStyle.edgeInsetsL16.copyWith(right: 8),
-      subtitle: subtitle == null
-          ? null
-          : Text(
-              subtitle!,
-              style: Get.textTheme.bodySmall!.copyWith(color: Colors.grey),
-            ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (value != null)
-            Text(
-              value!,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium!
-                  .copyWith(color: Colors.grey),
-            ),
-          AppStyle.hGap4,
-          const Icon(
-            Icons.chevron_right,
-            color: Colors.grey,
-          ),
-        ],
-      ),
+      trailing: SettingsValueIndicator(value: value),
       onTap: onTap,
     );
   }

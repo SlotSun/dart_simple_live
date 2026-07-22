@@ -1,41 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/app/design_system/app_design_tokens.dart';
+import 'package:simple_live_app/app/design_system/app_theme_extension.dart';
 
 class DesktopRefreshButton extends StatelessWidget {
   final bool refreshing;
   final Function()? onPressed;
-  const DesktopRefreshButton(
-      {required this.refreshing, this.onPressed, super.key});
+
+  const DesktopRefreshButton({
+    required this.refreshing,
+    this.onPressed,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: AppStyle.radius48,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withAlpha(50),
-            blurRadius: 4,
-          ),
-        ],
+    final semantic = context.appTheme;
+    final theme = Theme.of(context);
+
+    return Material(
+      color: semantic.elevatedSurface,
+      elevation: 0,
+      shadowColor: semantic.shadow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppDesignTokens.radius12),
+        side: BorderSide(color: semantic.border),
       ),
-      width: 40,
-      height: 40,
-      child: refreshing
-          ? const Center(
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
+      child: SizedBox.square(
+        dimension: 44,
+        child: refreshing
+            ? Center(
+                child: SizedBox.square(
+                  dimension: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: theme.colorScheme.primary,
+                    semanticsLabel: '正在刷新',
+                  ),
                 ),
+              )
+            : IconButton(
+                onPressed: onPressed,
+                tooltip: '刷新',
+                icon: const Icon(Icons.refresh_rounded),
               ),
-            )
-          : IconButton(
-              onPressed: onPressed,
-              icon: const Icon(Icons.refresh),
-            ),
+      ),
     );
   }
 }

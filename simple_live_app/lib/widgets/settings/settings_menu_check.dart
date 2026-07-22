@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
-import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/app/design_system/app_design_tokens.dart';
+import 'package:simple_live_app/widgets/settings/settings_tile.dart';
 
 class _MenuCheckController<T> extends GetxController {
   final RxList<T> selectedItems;
@@ -26,7 +27,6 @@ class SettingsMenuCheck<T> extends StatelessWidget {
   final List<T> initialSelection;
   final Future<List<T>> Function()? itemsProvider;
   final List<T> Function(List<T> providedItems)? initialSelectionProvider;
-
   final String Function(T item) itemToString;
   final Function(List<T> selectedItems)? onConfirm;
   final String? confirmText;
@@ -48,52 +48,24 @@ class SettingsMenuCheck<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 这里需要状态管理，暂时不实现
     final displayItemsCount = items.length;
     final displaySelectedCount = initialSelection.length;
 
-    return ListTile(
-      visualDensity: VisualDensity.compact,
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.bodyLarge,
+    return SettingsTile(
+      title: title,
+      subtitle: subtitle,
+      trailing: SettingsValueIndicator(
+        value: '$displaySelectedCount/$displayItemsCount',
       ),
-      shape: RoundedRectangleBorder(
-        borderRadius: AppStyle.radius8,
-      ),
-      contentPadding: AppStyle.edgeInsetsL16.copyWith(right: 8),
-      subtitle: subtitle == null
-          ? null
-          : Text(
-              subtitle!,
-              style: Get.textTheme.bodySmall!.copyWith(color: Colors.grey),
-            ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '$displaySelectedCount/$displayItemsCount',
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium!
-                .copyWith(color: Colors.grey),
-          ),
-          AppStyle.hGap4,
-          const Icon(
-            Icons.chevron_right,
-            color: Colors.grey,
-          ),
-        ],
-      ),
-      onTap: _handleTap,
+      onTap: () => _handleTap(context),
     );
   }
 
-  Future<void> _handleTap() async {
+  Future<void> _handleTap(BuildContext context) async {
     List<T> menuItems;
     List<T> menuInitialSelection;
     if (itemsProvider != null) {
-      SmartDialog.showLoading(msg: "");
+      SmartDialog.showLoading(msg: '');
       try {
         menuItems = await itemsProvider!();
         if (initialSelectionProvider != null) {
@@ -109,15 +81,18 @@ class SettingsMenuCheck<T> extends StatelessWidget {
       menuInitialSelection = initialSelection;
     }
 
-    if (menuItems.isEmpty) {
+    if (menuItems.isEmpty || !context.mounted) {
       return;
     }
 
-    _openMenu(Get.context!, menuItems, menuInitialSelection);
+    _openMenu(context, menuItems, menuInitialSelection);
   }
 
   void _openMenu(
-      BuildContext context, List<T> items, List<T> initialSelection) {
+    BuildContext context,
+    List<T> items,
+    List<T> initialSelection,
+  ) {
     final controller = _MenuCheckController<T>(initialSelection);
 
     showModalBottomSheet(
@@ -125,13 +100,11 @@ class SettingsMenuCheck<T> extends StatelessWidget {
       isScrollControlled: true,
       showDragHandle: false,
       useSafeArea: true,
-      constraints: BoxConstraints(
-        maxWidth: 600,
-      ),
+      constraints: const BoxConstraints(maxWidth: 600),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(12),
-          topRight: Radius.circular(12),
+          topLeft: Radius.circular(AppDesignTokens.radius16),
+          topRight: Radius.circular(AppDesignTokens.radius16),
         ),
       ),
       builder: (_) {
@@ -141,13 +114,17 @@ class SettingsMenuCheck<T> extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                contentPadding: const EdgeInsets.only(
-                  left: 12,
-                ),
+                contentPadding: const EdgeInsets.only(left: 16, right: 8),
                 title: Text(
                   modalTitle?.tr ?? title.tr,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 trailing: IconButton(
+                  constraints: const BoxConstraints(
+                    minWidth: 44,
+                    minHeight: 44,
+                  ),
+                  tooltip: confirmText?.tr ?? '确定',
                   onPressed: () {
                     Get.back();
                     onConfirm?.call(controller.selectedItems.toList());
@@ -155,22 +132,23 @@ class SettingsMenuCheck<T> extends StatelessWidget {
                   icon: const Icon(Remix.delete_bin_line),
                 ),
               ),
+              const Divider(),
               Flexible(
                 child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(bottom: 8),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: items.map((item) {
-                      return Obx(() => CheckboxListTile(
-                            value: controller.selectedItems.contains(item),
-                            controlAffinity: ListTileControlAffinity.leading,
-                            title: Text(
-                              itemToString(item),
-                              style: Get.textTheme.bodyMedium,
-                            ),
-                            onChanged: (bool? selected) {
-                              controller.toggle(item);
-                            },
-                          ));
+                      return Obx(
+                        () => CheckboxListTile(
+                          value: controller.selectedItems.contains(item),
+                          controlAffinity: ListTileControlAffinity.leading,
+                          title: Text(itemToString(item)),
+                          onChanged: (selected) {
+                            controller.toggle(item);
+                          },
+                        ),
+                      );
                     }).toList(),
                   ),
                 ),

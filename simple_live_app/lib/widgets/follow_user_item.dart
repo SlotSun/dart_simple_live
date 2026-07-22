@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
-import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/app/design_system/app_theme_extension.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/widgets/net_image.dart';
-import 'dart:ui' as ui;
 
 class FollowUserItem extends StatelessWidget {
   final FollowUser item;
@@ -13,6 +12,7 @@ class FollowUserItem extends StatelessWidget {
   final Function()? onTap;
   final Function()? onLongPress;
   final bool playing;
+
   const FollowUserItem({
     required this.item,
     this.onRemove,
@@ -24,107 +24,81 @@ class FollowUserItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var site = Sites.allSites[item.siteId]!;
+    final site = Sites.allSites[item.siteId]!;
+    final semantic = context.appTheme;
+    final theme = Theme.of(context);
+
     return ListTile(
-      contentPadding: AppStyle.edgeInsetsL16.copyWith(right: 4),
+      minVerticalPadding: 8,
+      contentPadding: const EdgeInsets.only(left: 16, right: 8),
       leading: NetImage(
         item.face,
         width: 48,
         height: 48,
         borderRadius: 24,
       ),
-      title: Text.rich(
-        TextSpan(
-          text: item.remark?.isNotEmpty == true ? item.remark : item.userName,
+      title: Row(
+        children: [
+          Expanded(
+            child: Text(
+              item.remark?.isNotEmpty == true ? item.remark! : item.userName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: semantic.textPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Obx(() => _LiveStatus(status: item.liveStatus.value)),
+        ],
+      ),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Row(
           children: [
-            WidgetSpan(
-              alignment: ui.PlaceholderAlignment.middle,
-              child: Obx(
-                () => Offstage(
-                  offstage: item.liveStatus.value == 0,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AppStyle.hGap12,
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: item.liveStatus.value == 2
-                              ? Colors.green
-                              : Colors.grey,
-                          borderRadius: AppStyle.radius12,
-                        ),
-                      ),
-                      AppStyle.hGap4,
-                      Text(
-                        getStatus(item.liveStatus.value),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.normal,
-                          color:
-                              item.liveStatus.value == 2 ? null : Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
+            Image.asset(site.logo, width: 16, height: 16),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                [
+                  site.name,
+                  item.watchDuration ?? '00:00:00',
+                  item.tag.length > 8
+                      ? '${item.tag.substring(0, 8)}...'
+                      : item.tag,
+                ].where((text) => text.isNotEmpty).join(' · '),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: semantic.textSecondary,
                 ),
               ),
             ),
           ],
         ),
       ),
-      subtitle: Wrap(
-        runSpacing: 1.0,
-        children: [
-          Image.asset(
-            site.logo,
-            width: 20,
-          ),
-          AppStyle.hGap4,
-          Text(
-            site.name,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-            ),
-          ),
-          AppStyle.hGap4,
-          Text(
-            item.watchDuration ?? "00:00:00",
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-            ),
-          ),
-          AppStyle.hGap4,
-          Text(
-            item.tag.length > 8 ? '${item.tag.substring(0, 8)}...' : item.tag,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
       trailing: playing
-          ? const SizedBox(
-              width: 64,
-              child: Center(
-                child: Icon(
-                  Icons.play_arrow,
-                ),
+          ? SizedBox(
+              width: 44,
+              height: 44,
+              child: Icon(
+                Icons.equalizer_rounded,
+                color: theme.colorScheme.primary,
+                semanticLabel: '正在播放',
               ),
             )
           : (onRemove == null
               ? null
               : IconButton(
-                  onPressed: () {
-                    onRemove?.call();
-                  },
-                  icon: const Icon(Remix.dislike_line),
+                  onPressed: onRemove,
+                  tooltip: '取消关注',
+                  constraints: const BoxConstraints(
+                    minWidth: 44,
+                    minHeight: 44,
+                  ),
+                  icon: const Icon(Remix.dislike_line, size: 20),
                 )),
       onTap: onTap,
       onLongPress: onLongPress,
@@ -133,11 +107,66 @@ class FollowUserItem extends StatelessWidget {
 
   String getStatus(int status) {
     if (status == 0) {
-      return "读取中";
+      return '读取中';
     } else if (status == 1) {
-      return "未开播";
+      return '未开播';
     } else {
-      return "直播中";
+      return '直播中';
     }
+  }
+}
+
+class _LiveStatus extends StatelessWidget {
+  const _LiveStatus({required this.status});
+
+  final int status;
+
+  @override
+  Widget build(BuildContext context) {
+    if (status == 0) {
+      return const SizedBox.shrink();
+    }
+
+    final theme = Theme.of(context);
+    final semantic = context.appTheme;
+    final isLive = status == 2;
+    final color = isLive ? theme.colorScheme.primary : semantic.textTertiary;
+
+    return Semantics(
+      label: isLive ? '直播中' : '未开播',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        decoration: BoxDecoration(
+          color: isLive
+              ? theme.colorScheme.primary.withAlpha(18)
+              : semantic.secondarySurface,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: isLive
+                ? theme.colorScheme.primary.withAlpha(54)
+                : semantic.border,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isLive ? Icons.sensors_rounded : Icons.pause_circle_outline,
+              size: 12,
+              color: color,
+            ),
+            const SizedBox(width: 3),
+            Text(
+              isLive ? '直播中' : '未开播',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w600,
+                height: 1,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

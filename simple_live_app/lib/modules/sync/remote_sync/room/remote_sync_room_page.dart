@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/app/design_system/app_design_tokens.dart';
+import 'package:simple_live_app/app/design_system/app_theme_extension.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/modules/sync/remote_sync/room/remote_sync_room_controller.dart';
 import 'package:simple_live_app/services/signalr_service.dart';
@@ -17,81 +19,43 @@ class RemoteSyncRoomPage extends GetView<RemoteSyncRoomController> {
         title: const Text("数据同步"),
         actions: [
           Padding(
-            padding: AppStyle.edgeInsetsH12,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: StreamBuilder<SignalRConnectionState>(
               stream: controller.signalR.stateStream,
               builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  switch (snapshot.data) {
-                    case SignalRConnectionState.connected:
-                      return Row(
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: Colors.green,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          AppStyle.hGap8,
-                          const Text(
-                            '已连接',
-                            style: TextStyle(
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      );
-                    case SignalRConnectionState.disconnected:
-                      return Row(
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          AppStyle.hGap8,
-                          const Text(
-                            '断开连接',
-                            style: TextStyle(
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      );
-                    default:
-                      return const Row(
-                        children: [
-                          SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
-                          ),
-                          Text(
-                            '连接中',
-                            style: TextStyle(
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      );
-                  }
+                if (!snapshot.hasData) return const SizedBox();
+                switch (snapshot.data) {
+                  case SignalRConnectionState.connected:
+                    return const _ConnectionStatus(
+                      icon: Icons.check_circle_outline_rounded,
+                      label: '已连接',
+                      state: _ConnectionVisualState.connected,
+                    );
+                  case SignalRConnectionState.disconnected:
+                    return const _ConnectionStatus(
+                      icon: Icons.error_outline_rounded,
+                      label: '断开连接',
+                      state: _ConnectionVisualState.disconnected,
+                    );
+                  default:
+                    return const _ConnectionStatus(
+                      icon: Icons.sync_rounded,
+                      label: '连接中',
+                      state: _ConnectionVisualState.connecting,
+                    );
                 }
-                return const SizedBox();
               },
             ),
           ),
         ],
       ),
-      body: ListView(
-        padding: AppStyle.edgeInsetsA12.copyWith(top: 0),
-        children: [
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 840),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+            children: [
           Visibility(
             visible: controller.roomId.isEmpty,
             child: SettingsCard(
@@ -215,7 +179,9 @@ class RemoteSyncRoomPage extends GetView<RemoteSyncRoomController> {
                 separatorBuilder: (context, index) => AppStyle.divider,
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (BuildContext context, int index) {
-                  var user = controller.roomUsers[index];
+                  final user = controller.roomUsers[index];
+                  final semantic = context.appTheme;
+                  final theme = Theme.of(context);
                   return ListTile(
                     visualDensity: VisualDensity.compact,
                     leading: SizedBox(
@@ -228,22 +194,34 @@ class RemoteSyncRoomPage extends GetView<RemoteSyncRoomController> {
                     title: Text.rich(
                       TextSpan(
                         text: user.shortId,
-                        style: const TextStyle(fontSize: 16),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: semantic.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
                         children: user.isCreator!
                             ? [
                                 WidgetSpan(
+                                  alignment: PlaceholderAlignment.middle,
                                   child: Container(
                                     margin: AppStyle.edgeInsetsL4,
-                                    padding: AppStyle.edgeInsetsH4,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.blue),
-                                      borderRadius: BorderRadius.circular(4),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
                                     ),
-                                    child: const Text(
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.primary.withAlpha(18),
+                                      border: Border.all(
+                                        color: theme.colorScheme.primary.withAlpha(54),
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        AppDesignTokens.radius6,
+                                      ),
+                                    ),
+                                    child: Text(
                                       "创建者",
-                                      style: TextStyle(
-                                        color: Colors.blue,
-                                        fontSize: 12,
+                                      style: theme.textTheme.labelSmall?.copyWith(
+                                        color: theme.colorScheme.primary,
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                   ),
@@ -252,7 +230,14 @@ class RemoteSyncRoomPage extends GetView<RemoteSyncRoomController> {
                             : null,
                       ),
                     ),
-                    subtitle: Text("${user.app} - v${user.version}"),
+                    subtitle: Text(
+                      "${user.app} - v${user.version}",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: semantic.textSecondary,
+                      ),
+                    ),
                     trailing: Visibility(
                       visible: controller.signalR.hubConnection?.connectionId ==
                           user.connectionId,
@@ -265,7 +250,9 @@ class RemoteSyncRoomPage extends GetView<RemoteSyncRoomController> {
               ),
             ),
           )
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -288,5 +275,52 @@ class RemoteSyncRoomPage extends GetView<RemoteSyncRoomController> {
     } else {
       return const Icon(Remix.device_line);
     }
+  }
+}
+
+enum _ConnectionVisualState { connected, disconnected, connecting }
+
+class _ConnectionStatus extends StatelessWidget {
+  const _ConnectionStatus({
+    required this.icon,
+    required this.label,
+    required this.state,
+  });
+
+  final IconData icon;
+  final String label;
+  final _ConnectionVisualState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final semantic = context.appTheme;
+    final color = switch (state) {
+      _ConnectionVisualState.connected => theme.colorScheme.primary,
+      _ConnectionVisualState.disconnected => theme.colorScheme.error,
+      _ConnectionVisualState.connecting => semantic.textSecondary,
+    };
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (state == _ConnectionVisualState.connecting)
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2, color: color),
+          )
+        else
+          Icon(icon, size: 18, color: color),
+        const SizedBox(width: AppDesignTokens.space4),
+        Text(
+          label,
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
   }
 }

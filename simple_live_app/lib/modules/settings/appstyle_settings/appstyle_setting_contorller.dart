@@ -11,6 +11,7 @@ import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:simple_live_app/app/constant.dart';
+import 'package:simple_live_app/app/design_system/app_design_tokens.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/models/font_model.dart';
 import 'package:simple_live_app/requests/http_client.dart';
@@ -22,7 +23,7 @@ class AppStyleSettingController extends GetxController {
 
   var themeMode = 0.obs;
   var isDynamic = false.obs;
-  var styleColor = 0xff3498db.obs;
+  var styleColor = AppDesignTokens.defaultSeedValue.obs;
   Rx<String?> curFontName = Rx<String?>(null);
   Rx<FontModel?> curFontModel = Rx<FontModel?>(null);
   final RxList<FontModel> fontList = <FontModel>[].obs;
@@ -31,8 +32,10 @@ class AppStyleSettingController extends GetxController {
 
 
   Future<void> init() async {
-    styleColor.value = LocalStorageService.instance
-        .getValue(LocalStorageService.kStyleColor, 0xff3498db);
+    styleColor.value = LocalStorageService.instance.getValue(
+      LocalStorageService.kStyleColor,
+      AppDesignTokens.defaultSeedValue,
+    );
 
     isDynamic.value = LocalStorageService.instance
         .getValue(LocalStorageService.kIsDynamic, false);

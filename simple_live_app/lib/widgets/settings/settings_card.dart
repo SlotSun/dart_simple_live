@@ -1,28 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/app/design_system/app_design_tokens.dart';
+import 'package:simple_live_app/app/design_system/app_theme_extension.dart';
 
 class SettingsCard extends StatelessWidget {
   final Widget child;
+
   const SettingsCard({required this.child, super.key});
 
   @override
   Widget build(BuildContext context) {
+    final semantic = context.appTheme;
+
     return Material(
-      color: Theme.of(context).brightness == Brightness.dark
-          ? Colors.grey.withAlpha(50)
-          : Colors.white70,
+      color: semantic.secondarySurface,
+      surfaceTintColor: Colors.transparent,
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: AppStyle.radius8,
-        side: BorderSide(
-          color: Colors.grey.withAlpha(25),
-        ),
+        borderRadius: BorderRadius.circular(AppDesignTokens.radius16),
+        side: BorderSide(color: semantic.border),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: AppStyle.radius8,
-        ),
-        child: child,
-      ),
+      child: child,
     );
   }
 }

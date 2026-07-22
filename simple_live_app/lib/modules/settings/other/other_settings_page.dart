@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
+import 'package:simple_live_app/app/design_system/app_theme_extension.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/modules/settings/other/other_settings_controller.dart';
 import 'package:simple_live_app/widgets/settings/settings_card.dart';
@@ -21,36 +22,51 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
       appBar: AppBar(
         title: const Text("其他设置"),
       ),
-      body: ListView(
-        padding: AppStyle.edgeInsetsA12,
-        children: [
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 840),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+            children: [
           SettingsCard(
             child: Padding(
               padding: AppStyle.edgeInsetsA4,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextButton.icon(
-                      onPressed: controller.exportConfig,
-                      label: const Text("导出配置"),
-                      icon: const Icon(Remix.export_line),
-                    ),
-                  ),
-                  Expanded(
-                    child: TextButton.icon(
-                      onPressed: controller.importConfig,
-                      label: const Text("导入配置"),
-                      icon: const Icon(Remix.import_line),
-                    ),
-                  ),
-                  Expanded(
-                    child: TextButton.icon(
-                      onPressed: controller.resetDefaultConfig,
-                      label: const Text("重置配置"),
-                      icon: const Icon(Remix.restart_line),
-                    ),
-                  ),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final stacked = constraints.maxWidth < 420;
+                  final buttonWidth = stacked
+                      ? constraints.maxWidth
+                      : constraints.maxWidth / 3;
+                  return Wrap(
+                    children: [
+                      SizedBox(
+                        width: buttonWidth,
+                        child: TextButton.icon(
+                          onPressed: controller.exportConfig,
+                          label: const Text("导出配置"),
+                          icon: const Icon(Remix.export_line),
+                        ),
+                      ),
+                      SizedBox(
+                        width: buttonWidth,
+                        child: TextButton.icon(
+                          onPressed: controller.importConfig,
+                          label: const Text("导入配置"),
+                          icon: const Icon(Remix.import_line),
+                        ),
+                      ),
+                      SizedBox(
+                        width: buttonWidth,
+                        child: TextButton.icon(
+                          onPressed: controller.resetDefaultConfig,
+                          label: const Text("重置配置"),
+                          icon: const Icon(Remix.restart_line),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -65,27 +81,29 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
             padding: AppStyle.edgeInsetsA12.copyWith(top: 0),
             child: Text.rich(
               TextSpan(
-                text: "请勿随意修改以下设置，除非你知道自己在做什么。\n在修改以下设置前，你应该先查阅",
+                text: "请勿随意修改以下设置，除非你知道自己在做什么。\n在修改以下设置前，你应该先查阅 ",
                 children: [
                   WidgetSpan(
                     child: GestureDetector(
                       onTap: () {
                         launchUrlString(
-                            "https://mpv.io/manual/stable/#video-output-drivers");
+                          "https://mpv.io/manual/stable/#video-output-drivers",
+                        );
                       },
-                      child: const Text(
+                      child: Text(
                         "MPV的文档",
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontSize: 12,
-                          decoration: TextDecoration.underline,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                              decoration: TextDecoration.underline,
+                            ),
                       ),
                     ),
                   ),
                 ],
               ),
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: context.appTheme.textSecondary,
+                  ),
             ),
           ),
           SettingsCard(
@@ -235,7 +253,9 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
               ),
             ),
           ),
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }

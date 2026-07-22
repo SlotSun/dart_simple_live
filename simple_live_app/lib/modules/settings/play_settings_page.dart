@@ -18,9 +18,13 @@ class PlaySettingsPage extends GetView<AppSettingsController> {
       appBar: AppBar(
         title: const Text("直播间设置"),
       ),
-      body: ListView(
-        padding: AppStyle.edgeInsetsA12,
-        children: [
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+            children: [
           Padding(
             padding: AppStyle.edgeInsetsA12.copyWith(top: 0),
             child: Text(
@@ -247,7 +251,9 @@ class PlaySettingsPage extends GetView<AppSettingsController> {
               ],
             ),
           ),
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }

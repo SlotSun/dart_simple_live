@@ -18,11 +18,17 @@ class DanmuSettingsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("弹幕设置"),
       ),
-      body: ListView(
-        padding: AppStyle.edgeInsetsA12,
-        children: const [
-          DanmuSettingsView(),
-        ],
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+            children: const [
+              DanmuSettingsView(),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:simple_live_app/app/design_system/app_design_tokens.dart';
+import 'package:simple_live_app/app/design_system/app_theme_extension.dart';
 
 class NoneBorderCircularTextField extends StatelessWidget {
   final TextEditingController editingController;
@@ -19,7 +21,6 @@ class NoneBorderCircularTextField extends StatelessWidget {
   final FocusNode? focusNode;
   final bool? enable;
   final bool readOnly;
-
   final bool needPadding;
 
   const NoneBorderCircularTextField({
@@ -47,25 +48,59 @@ class NoneBorderCircularTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextField common = TextField(
+    final theme = Theme.of(context);
+    final semantic = context.appTheme;
+    final radius = BorderRadius.circular(AppDesignTokens.radius12);
+    final common = TextField(
       enabled: enable,
       readOnly: readOnly,
       decoration: InputDecoration(
         prefixIcon: prefixIcon,
         hintText: hintText,
         filled: true,
-        contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+        fillColor: semantic.secondarySurface,
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 12,
+          horizontal: 14,
+        ),
         suffix: trailing,
         helperText: helperText,
         helperMaxLines: 3,
         border: OutlineInputBorder(
           borderSide: BorderSide.none,
-          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+          borderRadius: radius,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: semantic.border),
+          borderRadius: radius,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: theme.colorScheme.primary,
+            width: 1.5,
+          ),
+          borderRadius: radius,
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: semantic.divider),
+          borderRadius: radius,
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: theme.colorScheme.error),
+          borderRadius: radius,
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: theme.colorScheme.error,
+            width: 1.5,
+          ),
+          borderRadius: radius,
         ),
         labelText: labelText,
         errorText: errorText,
         errorMaxLines: 3,
       ),
+      cursorColor: theme.colorScheme.primary,
       textAlign: textAlign,
       autofocus: autoFocus,
       keyboardType: inputType,
@@ -77,16 +112,13 @@ class NoneBorderCircularTextField extends StatelessWidget {
       onTap: onTap,
       focusNode: focusNode,
     );
-    if (needPadding) {
-      return Padding(
-        padding: const EdgeInsets.only(
-          top: 10,
-          bottom: 10,
-        ),
-        child: common,
-      );
-    } else {
+
+    if (!needPadding) {
       return common;
     }
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: common,
+    );
   }
 }
