@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/modules/settings/appstyle_settings/appstyle_setting_contorller.dart';
 import 'package:simple_live_app/widgets/settings/settings_card.dart';
@@ -97,6 +100,35 @@ class AppStyleSettingPage extends GetView<AppStyleSettingController> {
               ),
             ),
           ),
+          if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) ...[
+            AppStyle.vGap12,
+            Padding(
+              padding: AppStyle.edgeInsetsA12,
+              child: Text(
+                "窗口",
+                style: Get.textTheme.titleSmall,
+              ),
+            ),
+            SettingsCard(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Obx(
+                    () => SettingsSwitch(
+                      title: "记忆窗口最大化状态",
+                      subtitle: "关闭后仅显示记忆窗口大小",
+                      value: AppSettingsController
+                          .instance.windowStartMaximized.value,
+                      onChanged: (e) {
+                        AppSettingsController.instance
+                            .setWindowStartMaximized(e);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           AppStyle.vGap12,
           Padding(
             padding: AppStyle.edgeInsetsA12,

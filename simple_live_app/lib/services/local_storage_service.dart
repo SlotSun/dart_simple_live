@@ -216,6 +216,12 @@ class LocalStorageService extends GetxService {
 
   static const String kWindowHeight = "WindowHeight";
 
+  /// 窗口启动时恢复最大化状态
+  static const String kWindowStartMaximized = "WindowStartMaximized";
+
+  /// 窗口是否处于最大化状态
+  static const String kWindowIsMaximized = "WindowIsMaximized";
+
   /// 关注列表排序方法
   static const String kFollowSortMethod = "FollowSortMethod";
 

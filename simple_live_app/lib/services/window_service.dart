@@ -15,6 +15,13 @@ class WindowService extends GetxService implements WindowListener {
   }
 
   Future<void> init() async {
+    // app setting controller has init before windows_service, so these codes ugly
+    // but lazy-safe was good
+    final startMaximized = LocalStorageService.instance
+        .getValue(LocalStorageService.kWindowStartMaximized, false);
+    final isMaximized = LocalStorageService.instance
+        .getValue(LocalStorageService.kWindowIsMaximized, false);
+
     await resize();
     WindowOptions windowOptions = WindowOptions(
       minimumSize: Size(280, 280),
@@ -22,6 +29,9 @@ class WindowService extends GetxService implements WindowListener {
       title: "Slive",
     );
     windowManager.waitUntilReadyToShow(windowOptions, () async {
+      if (startMaximized && isMaximized) {
+        await windowManager.maximize();
+      }
       await windowManager.show();
       await windowManager.focus();
     });
@@ -66,7 +76,10 @@ class WindowService extends GetxService implements WindowListener {
   void onWindowLeaveFullScreen() {}
 
   @override
-  void onWindowMaximize() {}
+  void onWindowMaximize() {
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kWindowIsMaximized, true);
+  }
 
   @override
   void onWindowMinimize() {}
@@ -77,8 +90,11 @@ class WindowService extends GetxService implements WindowListener {
   @override
   Future<void> onWindowMoved() async {
     if (!isPIP) {
-      final bounds = await windowManager.getBounds();
-      _saveBounds(bounds);
+      final isMaximized = await windowManager.isMaximized();
+      if (!isMaximized) {
+        final bounds = await windowManager.getBounds();
+        _saveBounds(bounds);
+      }
     }
   }
 
@@ -88,8 +104,11 @@ class WindowService extends GetxService implements WindowListener {
   @override
   Future<void> onWindowResized() async {
     if (!isPIP) {
-      final bounds = await windowManager.getBounds();
-      _saveBounds(bounds);
+      final isMaximized = await windowManager.isMaximized();
+      if (!isMaximized) {
+        final bounds = await windowManager.getBounds();
+        _saveBounds(bounds);
+      }
     }
   }
 
@@ -100,7 +119,10 @@ class WindowService extends GetxService implements WindowListener {
   void onWindowUndocked() {}
 
   @override
-  void onWindowUnmaximize() {}
+  void onWindowUnmaximize() {
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kWindowIsMaximized, false);
+  }
 
   void _saveBounds(Rect bounds) {
     LocalStorageService.instance
