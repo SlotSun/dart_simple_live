@@ -246,6 +246,9 @@ class LocalStorageService extends GetxService {
   /// 开启关注列表快照
   static const String kFollowSnapshotEnable = "FollowSnapshotEnable";
 
+  /// 休眠阈值（天）
+  static const String kDormancyThreshold = "DormancyThreshold";
+
   late Box settingsBox;
   late Box<String> shieldBox;
 

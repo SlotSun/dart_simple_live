@@ -117,6 +117,25 @@ class FollowSettingsPage extends GetView<FollowAppSettingsController> {
                         },
                       ),
                     ),
+                    AppStyle.divider,
+                    Obx(
+                      () => SettingsNumber(
+                        value: controller.appC.dormancyThreshold.value,
+                        title: "休眠阈值",
+                        subtitle: "超过设定天数未观看的主播将被标记为休眠",
+                        min: 0,
+                        max: 42,
+                        step: 1,
+                        unit: "天",
+                        displayValue:
+                            controller.appC.dormancyThreshold.value == 0
+                                ? "关闭"
+                                : "${controller.appC.dormancyThreshold.value}天",
+                        onChanged: (e) {
+                          controller.appC.setDormancyThreshold(e);
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),

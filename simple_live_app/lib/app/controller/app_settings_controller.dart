@@ -192,6 +192,9 @@ class AppSettingsController extends GetxController {
     followSnapshotEnable.value = LocalStorageService.instance
         .getValue(LocalStorageService.kFollowSnapshotEnable, false);
 
+    dormancyThreshold.value = LocalStorageService.instance
+        .getValue(LocalStorageService.kDormancyThreshold, 0);
+
     // danmaku-去重参数
     danmuFrequencyControl.value = LocalStorageService.instance
         .getValue(LocalStorageService.kDanmuFrequencyControl, false);
@@ -674,6 +677,14 @@ class AppSettingsController extends GetxController {
     followSnapshotEnable.value = e;
     LocalStorageService.instance
         .setValue(LocalStorageService.kFollowSnapshotEnable, e);
+  }
+
+  var dormancyThreshold = 0.obs;
+
+  void setDormancyThreshold(int e) {
+    dormancyThreshold.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kDormancyThreshold, e);
   }
 
   var playerForceHttps = false.obs;
