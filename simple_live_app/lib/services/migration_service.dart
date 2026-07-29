@@ -89,12 +89,28 @@ class MigrationService {
     // migrate follow.watchDuration -> follow.watchDurationSec
     // easy to calculate
     // delete this attribute after v10810, I think
+    // hive logic temp:
+    // old: watchDuration: fields[6] == null ? "00:00:00" : fields[6] as String?
+    // new: otherAtr(any type): fields[6] == null ? anyTypeValue : fields[6] as String to anyType
+    // String to int: like watchDurationSec, String.toDuration.toInt
     if(curDBVer <= 10807){
       var followList = DBService.instance.followBox.values.toList();
       for (FollowUser follow in followList) {
         follow.watchDurationSec = follow.watchDuration!.toDuration().inSeconds;
         DBService.instance.addFollow(follow);
       }
+    }
+    // set follow.lastWatchTime as cur timestamp after v10810
+    if (curDBVer <= 10809) {
+      var followList = DBService.instance.followBox.values.toList();
+      var now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      for (FollowUser follow in followList) {
+        if (follow.lastWatchTime == 0) {
+          follow.lastWatchTime = now;
+          DBService.instance.addFollow(follow);
+        }
+      }
+      Log.i("Migration: initialized lastWatchTime for ${followList.length} follows");
     }
     LocalStorageService.instance.settingsBox
         .put(LocalStorageService.kHiveDbVer, curAppVer);
