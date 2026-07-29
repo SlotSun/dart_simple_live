@@ -126,6 +126,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     showDanmakuState.value = AppSettingsController.instance.danmuEnable.value;
     followed.value =
         FollowService.instance.getFollowExist("${site.id}_$roomId");
+    // 解冻：更新 lastWatchTime 并从休眠列表移除
+    FollowService.instance.resumeUser("${site.id}_$roomId");
     loadData();
 
     scrollController.addListener(scrollListener);

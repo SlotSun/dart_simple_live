@@ -40,6 +40,9 @@ class FollowService extends GetxService {
   /// 关注用户列表
   RxList<FollowUser> followList = RxList<FollowUser>();
 
+  /// 休眠用户列表
+  RxList<FollowUser> dormantFollowList = RxList<FollowUser>();
+
   /// 直播中的用户列表
   RxList<FollowUser> liveList = RxList<FollowUser>();
 
@@ -342,7 +345,33 @@ class FollowService extends GetxService {
     if(_snap){
       liveListSort();
     }
+    _buildDormantList();
     getAllTagList();
+  }
+
+  /// 构建休眠用户列表
+  void _buildDormantList() {
+    final threshold = AppSettingsController.instance.dormancyThreshold.value;
+    if (threshold <= 0) {
+      dormantFollowList.clear();
+      return;
+    }
+    final cutoff = DateTime.now().subtract(Duration(days: threshold)).millisecondsSinceEpoch ~/ 1000;
+    dormantFollowList.assignAll(
+      followList.where((u) => u.lastWatchTime! > 0 && u.lastWatchTime! < cutoff),
+    );
+  }
+
+  /// 解冻：用户进入直播间时调用
+  void resumeUser(String userId) {
+    // 更新 lastWatchTime 如果已关注
+    var follow = followList.firstWhereOrNull((u) => u.id == userId);
+    if (follow != null) {
+      follow.lastWatchTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      DBService.instance.addFollow(follow);
+      // 从休眠列表移除
+      dormantFollowList.removeWhere((u) => u.id == userId);
+    }
   }
 
   Future<void> loadData({bool updateStatus = true, int? cycle}) async {
@@ -374,6 +403,10 @@ class FollowService extends GetxService {
     }
     final double maxDurationInSeconds =
         maxDuration.inSeconds > 0 ? maxDuration.inSeconds.toDouble() : 1.0;
+
+    // 休眠用户 ID 集合
+    final dormantIds = dormantFollowList.map((u) => u.id).toSet();
+
     // 简单线性加权组合算法，目前认定观看时长和最近观看时间权重一致
     // 如果用户历史行为序列非常长：可替换为时间衰减 + 观看时长加权
     followList.sort((a, b) {
@@ -390,18 +423,22 @@ class FollowService extends GetxService {
               maxDurationInSeconds;
       int rankA = historyRankMap[a.id] ?? maxRank;
       double normRecencyA = (maxRank - rankA).toDouble() / maxRank;
+      double wDormantA = dormantIds.contains(a.id) ? 0.0 : 1.0;
       double scoreA =
           ((wDuration * normDurationA) + (wRecency * normRecencyA)) *
-              (a.liveStatus.value == 2 ? wOnline : wOffline);
+              (a.liveStatus.value == 2 ? wOnline : wOffline) *
+              wDormantA;
 
       double normDurationB =
           b.watchDuration!.toDuration().inSeconds.toDouble() /
               maxDurationInSeconds;
       int rankB = historyRankMap[b.id] ?? maxRank;
       double normRecencyB = (maxRank - rankB).toDouble() / maxRank;
+      double wDormantB = dormantIds.contains(b.id) ? 0.0 : 1.0;
       double scoreB =
           ((wDuration * normDurationB) + (wRecency * normRecencyB)) *
-              (b.liveStatus.value == 2 ? wOnline : wOffline);
+              (b.liveStatus.value == 2 ? wOnline : wOffline) *
+              wDormantB;
 
       return scoreB.compareTo(scoreA);
     });
@@ -458,6 +495,16 @@ class FollowService extends GetxService {
     }
     await Future.wait(tasks);
     await pool.close();
+
+    // 增量检查：自动解冻 lastWatchTime >= cutoff 的用户
+    final threshold = AppSettingsController.instance.dormancyThreshold.value;
+    if (threshold > 0 && dormantFollowList.isNotEmpty) {
+      final cutoff = DateTime.now()
+          .subtract(Duration(days: threshold))
+          .millisecondsSinceEpoch ~/ 1000;
+      dormantFollowList.removeWhere((u) =>
+          u.lastWatchTime != null && u.lastWatchTime! >= cutoff);
+    }
 
     // frequency of snapshot-saving and expireAt calculation depend on user-setting: auto-update
     final minutes = AppSettingsController.instance.autoUpdateFollowDuration.value;
