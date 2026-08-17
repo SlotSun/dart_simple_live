@@ -119,6 +119,15 @@ class FollowUserController extends BasePageController<FollowUser> {
     if (hideOffline && filterMode.value.tag != "未开播") {
       list.retainWhere((user) => user.liveStatus.value == 2);
     }
+
+    // filterData 是列表的唯一数据出口（流监听/增删/切筛选都会经过这里），
+    // 需要同步 pageEmpty，否则首次空列表进入后 pageEmpty 会一直为 true，
+    // 空态浮层会盖住已有关注列表，导致页面看起来一直空白
+    if (list.isEmpty) {
+      pageEmpty.value = !pageLoadding.value;
+    } else {
+      pageEmpty.value = false;
+    }
   }
 
   // 用户自定义关注样式

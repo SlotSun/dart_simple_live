@@ -286,7 +286,8 @@ class FollowService extends GetxService {
       // sync watch-part between history and follow
       follow.syncDuration = history.syncDuration;
       follow.watchDuration = history.watchDuration;
-      follow.watchDurationSec = history.watchDuration!.toDuration().inSeconds;
+      follow.watchDurationSec =
+          (history.watchDuration ?? "00:00:00").toDuration().inSeconds;
       await addFollow(follow);
     }
     Log.i("已更新当前播放的观看时长：${follow.watchDuration}");
@@ -347,6 +348,9 @@ class FollowService extends GetxService {
     }
     _buildDormantList();
     getAllTagList();
+    // 非空路径也需要通知订阅者（如关注页），否则启动时若页面先于
+    // initFollowList 完成打开，将永远收不到列表就绪的通知
+    _updatedListController.add(0);
   }
 
   /// 构建休眠用户列表
@@ -358,7 +362,8 @@ class FollowService extends GetxService {
     }
     final cutoff = DateTime.now().subtract(Duration(days: threshold)).millisecondsSinceEpoch ~/ 1000;
     dormantFollowList.assignAll(
-      followList.where((u) => u.lastWatchTime! > 0 && u.lastWatchTime! < cutoff),
+      followList.where((u) =>
+          (u.lastWatchTime ?? 0) > 0 && (u.lastWatchTime ?? 0) < cutoff),
     );
   }
 
@@ -396,7 +401,7 @@ class FollowService extends GetxService {
 
     Duration maxDuration = const Duration();
     for (var user in followList) {
-      final duration = user.watchDuration!.toDuration();
+      final duration = (user.watchDuration ?? "00:00:00").toDuration();
       if (duration > maxDuration) {
         maxDuration = duration;
       }
@@ -419,7 +424,7 @@ class FollowService extends GetxService {
 
       // 动态权重
       double normDurationA =
-          a.watchDuration!.toDuration().inSeconds.toDouble() /
+          (a.watchDuration ?? "00:00:00").toDuration().inSeconds.toDouble() /
               maxDurationInSeconds;
       int rankA = historyRankMap[a.id] ?? maxRank;
       double normRecencyA = (maxRank - rankA).toDouble() / maxRank;
@@ -430,7 +435,7 @@ class FollowService extends GetxService {
               wDormantA;
 
       double normDurationB =
-          b.watchDuration!.toDuration().inSeconds.toDouble() /
+          (b.watchDuration ?? "00:00:00").toDuration().inSeconds.toDouble() /
               maxDurationInSeconds;
       int rankB = historyRankMap[b.id] ?? maxRank;
       double normRecencyB = (maxRank - rankB).toDouble() / maxRank;
