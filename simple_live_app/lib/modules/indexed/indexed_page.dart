@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/widgets/liquid_glass_navigation_bar.dart';
 
 import 'indexed_controller.dart';
 
@@ -12,6 +13,8 @@ class IndexedPage extends GetView<IndexedController> {
     return OrientationBuilder(
       builder: (context, orientation) {
         return Scaffold(
+          // 内容延伸到底部导航栏下方，液态玻璃栏才能模糊到页面内容
+          extendBody: true,
           body: Row(
             children: [
               Visibility(
@@ -58,15 +61,13 @@ class IndexedPage extends GetView<IndexedController> {
           bottomNavigationBar: Visibility(
             visible: orientation == Orientation.portrait,
             child: Obx(
-              () => NavigationBar(
+              () => LiquidGlassNavigationBar(
                 selectedIndex: controller.index.value,
                 onDestinationSelected: controller.setIndex,
-                height: 56,
-                labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
                 destinations: controller.items
                     .map(
-                      (item) => NavigationDestination(
-                        icon: Icon(item.iconData),
+                      (item) => LiquidGlassDestination(
+                        icon: item.iconData,
                         label: item.title,
                       ),
                     )

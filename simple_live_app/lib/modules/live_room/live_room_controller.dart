@@ -24,6 +24,7 @@ import 'package:simple_live_app/modules/settings/danmu_settings_page.dart';
 import 'package:simple_live_app/services/db_service.dart';
 import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/services/history_service.dart';
+import 'package:simple_live_app/services/now_playing_service.dart';
 import 'package:simple_live_app/src/rust/api/danmaku_mask.dart';
 import 'package:simple_live_app/widgets/desktop_refresh_button.dart';
 import 'package:simple_live_app/widgets/follow_user_item.dart';
@@ -412,6 +413,15 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
           FollowService.instance.getFollowExist("${site.id}_$roomId");
       online.value = detail.value!.online;
       liveStatus.value = detail.value!.status || detail.value!.isRecord;
+      // 更新系统 Now Playing（iOS 灵动岛/锁屏）
+      NowPlayingService.updateNowPlaying(
+        title: detail.value!.title,
+        artist: '${site.name} · ${detail.value!.userName}',
+        artworkUrl: detail.value!.cover.isNotEmpty
+            ? detail.value!.cover
+            : detail.value!.userAvatar,
+        isLive: detail.value!.status,
+      );
       if (liveStatus.value) {
         getPlayQualites();
         addSysMsg("开始连接弹幕服务器");
@@ -1141,6 +1151,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
     // 停止播放
     await player.stop();
+    // 清空系统媒体中心信息，切换房间后 loadData 会重新写入
+    NowPlayingService.clear();
 
     // 刷新信息
     loadData();
@@ -1187,6 +1199,7 @@ ${error?.stackTrace}''');
     autoExitTimer?.cancel();
     danmakuTimer?.cancel();
     HistoryService.instance.stop();
+    NowPlayingService.clear();
 
     liveDanmaku.stop();
     danmakuController = null;
