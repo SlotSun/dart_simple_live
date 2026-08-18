@@ -197,6 +197,11 @@ class NativeGlassTabBarView: NSObject, FlutterPlatformView {
         pill.layer.cornerRadius = 28
         pill.layer.cornerCurve = .continuous
         pill.clipsToBounds = true
+        // 半透明主题着色 + 描边高光兜底：即使平台视图内的玻璃材质未生效，
+        // 底部栏也呈现清晰的玻璃面板观感
+        pill.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.18)
+        pill.layer.borderColor = UIColor.white.withAlphaComponent(0.25).cgColor
+        pill.layer.borderWidth = 0.8
         if #available(iOS 26.0, *) {
             // iOS 26 原生液态玻璃：UIGlassEffect 由 UIVisualEffectView 承载
             let glassView = UIVisualEffectView(effect: UIGlassEffect(style: .regular))

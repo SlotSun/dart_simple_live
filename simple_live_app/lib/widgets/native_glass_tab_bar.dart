@@ -5,22 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/widgets/liquid_glass_navigation_bar.dart';
 
-/// iOS 26+ 使用原生液态玻璃底部栏（UIGlassEffect），
-/// iOS < 26 或非 iOS 平台回退到 Flutter 毛玻璃近似。
+/// iOS 一律使用原生液态玻璃底部栏（UIGlassEffect，原生侧用 #available 判断版本），
+/// 非 iOS 平台回退到 Flutter 毛玻璃近似。
 ///
-/// 注：不同 Flutter 版本下 operatingSystemVersion 类型不同（String/对象），
-/// 统一 toString 后取首个数字解析主版本号。
-bool get useNativeGlassTabBar {
-  if (!Platform.isIOS) {
-    return false;
-  }
-  final raw = Platform.operatingSystemVersion.toString();
-  final major = int.tryParse(
-        RegExp(r'(\d+)').firstMatch(raw)?.group(1) ?? '',
-      ) ??
-      0;
-  return major >= 26;
-}
+/// 注：Flutter 3.47 的 Platform.operatingSystemVersion 运行时格式不可靠，
+/// 版本判断交给原生侧（iOS < 26 时原生视图自动使用普通毛玻璃背景兜底）。
+bool get useNativeGlassTabBar => Platform.isIOS;
 
 /// 原生 iOS 26 液态玻璃底部导航栏（平台视图）
 class NativeGlassTabBar extends StatefulWidget {
