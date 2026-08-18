@@ -197,11 +197,11 @@ class NativeGlassTabBarView: NSObject, FlutterPlatformView {
         pill.layer.cornerRadius = 28
         pill.layer.cornerCurve = .continuous
         pill.clipsToBounds = true
-        // 半透明主题着色 + 描边高光兜底：即使平台视图内的玻璃材质未生效，
+        // 半透明主题着色 + 高光描边兜底：即使平台视图内的玻璃材质未生效，
         // 底部栏也呈现清晰的玻璃面板观感
-        pill.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.18)
-        pill.layer.borderColor = UIColor.white.withAlphaComponent(0.25).cgColor
-        pill.layer.borderWidth = 0.8
+        pill.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.22)
+        pill.layer.borderColor = UIColor.white.withAlphaComponent(0.4).cgColor
+        pill.layer.borderWidth = 1.0
         if #available(iOS 26.0, *) {
             // iOS 26 原生液态玻璃：UIGlassEffect 由 UIVisualEffectView 承载
             let glassView = UIVisualEffectView(effect: UIGlassEffect(style: .regular))
@@ -211,6 +211,11 @@ class NativeGlassTabBarView: NSObject, FlutterPlatformView {
         } else {
             pill.backgroundColor = UIColor.secondarySystemBackground.withAlphaComponent(0.85)
         }
+        // 顶部高光条：模拟液态玻璃的镜面反射边缘
+        let highlight = UIView(frame: CGRect(x: 0, y: 0, width: pill.bounds.width, height: 1.5))
+        highlight.backgroundColor = UIColor.white.withAlphaComponent(0.55)
+        highlight.autoresizingMask = [.flexibleWidth, .flexibleBottomMargin]
+        pill.addSubview(highlight)
         container.addSubview(pill)
 
         let stack = UIStackView()
