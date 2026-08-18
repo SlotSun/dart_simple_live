@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:remixicon/remixicon.dart';
@@ -7,8 +5,20 @@ import 'package:simple_live_app/widgets/liquid_glass_navigation_bar.dart';
 
 /// iOS 26+ 使用原生液态玻璃底部栏（UIGlassEffect），
 /// iOS < 26 或非 iOS 平台回退到 Flutter 毛玻璃近似。
-bool get useNativeGlassTabBar =>
-    Platform.isIOS && Platform.operatingSystemVersion.major >= 26;
+///
+/// 注：此处 Platform 来自 flutter/foundation（material 转出），
+/// operatingSystemVersion 为 String，用首个数字解析主版本号。
+bool get useNativeGlassTabBar {
+  if (!Platform.isIOS) {
+    return false;
+  }
+  final raw = Platform.operatingSystemVersion;
+  final major = int.tryParse(
+        RegExp(r'(\d+)').firstMatch(raw)?.group(1) ?? '',
+      ) ??
+      0;
+  return major >= 26;
+}
 
 /// 原生 iOS 26 液态玻璃底部导航栏（平台视图）
 class NativeGlassTabBar extends StatefulWidget {
@@ -79,9 +89,6 @@ class _NativeGlassTabBarState extends State<NativeGlassTabBar> {
             creationParamsCodec: const StandardMessageCodec(),
             onFocus: () => params.onFocusChanged(true),
           );
-        },
-        onCreateAndroidSurfaceView: (params) {
-          throw UnimplementedError('原生液态玻璃栏仅支持 iOS');
         },
       ),
     );
