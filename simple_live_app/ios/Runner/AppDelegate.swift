@@ -18,8 +18,8 @@ struct LiveStreamActivityAttributes: ActivityAttributes {
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
-    @available(iOS 16.2, *)
-    private var liveActivity: Activity<LiveStreamActivityAttributes>?
+    // Live Activity 属性类型仅 iOS 16.1+ 可用，用 Any? 存储，使用时在 #available 内转换
+    private var liveActivityStore: Any?
 
     override func application(
         _ application: UIApplication,
@@ -91,7 +91,7 @@ struct LiveStreamActivityAttributes: ActivityAttributes {
         let online = args["online"] as? Int ?? 0
 
         // 已有活动则只更新状态，避免在灵动岛堆积多个活动
-        if let activity = liveActivity {
+        if let activity = liveActivityStore as? Activity<LiveStreamActivityAttributes> {
             let state = LiveStreamActivityAttributes.ContentState(online: online, isLive: isLive)
             Task { await activity.update(ActivityContent(state: state, staleDate: nil)) }
             return
@@ -104,7 +104,7 @@ struct LiveStreamActivityAttributes: ActivityAttributes {
         )
         let state = LiveStreamActivityAttributes.ContentState(online: online, isLive: isLive)
         do {
-            liveActivity = try Activity.request(
+            liveActivityStore = try Activity.request(
                 attributes: attributes,
                 content: ActivityContent(state: state, staleDate: nil)
             )
@@ -115,7 +115,7 @@ struct LiveStreamActivityAttributes: ActivityAttributes {
 
     private func updateLiveActivity(_ args: [String: Any]) {
         guard #available(iOS 16.2, *) else { return }
-        guard let activity = liveActivity else { return }
+        guard let activity = liveActivityStore as? Activity<LiveStreamActivityAttributes> else { return }
         let online = args["online"] as? Int ?? 0
         let isLive = args["isLive"] as? Bool ?? true
         let state = LiveStreamActivityAttributes.ContentState(online: online, isLive: isLive)
@@ -124,8 +124,8 @@ struct LiveStreamActivityAttributes: ActivityAttributes {
 
     private func endLiveActivity() {
         guard #available(iOS 16.2, *) else { return }
-        guard let activity = liveActivity else { return }
-        liveActivity = nil
+        guard let activity = liveActivityStore as? Activity<LiveStreamActivityAttributes> else { return }
+        liveActivityStore = nil
         let state = LiveStreamActivityAttributes.ContentState(online: 0, isLive: false)
         Task {
             await activity.end(
@@ -198,8 +198,11 @@ class NativeGlassTabBarView: NSObject, FlutterPlatformView {
         pill.layer.cornerCurve = .continuous
         pill.clipsToBounds = true
         if #available(iOS 26.0, *) {
-            // iOS 26 原生液态玻璃：UIGlassEffect 挂到视图的 effect 属性
-            pill.effect = UIGlassEffect(style: .regular)
+            // iOS 26 原生液态玻璃：UIGlassEffect 由 UIVisualEffectView 承载
+            let glassView = UIVisualEffectView(effect: UIGlassEffect(style: .regular))
+            glassView.frame = pill.bounds
+            glassView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            pill.addSubview(glassView)
         } else {
             pill.backgroundColor = UIColor.secondarySystemBackground.withAlphaComponent(0.85)
         }
