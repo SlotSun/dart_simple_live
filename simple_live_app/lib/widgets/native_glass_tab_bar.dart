@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:remixicon/remixicon.dart';
@@ -6,13 +8,13 @@ import 'package:simple_live_app/widgets/liquid_glass_navigation_bar.dart';
 /// iOS 26+ 使用原生液态玻璃底部栏（UIGlassEffect），
 /// iOS < 26 或非 iOS 平台回退到 Flutter 毛玻璃近似。
 ///
-/// 注：此处 Platform 来自 flutter/foundation（material 转出），
-/// operatingSystemVersion 为 String，用首个数字解析主版本号。
+/// 注：不同 Flutter 版本下 operatingSystemVersion 类型不同（String/对象），
+/// 统一 toString 后取首个数字解析主版本号。
 bool get useNativeGlassTabBar {
   if (!Platform.isIOS) {
     return false;
   }
-  final raw = Platform.operatingSystemVersion;
+  final raw = Platform.operatingSystemVersion.toString();
   final major = int.tryParse(
         RegExp(r'(\d+)').firstMatch(raw)?.group(1) ?? '',
       ) ??
@@ -80,6 +82,13 @@ class _NativeGlassTabBarState extends State<NativeGlassTabBar> {
       height: 64 + bottomPad,
       child: PlatformViewLink(
         viewType: _viewType,
+        surfaceFactory: (context, controller) {
+          return PlatformViewSurface(
+            controller: controller,
+            gestureRecognizers: const {},
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          );
+        },
         onCreatePlatformView: (params) {
           return PlatformViewsService.initUiKitView(
             id: params.id,
