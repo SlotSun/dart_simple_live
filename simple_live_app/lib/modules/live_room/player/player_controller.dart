@@ -22,7 +22,6 @@ import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/app/custom_throttle.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
-import 'package:simple_live_app/services/now_playing_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -711,17 +710,6 @@ class PlayerController extends BaseController
   void onInit() {
     initSystem();
     initStream();
-    // 系统 Now Playing（iOS 灵动岛/锁屏媒体控制）
-    NowPlayingService.init();
-    NowPlayingService.onRemoteCommand = (command) {
-      switch (command) {
-        case 'play':
-          player.play();
-        case 'pause':
-        case 'stop':
-          player.pause();
-      }
-    };
     //设置音量
     player.setVolume(AppSettingsController.instance.playerVolume.value);
     super.onInit();
@@ -752,7 +740,6 @@ class PlayerController extends BaseController
         WakelockPlus.enable();
         Log.d("Playing");
       }
-      NowPlayingService.setPlaying(event);
     });
 
     _completedSubscription = player.stream.completed.listen((event) {
@@ -928,8 +915,6 @@ class PlayerController extends BaseController
     if (smallWindowState.value) {
       exitSmallWindow();
     }
-    NowPlayingService.onRemoteCommand = null;
-    NowPlayingService.clear();
     disposeStream();
     disposeDanmakuController();
     await resetSystem();

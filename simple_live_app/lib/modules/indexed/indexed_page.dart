@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/widgets/liquid_glass_navigation_bar.dart';
+import 'package:simple_live_app/widgets/native_glass_tab_bar.dart';
 
 import 'indexed_controller.dart';
 
@@ -61,18 +62,28 @@ class IndexedPage extends GetView<IndexedController> {
           bottomNavigationBar: Visibility(
             visible: orientation == Orientation.portrait,
             child: Obx(
-              () => LiquidGlassNavigationBar(
-                selectedIndex: controller.index.value,
-                onDestinationSelected: controller.setIndex,
-                destinations: controller.items
+              () {
+                final destinations = controller.items
                     .map(
                       (item) => LiquidGlassDestination(
                         icon: item.iconData,
                         label: item.title,
                       ),
                     )
-                    .toList(),
-              ),
+                    .toList();
+                // iOS 26+ 用原生液态玻璃，其余回退到 Flutter 毛玻璃近似
+                return useNativeGlassTabBar
+                    ? NativeGlassTabBar(
+                        selectedIndex: controller.index.value,
+                        onDestinationSelected: controller.setIndex,
+                        destinations: destinations,
+                      )
+                    : LiquidGlassNavigationBar(
+                        selectedIndex: controller.index.value,
+                        onDestinationSelected: controller.setIndex,
+                        destinations: destinations,
+                      );
+              },
             ),
           ),
         );

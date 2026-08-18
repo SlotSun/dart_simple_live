@@ -14,6 +14,8 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+			C50CC7F2B39A42FF99CB0316 /* LiveActivityExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 029FEE83294346CC888F7754 /* LiveActivityExtension.swift */; };
+			5DB9DFB9DBCB465CA2569BFD /* LiveActivityExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 49786F54AF9348AF8C502776 /* LiveActivityExtension.appex */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -27,6 +29,17 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+			3FD1596E3C894B628855DEB5 /* Embed App Extensions */ = {
+				isa = PBXCopyFilesBuildPhase;
+				buildActionMask = 2147483647;
+				dstPath = "";
+				dstSubfolderSpec = 13;
+				files = (
+					5DB9DFB9DBCB465CA2569BFD /* LiveActivityExtension.appex in Embed App Extensions */,
+				);
+				name = "Embed App Extensions";
+				runOnlyForDeploymentPostprocessing = 0;
+			};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +60,9 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+			029FEE83294346CC888F7754 /* LiveActivityExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LiveActivityExtension.swift; sourceTree = "<group>"; };
+			47A3AA54B89A4843AC64BF3A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+			49786F54AF9348AF8C502776 /* LiveActivityExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LiveActivityExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +74,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+			6DB61C15D8DF4E86B354F7A9 /* Frameworks */ = {
+				isa = PBXFrameworksBuildPhase;
+				buildActionMask = 2147483647;
+				files = (
+				);
+				runOnlyForDeploymentPostprocessing = 0;
+			};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -86,6 +109,7 @@
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
 				97C146EF1CF9000F007C117D /* Products */,
+				7325C4D1DD224801A10CD1AF /* LiveActivityExtension */,
 				FD158AC2F4211953A42B4A25 /* Pods */,
 				65B8FB167D986F3BCF168FB6 /* Frameworks */,
 			);
@@ -95,6 +119,7 @@
 			isa = PBXGroup;
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
+				49786F54AF9348AF8C502776 /* LiveActivityExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -124,6 +149,15 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+			7325C4D1DD224801A10CD1AF /* LiveActivityExtension */ = {
+				isa = PBXGroup;
+				children = (
+					029FEE83294346CC888F7754 /* LiveActivityExtension.swift */,
+					47A3AA54B89A4843AC64BF3A /* Info.plist */,
+				);
+				path = LiveActivityExtension;
+				sourceTree = "<group>";
+			};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -136,6 +170,7 @@
 				97C146EA1CF9000F007C117D /* Sources */,
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
+				3FD1596E3C894B628855DEB5 /* Embed App Extensions */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				6D32CBFCD866586D78A69BE1 /* [CP] Embed Pods Frameworks */,
@@ -144,12 +179,30 @@
 			buildRules = (
 			);
 			dependencies = (
+				0BDACAE7C365473A9678C6AE /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
 		};
+			1FE57E1E32274029868EF24C /* LiveActivityExtension */ = {
+				isa = PBXNativeTarget;
+				buildConfigurationList = 612E08F9FF92433286955374 /* Build configuration list for PBXNativeTarget "LiveActivityExtension" */;
+				buildPhases = (
+					22241B6CB19C4992A0ACEF85 /* Sources */,
+					6DB61C15D8DF4E86B354F7A9 /* Frameworks */,
+					0CBF1A4700A24F7A985F1E6D /* Resources */,
+				);
+				buildRules = (
+				);
+				dependencies = (
+				);
+				name = LiveActivityExtension;
+				productName = LiveActivityExtension;
+				productReference = 49786F54AF9348AF8C502776 /* LiveActivityExtension.appex */;
+				productType = "com.apple.product-type.app-extension";
+			};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -179,6 +232,7 @@
 			projectRoot = "";
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
+				1FE57E1E32274029868EF24C /* LiveActivityExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -195,6 +249,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+			0CBF1A4700A24F7A985F1E6D /* Resources */ = {
+				isa = PBXResourcesBuildPhase;
+				buildActionMask = 2147483647;
+				files = (
+				);
+				runOnlyForDeploymentPostprocessing = 0;
+			};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -297,6 +358,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+			22241B6CB19C4992A0ACEF85 /* Sources */ = {
+				isa = PBXSourcesBuildPhase;
+				buildActionMask = 2147483647;
+				files = (
+					C50CC7F2B39A42FF99CB0316 /* LiveActivityExtension.swift in Sources */,
+				);
+				runOnlyForDeploymentPostprocessing = 0;
+			};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
@@ -317,6 +386,24 @@
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
+
+/* Begin PBXContainerItemProxy section */
+			C6A106DB98C7470D87B2D074 /* PBXContainerItemProxy */ = {
+				isa = PBXContainerItemProxy;
+				containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+				proxyType = 1;
+				remoteGlobalIDString = 1FE57E1E32274029868EF24C;
+				remoteInfo = LiveActivityExtension;
+			};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+			0BDACAE7C365473A9678C6AE /* PBXTargetDependency */ = {
+				isa = PBXTargetDependency;
+				target = 1FE57E1E32274029868EF24C /* LiveActivityExtension */;
+				targetProxy = C6A106DB98C7470D87B2D074 /* PBXContainerItemProxy */;
+			};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		249021D3217E4FDB00AE95B9 /* Profile */ = {
@@ -546,6 +633,84 @@
 			};
 			name = Release;
 		};
+			683D6D4346F4420C9D273157 /* Debug */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					APPLICATION_EXTENSION_API_ONLY = YES;
+					CODE_SIGN_STYLE = Automatic;
+					CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+					GENERATE_INFOPLIST_FILE = YES;
+					INFOPLIST_FILE = LiveActivityExtension/Info.plist;
+					IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+					LD_RUNPATH_SEARCH_PATHS = (
+						"$(inherited)",
+						"@executable_path/Frameworks",
+						"@executable_path/../../Frameworks",
+					);
+					MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+					PRODUCT_BUNDLE_IDENTIFIER = com.slotsun.slive.LiveActivityExtension;
+					PRODUCT_NAME = "$(TARGET_NAME)";
+					SDKROOT = iphoneos;
+					SKIP_INSTALL = YES;
+					SWIFT_EMIT_LOC_STRINGS = YES;
+					SWIFT_VERSION = 5.0;
+					TARGETED_DEVICE_FAMILY = "1,2";
+				};
+				name = Debug;
+			};
+
+			79EE228615274F2D9285A5FD /* Release */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					APPLICATION_EXTENSION_API_ONLY = YES;
+					CODE_SIGN_STYLE = Automatic;
+					CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+					GENERATE_INFOPLIST_FILE = YES;
+					INFOPLIST_FILE = LiveActivityExtension/Info.plist;
+					IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+					LD_RUNPATH_SEARCH_PATHS = (
+						"$(inherited)",
+						"@executable_path/Frameworks",
+						"@executable_path/../../Frameworks",
+					);
+					MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+					PRODUCT_BUNDLE_IDENTIFIER = com.slotsun.slive.LiveActivityExtension;
+					PRODUCT_NAME = "$(TARGET_NAME)";
+					SDKROOT = iphoneos;
+					SKIP_INSTALL = YES;
+					SWIFT_EMIT_LOC_STRINGS = YES;
+					SWIFT_VERSION = 5.0;
+					TARGETED_DEVICE_FAMILY = "1,2";
+				};
+				name = Release;
+			};
+
+			48679ECA7EBA43E097555328 /* Profile */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					APPLICATION_EXTENSION_API_ONLY = YES;
+					CODE_SIGN_STYLE = Automatic;
+					CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+					GENERATE_INFOPLIST_FILE = YES;
+					INFOPLIST_FILE = LiveActivityExtension/Info.plist;
+					IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+					LD_RUNPATH_SEARCH_PATHS = (
+						"$(inherited)",
+						"@executable_path/Frameworks",
+						"@executable_path/../../Frameworks",
+					);
+					MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+					PRODUCT_BUNDLE_IDENTIFIER = com.slotsun.slive.LiveActivityExtension;
+					PRODUCT_NAME = "$(TARGET_NAME)";
+					SDKROOT = iphoneos;
+					SKIP_INSTALL = YES;
+					SWIFT_EMIT_LOC_STRINGS = YES;
+					SWIFT_VERSION = 5.0;
+					TARGETED_DEVICE_FAMILY = "1,2";
+				};
+				name = Profile;
+			};
+
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -569,6 +734,16 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+			612E08F9FF92433286955374 /* Build configuration list for PBXNativeTarget "LiveActivityExtension" */ = {
+				isa = XCConfigurationList;
+				buildConfigurations = (
+					683D6D4346F4420C9D273157 /* Debug */,
+					79EE228615274F2D9285A5FD /* Release */,
+					48679ECA7EBA43E097555328 /* Profile */,
+				);
+				defaultConfigurationIsVisible = 0;
+				defaultConfigurationName = Release;
+			};
 /* End XCConfigurationList section */
 	};
 	rootObject = 97C146E61CF9000F007C117D /* Project object */;

@@ -1,139 +1,244 @@
 import UIKit
 import Flutter
 import AVFoundation
-import MediaPlayer
+import ActivityKit
+
+// Live Activity 属性类型（与 LiveActivityExtension 中同名定义，ActivityKit 按类型名匹配）
+struct LiveStreamActivityAttributes: ActivityAttributes {
+    public struct ContentState: Codable, Hashable {
+        var online: Int
+        var isLive: Bool
+    }
+
+    var title: String
+    var artist: String
+    var thumbnailUrl: String
+    var isLive: Bool
+}
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
-  private var artworkCache: [String: MPMediaItemArtwork] = [:]
+    private var liveActivity: Activity<LiveStreamActivityAttributes>?
 
-  override func application(
-    _ application: UIApplication,
-    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-  ) -> Bool {
-    let result = super.application(application, didFinishLaunchingWithOptions: launchOptions)
-    configureAudioSession()
-    return result
-  }
-
-  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
-    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
-
-    // 通过 registrar 获取 messenger，兼容隐式引擎的 bridge API
-    guard let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "NowPlaying") else {
-      return
+    override func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        let result = super.application(application, didFinishLaunchingWithOptions: launchOptions)
+        configureAudioSession()
+        return result
     }
-    let channel = FlutterMethodChannel(
-      name: "simple_live/now_playing",
-      binaryMessenger: registrar.messenger()
-    )
 
-    channel.setMethodCallHandler { [weak self] call, result in
-      guard let self = self else {
-        result(FlutterError(code: "unavailable", message: "AppDelegate deallocated", details: nil))
-        return
-      }
-      switch call.method {
-      case "configure":
-        self.configureAudioSession()
-        result(nil)
-      case "update":
-        let args = call.arguments as? [String: Any] ?? [:]
-        self.updateNowPlaying(args)
-        result(nil)
-      case "setPlaying":
-        let args = call.arguments as? [String: Any] ?? [:]
-        let playing = args["playing"] as? Bool ?? false
-        self.setPlaying(playing)
-        result(nil)
-      case "clear":
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
-        result(nil)
-      default:
-        result(FlutterMethodNotImplemented)
-      }
-    }
-    setupRemoteCommands(channel)
-  }
+    func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+        GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
 
-  /// 配置并激活音频会话，保证后台播放与系统媒体中心可用
-  private func configureAudioSession() {
-    do {
-      let session = AVAudioSession.sharedInstance()
-      try session.setCategory(.playback, mode: .default)
-      try session.setActive(true)
-    } catch {
-      // 会话配置失败不阻塞应用启动
-    }
-  }
+        guard let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "SliveNative") else {
+            return
+        }
+        let messenger = registrar.messenger()
 
-  /// 更新正在播放的直播信息到系统媒体中心（锁屏/控制中心/灵动岛）
-  private func updateNowPlaying(_ args: [String: Any]) {
-    let title = args["title"] as? String ?? ""
-    let artist = args["artist"] as? String ?? ""
-    let artworkUrl = args["artworkUrl"] as? String ?? ""
-    let isLive = args["isLive"] as? Bool ?? true
+        setupLiveActivityChannel(messenger)
+        registrar.register(
+            NativeGlassTabBarViewFactory(messenger: messenger),
+            withId: "simple_live/native_glass_tab_bar"
+        )
+    }
 
-    var info: [String: Any] = [
-      MPMediaItemPropertyTitle: title,
-      MPMediaItemPropertyArtist: artist,
-      MPNowPlayingInfoPropertyIsLiveStream: isLive,
-      MPNowPlayingInfoPropertyPlaybackRate: 1.0,
-    ]
-    MPNowPlayingInfoCenter.default().nowPlayingInfo = info
+    // MARK: - 音频会话（后台播放）
 
-    // 异步加载封面，失败则保持无封面状态
-    guard !artworkUrl.isEmpty else { return }
-    loadArtwork(artworkUrl) { artwork in
-      guard let artwork = artwork else { return }
-      var updated = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? info
-      updated[MPMediaItemPropertyArtwork] = artwork
-      MPNowPlayingInfoCenter.default().nowPlayingInfo = updated
+    private func configureAudioSession() {
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .default)
+            try session.setActive(true)
+        } catch {
+            // 会话配置失败不阻塞应用启动
+        }
     }
-  }
 
-  /// 同步播放/暂停状态
-  private func setPlaying(_ playing: Bool) {
-    var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
-    info[MPNowPlayingInfoPropertyPlaybackRate] = playing ? 1.0 : 0.0
-    MPNowPlayingInfoCenter.default().nowPlayingInfo = info
-  }
+    // MARK: - Live Activity（灵动岛，点击直接回 App）
 
-  /// 远程控制（锁屏/耳机/控制中心的播放暂停按钮）回调到 Dart 侧
-  private func setupRemoteCommands(_ channel: FlutterMethodChannel) {
-    let commandCenter = MPRemoteCommandCenter.shared()
-    commandCenter.playCommand.addTarget { [weak channel] _ in
-      channel?.invokeMethod("onRemoteCommand", arguments: "play")
-      return .success
+    private func setupLiveActivityChannel(_ messenger: FlutterBinaryMessenger) {
+        let channel = FlutterMethodChannel(name: "simple_live/live_activity", binaryMessenger: messenger)
+        channel.setMethodCallHandler { [weak self] call, result in
+            guard let self = self else {
+                result(FlutterError(code: "unavailable", message: "AppDelegate deallocated", details: nil))
+                return
+            }
+            switch call.method {
+            case "start":
+                self.startLiveActivity(call.arguments as? [String: Any] ?? [:])
+                result(nil)
+            case "update":
+                self.updateLiveActivity(call.arguments as? [String: Any] ?? [:])
+                result(nil)
+            case "end":
+                self.endLiveActivity()
+                result(nil)
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+        }
     }
-    commandCenter.pauseCommand.addTarget { [weak channel] _ in
-      channel?.invokeMethod("onRemoteCommand", arguments: "pause")
-      return .success
-    }
-    commandCenter.stopCommand.addTarget { [weak channel] _ in
-      channel?.invokeMethod("onRemoteCommand", arguments: "stop")
-      return .success
-    }
-  }
 
-  /// 下载封面并缓存为 MPMediaItemArtwork
-  private func loadArtwork(_ urlString: String, completion: @escaping (MPMediaItemArtwork?) -> Void) {
-    if let cached = artworkCache[urlString] {
-      completion(cached)
-      return
+    private func startLiveActivity(_ args: [String: Any]) {
+        guard #available(iOS 16.1, *) else { return }
+        let title = args["title"] as? String ?? ""
+        let artist = args["artist"] as? String ?? ""
+        let thumbnailUrl = args["thumbnailUrl"] as? String ?? ""
+        let isLive = args["isLive"] as? Bool ?? true
+        let online = args["online"] as? Int ?? 0
+
+        // 已有活动则只更新状态，避免在灵动岛堆积多个活动
+        if let activity = liveActivity {
+            let state = LiveStreamActivityAttributes.ContentState(online: online, isLive: isLive)
+            Task { await activity.update(ActivityContent(state: state, staleDate: nil)) }
+            return
+        }
+        let attributes = LiveStreamActivityAttributes(
+            title: title,
+            artist: artist,
+            thumbnailUrl: thumbnailUrl,
+            isLive: isLive
+        )
+        let state = LiveStreamActivityAttributes.ContentState(online: online, isLive: isLive)
+        do {
+            liveActivity = try Activity.request(
+                attributes: attributes,
+                content: ActivityContent(state: state, staleDate: nil)
+            )
+        } catch {
+            // 启动失败静默处理
+        }
     }
-    guard let url = URL(string: urlString) else {
-      completion(nil)
-      return
+
+    private func updateLiveActivity(_ args: [String: Any]) {
+        guard #available(iOS 16.1, *) else { return }
+        guard let activity = liveActivity else { return }
+        let online = args["online"] as? Int ?? 0
+        let isLive = args["isLive"] as? Bool ?? true
+        let state = LiveStreamActivityAttributes.ContentState(online: online, isLive: isLive)
+        Task { await activity.update(ActivityContent(state: state, staleDate: nil)) }
     }
-    URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-      guard let data = data, let image = UIImage(data: data) else {
-        DispatchQueue.main.async { completion(nil) }
-        return
-      }
-      let artwork = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
-      self?.artworkCache[urlString] = artwork
-      DispatchQueue.main.async { completion(artwork) }
-    }.resume()
-  }
+
+    private func endLiveActivity() {
+        guard #available(iOS 16.1, *) else { return }
+        guard let activity = liveActivity else { return }
+        liveActivity = nil
+        let state = LiveStreamActivityAttributes.ContentState(online: 0, isLive: false)
+        Task {
+            await activity.end(
+                ActivityContent(state: state, staleDate: nil),
+                dismissalPolicy: .immediate
+            )
+        }
+    }
+}
+
+// MARK: - 原生 iOS 26 液态玻璃底部导航（平台视图）
+
+class NativeGlassTabBarViewFactory: NSObject, FlutterPlatformViewFactory {
+    private let messenger: FlutterBinaryMessenger
+
+    init(messenger: FlutterBinaryMessenger) {
+        self.messenger = messenger
+        super.init()
+    }
+
+    func create(
+        withFrame frame: CGRect,
+        viewIdentifier viewId: Int64,
+        arguments args: Any?
+    ) -> FlutterPlatformView {
+        return NativeGlassTabBarView(frame: frame, viewId: viewId, args: args, messenger: messenger)
+    }
+
+    func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol {
+        return FlutterStandardMessageCodec.sharedInstance()
+    }
+}
+
+class NativeGlassTabBarView: NSObject, FlutterPlatformView {
+    private let container = UIView()
+    private let channel: FlutterMethodChannel
+    private var itemButtons: [UIButton] = []
+    private let selectedColor = UIColor(red: 52 / 255.0, green: 152 / 255.0, blue: 219 / 255.0, alpha: 1.0)
+
+    init(frame: CGRect, viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
+        channel = FlutterMethodChannel(name: "simple_live/native_glass_tab", binaryMessenger: messenger)
+        super.init()
+
+        container.frame = frame
+        container.backgroundColor = .clear
+
+        var tabs: [[String: Any]] = []
+        if let args = args as? [String: Any], let list = args["tabs"] as? [[String: Any]] {
+            tabs = list
+        }
+        buildUI(tabs: tabs)
+
+        channel.setMethodCallHandler { [weak self] call, result in
+            if call.method == "setIndex",
+               let args = call.arguments as? [String: Any],
+               let index = args["index"] as? Int {
+                self?.setSelected(index: index)
+            }
+            result(nil)
+        }
+    }
+
+    func view() -> UIView {
+        return container
+    }
+
+    private func buildUI(tabs: [[String: Any]]) {
+        let pill = UIView(frame: CGRect(x: 16, y: 8, width: max(container.bounds.width - 32, 0), height: 56))
+        if #available(iOS 26.0, *) {
+            let descriptor = UIGlassEffectDescriptor()
+            descriptor.cornerRadius = 28
+            pill.glassEffect = UIGlassEffect.glassEffect(with: descriptor)
+        } else {
+            pill.backgroundColor = UIColor.secondarySystemBackground.withAlphaComponent(0.85)
+        }
+        container.addSubview(pill)
+
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.distribution = .fillEqually
+        stack.alignment = .fill
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        pill.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: pill.leadingAnchor, constant: 8),
+            stack.trailingAnchor.constraint(equalTo: pill.trailingAnchor, constant: -8),
+            stack.topAnchor.constraint(equalTo: pill.topAnchor, constant: 6),
+            stack.bottomAnchor.constraint(equalTo: pill.bottomAnchor, constant: -6),
+        ])
+
+        for (i, tab) in tabs.enumerated() {
+            let iconName = tab["icon"] as? String ?? "circle"
+            let button = UIButton(type: .system)
+            button.setImage(UIImage(systemName: iconName), for: .normal)
+            button.tag = i
+            button.addTarget(self, action: #selector(itemTapped(_:)), for: .touchUpInside)
+            button.layer.cornerRadius = 22
+            stack.addArrangedSubview(button)
+            itemButtons.append(button)
+        }
+        setSelected(index: 0)
+    }
+
+    @objc private func itemTapped(_ sender: UIButton) {
+        let index = sender.tag
+        setSelected(index: index)
+        channel.invokeMethod("onTabSelected", arguments: ["index": index])
+    }
+
+    private func setSelected(index: Int) {
+        for (i, button) in itemButtons.enumerated() {
+            let selected = (i == index)
+            button.tintColor = selected ? selectedColor : UIColor.secondaryLabel
+            button.backgroundColor = selected ? UIColor.secondarySystemFill : .clear
+        }
+    }
 }
