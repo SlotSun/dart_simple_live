@@ -80,25 +80,10 @@ class _NativeGlassTabBarState extends State<NativeGlassTabBar> {
     };
     return SizedBox(
       height: 64 + bottomPad,
-      child: PlatformViewLink(
+      child: UiKitView(
         viewType: _viewType,
-        surfaceFactory: (context, controller) {
-          return PlatformViewSurface(
-            controller: controller,
-            gestureRecognizers: const {},
-            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-          );
-        },
-        onCreatePlatformView: (params) {
-          return PlatformViewsService.initUiKitView(
-            id: params.id,
-            viewType: _viewType,
-            layoutDirection: TextDirection.ltr,
-            creationParams: creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            onFocus: () => params.onFocusChanged(true),
-          );
-        },
+        creationParams: creationParams,
+        creationParamsCodec: const StandardMessageCodec(),
       ),
     );
   }
