@@ -18,6 +18,7 @@ struct LiveStreamActivityAttributes: ActivityAttributes {
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
+    @available(iOS 16.2, *)
     private var liveActivity: Activity<LiveStreamActivityAttributes>?
 
     override func application(
@@ -82,7 +83,7 @@ struct LiveStreamActivityAttributes: ActivityAttributes {
     }
 
     private func startLiveActivity(_ args: [String: Any]) {
-        guard #available(iOS 16.1, *) else { return }
+        guard #available(iOS 16.2, *) else { return }
         let title = args["title"] as? String ?? ""
         let artist = args["artist"] as? String ?? ""
         let thumbnailUrl = args["thumbnailUrl"] as? String ?? ""
@@ -113,7 +114,7 @@ struct LiveStreamActivityAttributes: ActivityAttributes {
     }
 
     private func updateLiveActivity(_ args: [String: Any]) {
-        guard #available(iOS 16.1, *) else { return }
+        guard #available(iOS 16.2, *) else { return }
         guard let activity = liveActivity else { return }
         let online = args["online"] as? Int ?? 0
         let isLive = args["isLive"] as? Bool ?? true
@@ -122,7 +123,7 @@ struct LiveStreamActivityAttributes: ActivityAttributes {
     }
 
     private func endLiveActivity() {
-        guard #available(iOS 16.1, *) else { return }
+        guard #available(iOS 16.2, *) else { return }
         guard let activity = liveActivity else { return }
         liveActivity = nil
         let state = LiveStreamActivityAttributes.ContentState(online: 0, isLive: false)
@@ -193,10 +194,12 @@ class NativeGlassTabBarView: NSObject, FlutterPlatformView {
 
     private func buildUI(tabs: [[String: Any]]) {
         let pill = UIView(frame: CGRect(x: 16, y: 8, width: max(container.bounds.width - 32, 0), height: 56))
+        pill.layer.cornerRadius = 28
+        pill.layer.cornerCurve = .continuous
+        pill.clipsToBounds = true
         if #available(iOS 26.0, *) {
-            let descriptor = UIGlassEffectDescriptor()
-            descriptor.cornerRadius = 28
-            pill.glassEffect = UIGlassEffect.glassEffect(with: descriptor)
+            // iOS 26 原生液态玻璃：UIGlassEffect 挂到视图的 effect 属性
+            pill.effect = UIGlassEffect(style: .regular)
         } else {
             pill.backgroundColor = UIColor.secondarySystemBackground.withAlphaComponent(0.85)
         }
