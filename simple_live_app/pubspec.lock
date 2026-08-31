@@ -611,7 +611,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "8bbb4fb13e6ad18cb053c1638ba6eaee66868a3d"
+      resolved-ref: f0ddb3514c96dde2816495e3461d1c3b8456de3c
       url: "https://github.com/SlotSun/get.git"
     source: git
     version: "4.7.3"

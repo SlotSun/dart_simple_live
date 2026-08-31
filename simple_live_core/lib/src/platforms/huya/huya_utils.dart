@@ -33,7 +33,7 @@ Future<List<LiveSuperChatMessage>> getHuyaSuperChatMessageList(
     ..lPid = lPid
     ..tId = userId
     ..iMessageBoardScope = 0
-    ..iPageSize = 10;
+    ..iPageSize = 50;
   var rsp = await messageBoardClient.tupRequest(
     "getHeadLineMessageBoard",
     req,
@@ -75,12 +75,13 @@ Future<List<LiveSuperChatMessage>> getHuyaSuperChatMessageList(
 
     messages.add(message);
   }
+  // https://github.com/SlotSun/dart_simple_live/issues/157#issuecomment-5479457055
+  // huya 按 money->level->countDown 排序 调整为 startTime 逆序 最新的在最前面
+  messages.sort((a, b) => b.startTime.compareTo(a.startTime));
   if (first) {
-    return messages;
+    return messages.length > 10 ? messages.sublist(0,10) : messages;
   } else {
-    // huya 按money->level->countDown 排序 调整为 startTime
-    messages.sort((a, b) => a.startTime.compareTo(b.startTime));
-    return [messages.last];
+    return [messages.first];
   }
 }
 class RequestIdGenerator {
