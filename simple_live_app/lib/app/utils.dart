@@ -132,47 +132,52 @@ class Utils {
       useSystem: useSystem,
       maskColor: Colors.transparent,
       animationTime: const Duration(milliseconds: 200),
-      builder: (context) => Container(
-        width: width + MediaQuery.of(context).padding.right,
-        padding: EdgeInsets.only(right: MediaQuery.of(context).padding.right),
-        decoration: BoxDecoration(
-          color: Get.theme.cardColor,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(4),
-            bottomLeft: Radius.circular(4),
-          ),
+      builder: (context) => Material(
+        color: Get.theme.cardColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(4),
+          bottomLeft: Radius.circular(4),
         ),
-        child: SafeArea(
-          left: false,
-          right: false,
-          child: MediaQuery(
-            data: const MediaQueryData(padding: EdgeInsets.zero),
-            child: Column(
-              children: [
-                ListTile(
-                  visualDensity: VisualDensity.compact,
-                  contentPadding: EdgeInsets.zero,
-                  leading: IconButton(
-                    onPressed: () {
-                      SmartDialog.dismiss(status: SmartStatus.allCustom).then(
-                        (value) => onDismiss?.call(),
-                      );
-                    },
-                    icon: const Icon(Icons.arrow_back),
-                  ),
-                  title: Text(
-                    title,
-                    style: Get.textTheme.titleMedium,
-                  ),
+        clipBehavior: Clip.antiAlias,
+        child: SizedBox(
+          width: width + MediaQuery.of(context).padding.right,
+          child: Padding(
+            padding: EdgeInsets.only(
+              right: MediaQuery.of(context).padding.right,
+            ),
+            child: SafeArea(
+              left: false,
+              right: false,
+              child: MediaQuery(
+                data: const MediaQueryData(padding: EdgeInsets.zero),
+                child: Column(
+                  children: [
+                    ListTile(
+                      visualDensity: VisualDensity.compact,
+                      contentPadding: EdgeInsets.zero,
+                      leading: IconButton(
+                        onPressed: () {
+                          SmartDialog.dismiss(status: SmartStatus.allCustom).then(
+                            (value) => onDismiss?.call(),
+                          );
+                        },
+                        icon: const Icon(Icons.arrow_back),
+                      ),
+                      title: Text(
+                        title,
+                        style: Get.textTheme.titleMedium,
+                      ),
+                    ),
+                    Divider(
+                      height: 1,
+                      color: Colors.grey.withAlpha(25),
+                    ),
+                    Expanded(
+                      child: child,
+                    ),
+                  ],
                 ),
-                Divider(
-                  height: 1,
-                  color: Colors.grey.withAlpha(25),
-                ),
-                Expanded(
-                  child: child,
-                ),
-              ],
+              ),
             ),
           ),
         ),

@@ -327,6 +327,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
 
   /// 退出全屏
   void exitFull() async {
+    // todo: 还应该关闭所有的dialog
     if (Platform.isAndroid || Platform.isIOS) {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge,
           overlays: SystemUiOverlay.values);

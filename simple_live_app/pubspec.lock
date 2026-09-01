@@ -571,10 +571,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_smart_dialog
-      sha256: "7dd4078681291402ec39861d768787d27a0a9c4cd0912263a6a327654b96f6c1"
+      sha256: "2f50b6b120da18ceb59df42ee057e2f608a1776267203359b832e469c45a406b"
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.1"
+    version: "5.3.0"
   flutter_staggered_grid_view:
     dependency: "direct main"
     description:
