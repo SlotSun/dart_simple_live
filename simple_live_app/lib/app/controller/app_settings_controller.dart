@@ -53,7 +53,11 @@ class AppSettingsController extends GetxController {
     danmuBottomMargin.value = LocalStorageService.instance
         .getValue(LocalStorageService.kDanmuBottomMargin, 0.0);
     danmuFontWeight.value = LocalStorageService.instance.getValue(
+      // ignore: deprecated_member_use
         LocalStorageService.kDanmuFontWeight, FontWeight.normal.index);
+    // limit of canvas_danmaku interface, there is bug if change index to value
+    // and now, value was set 0..8, the value needs ..=FontWeight[index] after
+    // migration, so marked it, next migration depends on canvas_danmaku upgrade
 
     hardwareDecode.value = LocalStorageService.instance
         .getValue(LocalStorageService.kHardwareDecode, true);
@@ -358,6 +362,7 @@ class AppSettingsController extends GetxController {
         .setValue(LocalStorageService.kDanmuStrokeWidth, e);
   }
 
+  // ignore: deprecated_member_use
   var danmuFontWeight = FontWeight.normal.index.obs;
 
   void setDanmuFontWeight(int e) {

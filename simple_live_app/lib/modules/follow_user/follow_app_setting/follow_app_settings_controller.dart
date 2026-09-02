@@ -148,7 +148,7 @@ class FollowAppSettingsController extends BaseController {
                       ),
                     );
                   },
-                  onReorder: (int oldIndex, int newIndex) {
+                  onReorderItem: (int oldIndex, int newIndex) {
                     updateTagOrder(oldIndex, newIndex);
                   },
                 ),
