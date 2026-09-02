@@ -145,7 +145,7 @@ class OtherSettingsController extends BaseController {
   }
 
   void saveLogFile(LogFileModel item) async {
-    var filePath = await FilePicker.platform.saveFile(
+    var filePath = await FilePicker.saveFile(
       allowedExtensions: ['log'],
       type: FileType.custom,
       fileName: item.name,
@@ -174,7 +174,7 @@ class OtherSettingsController extends BaseController {
       // FilePicker 直接写入
       var inlineSave = Platform.isAndroid || Platform.isIOS || kIsWeb;
 
-      var path = await FilePicker.platform.saveFile(
+      var path = await FilePicker.saveFile(
         allowedExtensions: ['json'],
         type: FileType.custom,
         fileName: "simple_live_config.json",
@@ -200,7 +200,7 @@ class OtherSettingsController extends BaseController {
 
   void importConfig() async {
     try {
-      var file = await FilePicker.platform.pickFiles(
+      var file = await FilePicker.pickFiles(
         allowedExtensions: ['json'],
         type: FileType.custom,
       );

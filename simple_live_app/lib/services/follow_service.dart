@@ -620,7 +620,7 @@ class FollowService extends GetxService {
       if (Platform.isIOS) {
         dir = (await getApplicationDocumentsDirectory()).path;
       } else {
-        dir = await FilePicker.platform.getDirectoryPath() ?? "";
+        dir = await FilePicker.getDirectoryPath() ?? "";
       }
 
       if (dir.isEmpty) {
@@ -644,7 +644,7 @@ class FollowService extends GetxService {
         SmartDialog.showToast("无权限");
         return;
       }
-      var file = await FilePicker.platform.pickFiles(
+      var file = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
       );
