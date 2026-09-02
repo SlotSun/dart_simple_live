@@ -1,5 +1,5 @@
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_easyrefresh/easy_refresh.dart';
 
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/app_style.dart';
@@ -21,11 +21,11 @@ class CategoryListView extends StatelessWidget {
     return KeepAliveWrapper(
       child: Obx(
         () => EasyRefresh(
-          firstRefresh: true,
+          refreshOnStart: true,
           controller: controller.easyRefreshController,
           onRefresh: controller.refreshData,
           header: MaterialHeader(
-            completeDuration: const Duration(milliseconds: 400),
+            processedDuration: const Duration(milliseconds: 400),
           ),
           child: ListView.builder(
             padding: AppStyle.edgeInsetsA12,

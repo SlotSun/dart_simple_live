@@ -1,12 +1,11 @@
 import 'dart:io';
 
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/widgets/status/app_empty_widget.dart';
 import 'package:simple_live_app/widgets/status/app_error_widget.dart';
 import 'package:simple_live_app/widgets/status/app_loadding_widget.dart';
-
-import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:get/get.dart';
 
 typedef IndexedWidgetBuilder = Widget Function(BuildContext context, int index);
@@ -39,14 +38,14 @@ class PageListView extends StatelessWidget {
         children: [
           EasyRefresh(
             header: MaterialHeader(
-              completeDuration: const Duration(milliseconds: 400),
+              processedDuration: const Duration(milliseconds: 400),
             ),
             footer: MaterialFooter(
-              completeDuration: const Duration(milliseconds: 400),
+              processedDuration: const Duration(milliseconds: 400),
             ),
             scrollController: pageController.scrollController,
             controller: pageController.easyRefreshController,
-            firstRefresh: firstRefresh,
+            refreshOnStart: firstRefresh,
             onLoad: pageController.loadData,
             onRefresh: pageController.refreshData,
             child: ListView.separated(
