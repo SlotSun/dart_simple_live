@@ -53,10 +53,10 @@ packages:
     dependency: "direct main"
     description:
       name: auto_orientation_v2
-      sha256: "3fc17c769b17c49246e897d0b498c398c20eee5b7ecd54ae650bffc4113bdef2"
+      sha256: "9e4944f6f99a5201bbc5ab52ad3030ae33e912cabb8bd9a33bef582e78e39959"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.6"
+    version: "2.3.8"
   boolean_selector:
     dependency: transitive
     description:
