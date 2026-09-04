@@ -1,11 +1,15 @@
 ﻿import 'dart:math';
-
+import 'package:crypto/crypto.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/platforms/huya/tars/get_game_event_message_board_req.dart';
 import 'package:simple_live_core/src/platforms/huya/tars/get_game_event_message_board_rsp.dart';
+import 'package:simple_live_core/src/platforms/huya/tars/huya_danmaku.dart';
 import 'package:simple_live_core/src/platforms/huya/tars/types.dart';
+import 'package:tars_dart/tars/codec/tars_struct.dart';
 
 import 'package:tars_dart/tars/net/base_tars_http.dart';
+import 'package:tars_dart/tars/tup/request_packet.dart';
+import 'package:tars_dart/tars/tup/tars_message.dart';
 
 import 'huya_request_params.dart';
 
@@ -96,3 +100,46 @@ class RequestIdGenerator {
   }
 }
 
+List<int> sendWupData({
+  required String servantName,
+  required String funcName,
+  required TarsStruct req,
+  int requestId = 1,
+  dynamic a,
+  String traceId = "",
+}) {
+  var bodyMap = {'tReq': req.toByteArray()};
+  var message = TarsMessage()
+    ..header = RequestPacket(
+      iVersion: 3,
+      iRequestId: requestId,
+      sServantName: servantName,
+      sFuncName: funcName,
+      sBuffer: RequestPacket.cache_sBuffer,
+      context: RequestPacket.cache_context,
+      status: RequestPacket.cache_status,
+    )..body = bodyMap;
+  var s = getTraceId();
+  var traceId = "$s:$s:0:0";
+  var socketCmd = WebSocketCommand()
+    ..cmdType = 3
+    ..traceId = traceId
+    ..data = message.toByteArray();
+  try{
+    var md5Res = md5.convert(req.toByteArray());
+    socketCmd.md5 = md5Res.toString();
+  }catch(e){
+    CoreLog.error("sparkMd5:$e");
+  }
+  // end build
+  return socketCmd.toByteArray();
+}
+
+String getTraceId() {
+  final random = Random();
+  return 'xxxxxxxxxxxxxxxx'.replaceAllMapped(RegExp(r'[xy]'), (match) {
+    final t = (16 * random.nextDouble()).floor();
+    final value = match.group(0) == 'x' ? t : (t & 0x3) | 0x8;
+    return value.toRadixString(16);
+  });
+}

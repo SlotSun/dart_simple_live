@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/web_socket_util.dart';
 import 'package:simple_live_core/src/platforms/huya/model/huya_damaku_model.dart';
+import 'package:simple_live_core/src/platforms/huya/tars/enter_channel_req.dart';
 import 'package:simple_live_core/src/platforms/huya/tars/huya_danmaku.dart';
 import 'package:simple_live_core/src/platforms/huya/tars/types.dart';
 import 'package:tars_dart/tars/codec/tars_input_stream.dart';
@@ -122,22 +123,12 @@ class HuyaDanmaku implements LiveDanmaku {
     var req = GetLivingInfoReq()
       ..lPresenterUid = pid
       ..tId = userId;
-    var bodyMap = {'tReq': req.toByteArray()};
-    var message = TarsMessage()
-      ..header = RequestPacket(
-        iVersion: 3,
-        iRequestId: 0,
-        sServantName: 'huyaliveui',
-        sFuncName: 'getLivingInfo',
-        sBuffer: RequestPacket.cache_sBuffer,
-        context: RequestPacket.cache_context,
-        status: RequestPacket.cache_status,
-      )..body = bodyMap;
-    var messageByte = message.toByteArray();
-    var socketCmd = WebSocketCommand()
-      ..cmdType = 3
-      ..data = messageByte;
-    return socketCmd.toByteArray();
+    var wupData = sendWupData(
+      servantName: "huyaliveui",
+      funcName: "getLivingInfo",
+      req: req,
+    );
+    return wupData;
   }
 
   List<int> buildDoLaunchData({required String ua, required String device}) {
@@ -152,37 +143,49 @@ class HuyaDanmaku implements LiveDanmaku {
       ..eSource = 3
       ..eType = 0
       ..uaEx = LiveAppUAEx();
-    LiveLaunchReq liveLaunchReq = LiveLaunchReq()
+    LiveLaunchReq req = LiveLaunchReq()
       ..id = userId
       ..liveUb = userBase
       ..supportDomain = true;
-    var bodyBytes = liveLaunchReq.toByteArray();
-    var bodyMap = {'tReq': bodyBytes};
-    var message = TarsMessage()
-      ..header = RequestPacket(
-        iVersion: 3,
-        cPacketType: 0,
-        iMessageType: 0,
-        iRequestId: 0,
-        sServantName: "liveui",
-        sFuncName: "doLaunch",
-        sBuffer: RequestPacket.cache_sBuffer,
-        context: RequestPacket.cache_context,
-        status: RequestPacket.cache_status,
-      )
-      ..body = bodyMap;
-    var messageByte = message.toByteArray();
-    var socketCmd = WebSocketCommand()
-      ..cmdType = 3
-      ..data = messageByte;
-    return socketCmd.toByteArray();
+    var wupData = sendWupData(
+      servantName: "doLaunch",
+      funcName: "OnClientReady",
+      req: req,
+    );
+    return wupData;
+  }
+
+  List<int> buildEnterChanelData(){
+    HuyaUserId userId = HuyaUserId()
+      ..lUid = 0
+      ..sGuid = "0a7d4b0826af6c69380199dc9adc6b50"
+      ..sToken = ""
+      ..sCookie = cookie
+      ..sHuYaUA = dHuyaUa
+      ..sDeviceInfo = device;
+    var req = EnterChannelReq()
+      ..tUserId = userId
+      ..lSid = danmakuArgs.subSid
+      ..lTid=danmakuArgs.topSid;
+    var wupData = sendWupData(
+      servantName: "ActivityUIServer",
+      funcName: "OnClientReady",
+      req: req,
+    );
+    return wupData;
   }
 
   void joinRoom() {
     try {
       var pid = danmakuArgs.topSid;
       var data = buildJoinGroupData(pid: pid);
+      // var doLaunchData = buildDoLaunchData(ua: dHuyaUa, device: device);
+      // var liveInfoData = buildLiveInfoData(pid: pid, ua: dHuyaUa, device: device);
+      // var enterChannelData = buildEnterChanelData();
+      // webScoketUtils?.sendMessage(liveInfoData);
+      // webScoketUtils?.sendMessage(doLaunchData);
       webScoketUtils?.sendMessage(data);
+      // webScoketUtils?.sendMessage(enterChannelData);
     } catch (e) {
       CoreLog.error("join_data_error:$e");
     }
@@ -246,12 +249,14 @@ class HuyaDanmaku implements LiveDanmaku {
         stream = TarsInputStream(stream.readBytes(1, false));
         wsPushMessageV2.readFrom(stream);
         for (var item in wsPushMessageV2.vMsgItem) {
-          // CoreLog.i("huya-danmaku-type22-uri: ${item.iUri}");
+          CoreLog.i("huya-danmaku-type22-uri: ${item.iUri}");
           // match uri
           // '110003': ai(666,大气，NB etc)
           // '2001314': sc
           // '1400': 醒目留言
           // '8006': sc-countDown
+          // '6220': RankInfoNotice
+          // '1091000': pk
           if (item.iUri == 2001314) {
             var sc =
                 await getHuyaSuperChatMessageList(lPid: danmakuArgs.topSid);
