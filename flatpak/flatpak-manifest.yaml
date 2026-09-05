@@ -41,11 +41,11 @@ modules:
       - type: file
         only-arches: [x86_64]
         url: https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init
-        sha256: 4acc9acc76d5079515b46346a485974457b5a79893cfb01112423c89aeb5aa10
+        sha256: dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71
       - type: file
         only-arches: [aarch64]
         url: https://static.rust-lang.org/rustup/dist/aarch64-unknown-linux-gnu/rustup-init
-        sha256: 9732d6c5e2a098d3521fca8145d826ae0aaa067ef2385ead08e6feac88fa5792
+        sha256: 15f6e4ce9f583b929c996c91562bad6d4454f3281de858b02cdfdef615fac433
 
   - name: Slive
     buildsystem: simple

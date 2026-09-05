@@ -101,6 +101,9 @@ class AppSettingsController extends GetxController {
     autoFullScreen.value = LocalStorageService.instance
         .getValue(LocalStorageService.kAutoFullScreen, false);
 
+    verticalDragLock.value = LocalStorageService.instance
+        .getValue(LocalStorageService.kVerticalDragLock, false);
+
     // ignore: invalid_use_of_protected_member
     shieldList.value = LocalStorageService.instance.shieldBox.values.toSet();
 
@@ -442,6 +445,17 @@ class AppSettingsController extends GetxController {
     LocalStorageService.instance
         .setValue(LocalStorageService.kAutoFullScreen, e);
   }
+
+  // todo: 构造一个settings struct,用于批量生成ui和配置参数
+  // 滑动调节亮度/音量上下滑动手势控制
+  var verticalDragLock = false.obs;
+
+  void setVerticalDragLock(bool e) {
+    verticalDragLock.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kVerticalDragLock, e);
+  }
+
 
   RxSet<String> shieldList = <String>{}.obs;
 

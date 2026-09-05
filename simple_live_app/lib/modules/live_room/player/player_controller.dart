@@ -578,7 +578,9 @@ mixin PlayerGestureControlMixin
     if (lockControlsState.value && fullScreenState.value) {
       return;
     }
-
+    if(AppSettingsController.instance.verticalDragLock.value){
+      return;
+    }
     final dy = details.globalPosition.dy;
     // 开始位置必须是中间2/4的位置
     if (dy < Get.height * 0.25 || dy > Get.height * 0.75) {
@@ -605,6 +607,10 @@ mixin PlayerGestureControlMixin
   /// 竖向手势更新
   void onVerticalDragUpdate(DragUpdateDetails e) async {
     if (lockControlsState.value && fullScreenState.value) {
+      return;
+    }
+    // todo: lockControls 可以临时解锁，滑动结束后再次上锁，让ai来做这些简单的工作
+    if(AppSettingsController.instance.verticalDragLock.value){
       return;
     }
     if (verticalDragging == false) return;
@@ -691,6 +697,9 @@ mixin PlayerGestureControlMixin
   /// 竖向手势完成
   void onVerticalDragEnd(DragEndDetails details) async {
     if (lockControlsState.value && fullScreenState.value) {
+      return;
+    }
+    if(AppSettingsController.instance.verticalDragLock.value){
       return;
     }
     throttle = null;
