@@ -237,6 +237,7 @@ class FollowService extends GetxService {
     // 重新关注时清除墓碑标记
     follow.deleted = false;
     follow.updateTime = 0;
+    // live_room_controller.add 已同步history
     // db.add 其实是update会直接更新数据，所以外表也应该实现此功能：有则更，无则添加
     int index = followList.indexWhere((f) => f.id == follow.id);
     if (index != -1) {
@@ -792,18 +793,29 @@ class FollowService extends GetxService {
   // 根据此思路，可以重写文件导入导出以及webdav恢复逻辑
   Future<void> followUserAllDataCheck() async {
     var followUserListTemp = DBService.instance.getFollowList();
+    var historyListTemp = DBService.instance.getHistories();
     var oldTagList = DBService.instance.getFollowTagList();
     final Map<String, List<String>> tagMap = {
       for (var tag in oldTagList) tag.tag: <String>[],
     };
-    // 手动添加罗马音
+
     for (FollowUser follow in followUserListTemp) {
+      // 手动添加罗马音
       if (follow.remark != null && follow.remark!.isNotEmpty) {
         var roman = PinyinHelper.getShortPinyin(follow.remark!).normalize();
         follow.romanName = roman;
       } else {
         follow.romanName =
             PinyinHelper.getShortPinyin(follow.userName).normalize();
+      }
+      // 手动同步 watchDurationSec
+      var historyItem = historyListTemp
+          .where((history) => follow.id == history.id)
+          .firstOrNull;
+      // 用户可能存在删除历史记录可能
+      if (historyItem != null) {
+        follow.watchDurationSec =
+            historyItem.watchDuration!.toDuration().inSeconds;
       }
       await DBService.instance.addFollow(follow);
     }
