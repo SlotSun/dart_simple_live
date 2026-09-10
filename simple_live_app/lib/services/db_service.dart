@@ -4,6 +4,7 @@ import 'package:fractional_indexing_dart/fractional_indexing_dart.dart';
 import 'package:get/get.dart';
 import 'package:hive_ce/hive_ce.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
+import 'package:simple_live_app/models/db/follow_user_block.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/models/db/history.dart';
 import 'package:collection/collection.dart';
@@ -13,11 +14,13 @@ class DBService extends GetxService {
   late Box<History> historyBox;
   late Box<FollowUser> followBox;
   late Box<FollowUserTag> tagBox;
+  late Box<FollowUserBlock> followUserBlockBox;
 
   Future init() async {
     historyBox = await Hive.openBox("History");
     followBox = await Hive.openBox("FollowUser");
     tagBox = await Hive.openBox("FollowUserTag");
+    followUserBlockBox = await Hive.openBox("FollowUserBlock");
   }
 
   Future<void> clearFollowTag() async {
@@ -117,5 +120,39 @@ class DBService extends GetxService {
     var his = historyBox.values.toList();
     his.sort((a, b) => b.updateTime.compareTo(a.updateTime));
     return his;
+  }
+
+  //----------- FollowUserBlock -----------
+
+  /// 获取直播间屏蔽设置，不存在则返回 null
+  FollowUserBlock? getFollowUserBlock(String id) {
+    return followUserBlockBox.get(id);
+  }
+
+  /// 获取直播间屏蔽设置，不存在则创建默认值（id 格式同 FollowUser.id: siteId_roomId）
+  FollowUserBlock getFollowUserBlockOrDefault(String id) {
+    return followUserBlockBox.get(id) ??
+        FollowUserBlock(
+          id: id,
+          roomId: id.split('_').last,
+          siteId: id.split('_').first,
+          blockAccounts: [],
+          blockWords: [],
+        );
+  }
+
+  /// 添加或更新屏蔽设置
+  Future setFollowUserBlock(FollowUserBlock block) async {
+    await followUserBlockBox.put(block.id, block);
+  }
+
+  /// 删除屏蔽设置
+  Future deleteFollowUserBlock(String id) async {
+    await followUserBlockBox.delete(id);
+  }
+
+  /// 获取所有屏蔽设置
+  List<FollowUserBlock> getAllFollowUserBlocks() {
+    return followUserBlockBox.values.toList();
   }
 }
