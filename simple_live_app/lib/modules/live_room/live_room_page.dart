@@ -705,7 +705,11 @@ class LiveRoomPage extends GetView<LiveRoomController> {
             children: [
               SettingsAction(
                 title: "关键词屏蔽",
-                onTap: controller.showDanmuShield,
+                onTap: controller.showFollowBlockShield,
+              ),
+              SettingsAction(
+                title: "用户屏蔽",
+                onTap: ()=>controller.showFollowBlockShield(blockWords: false),
               ),
               AppStyle.divider,
               SettingsAction(

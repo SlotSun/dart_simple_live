@@ -37,10 +37,10 @@ class FollowBlockService extends GetxService {
   Future<void> removeBlockAccount({
     required String siteId,
     required String roomId,
-    required String uid,
+    required String name,
   }) async {
     final block = getBlock(siteId: siteId, roomId: roomId);
-    block.blockAccounts.removeWhere((a) => a.uid == uid);
+    block.blockAccounts.removeWhere((a) => a.name == name);
     block.updateTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     await DBService.instance.setFollowUserBlock(block);
   }

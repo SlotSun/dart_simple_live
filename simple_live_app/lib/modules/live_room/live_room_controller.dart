@@ -382,24 +382,42 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   /// 添加当前房间屏蔽词
   void addCurBlockWord(String word){
     // 为剥离getx做准备
-    if (!followUserBlock.value!.blockWords.contains(word)) {
+    if (!followUserBlock.value!.blockWords.contains(word) && word !="") {
       followUserBlock.value!.blockWords.add(word);
       FollowBlockService.instance.addBlockWord(siteId: site.id, roomId: roomId, word: word);
+      followUserBlock.refresh();
     }
     SmartDialog.showToast("已屏蔽词:$word");
+  }
+  void delCurBlockWord(String word){
+    if (followUserBlock.value!.blockWords.contains(word)) {
+      followUserBlock.value!.blockWords.remove(word);
+      FollowBlockService.instance.removeBlockWord(siteId: site.id, roomId: roomId, word: word);
+      followUserBlock.refresh();
+    }
   }
   /// 添加当前房间屏蔽用户
   void addCurBlockAccount(String accName){
     bool exists = followUserBlock.value!.blockAccounts.any((acc) => acc.name == accName);
-    if (!exists) {
+    if (!exists && accName != "") {
       //todo: temp use uid == 0
       var accInMessage = messages.firstWhereOrNull((e) => e.userName == accName);
       var accId = accInMessage?.userId ?? "0";
       var acc = FollowUserBlockAccount(uid: accId, name: accName);
       followUserBlock.value!.blockAccounts.add(acc);
       FollowBlockService.instance.addBlockAccount(siteId: site.id, roomId: roomId, account: acc);
+      followUserBlock.refresh();
     }
     SmartDialog.showToast("已屏蔽用户:$accName");
+  }
+
+  void delCurBlockAccount(String accName){
+    bool exists = followUserBlock.value!.blockAccounts.any((acc) => acc.name == accName);
+    if (exists) {
+      followUserBlock.value!.blockAccounts.removeWhere((e)=>e.name == accName);
+      FollowBlockService.instance.removeBlockAccount(siteId: site.id, roomId: roomId, name: accName);
+      followUserBlock.refresh();
+    }
   }
 
   /// 添加一条系统消息
@@ -748,7 +766,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
             danmakuController: danmakuController,
             onTapDanmuShield: () {
               Get.back();
-              showDanmuShield();
+              showFollowBlockShield();
             },
           ),
         ],
@@ -955,22 +973,20 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     );
   }
 
-  void showDanmuShield() {
+  void showFollowBlockShield({bool blockWords = true}) {
     TextEditingController keywordController = TextEditingController();
 
     void addKeyword() {
       if (keywordController.text.isEmpty) {
-        SmartDialog.showToast("请输入关键词");
+        SmartDialog.showToast("请输入${blockWords?"关键词":"用户名"}");
         return;
       }
-
-      AppSettingsController.instance
-          .addShieldList(keywordController.text.trim());
+      addCurBlockWord(keywordController.text.trim());
       keywordController.text = "";
     }
 
     Utils.showBottomSheet(
-      title: "关键词屏蔽",
+      title: "当前主播${blockWords ? "弹幕" : "用户"}屏蔽",
       child: ListView(
         padding: AppStyle.edgeInsetsA12,
         children: [
@@ -979,7 +995,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
             decoration: InputDecoration(
               contentPadding: AppStyle.edgeInsetsH12,
               border: const OutlineInputBorder(),
-              hintText: "请输入关键词",
+              hintText: "请输入${blockWords ? "关键词" : "用户名"}",
               suffixIcon: TextButton.icon(
                 onPressed: addKeyword,
                 icon: const Icon(Icons.add),
@@ -991,43 +1007,51 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
             },
           ),
           AppStyle.vGap12,
-          Obx(
-            () => Text(
-              "已添加${AppSettingsController.instance.shieldList.length}个关键词（点击移除）",
+          Obx(() {
+            var len = blockWords
+                ? followUserBlock.value!.blockWords.length
+                : followUserBlock.value!.blockAccounts.length;
+            return Text(
+              "已添加$len个${blockWords ? "关键词" : "用户"}（点击移除）",
               style: Get.textTheme.titleSmall,
-            ),
-          ),
+            );
+          }),
           AppStyle.vGap12,
-          Obx(
-            () => Wrap(
+          Obx(() {
+            final block = followUserBlock.value!;
+
+            final List<({String label, VoidCallback onTap})> items = blockWords
+                ? block.blockWords.map((item) => (
+                        label: item,
+                        onTap: () => delCurBlockWord(item),
+                      ),
+                    ).toList()
+                : block.blockAccounts.map((item) => (
+                        label: item.name,
+                        onTap: () => delCurBlockAccount(item.name),
+                      ),
+                    ).toList();
+
+            return Wrap(
               runSpacing: 12,
               spacing: 12,
-              children: AppSettingsController.instance.shieldList
+              children: items
                   .map(
                     (item) => InkWell(
                       borderRadius: AppStyle.radius24,
-                      onTap: () {
-                        AppSettingsController.instance.removeShieldList(item);
-                      },
+                      onTap: item.onTap,
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius: AppStyle.radius24,
                         ),
-                        padding: AppStyle.edgeInsetsH12.copyWith(
-                          top: 4,
-                          bottom: 4,
-                        ),
-                        child: Text(
-                          item,
-                          style: Get.textTheme.bodyMedium,
-                        ),
+                        padding: AppStyle.edgeInsetsH12.copyWith(top: 4, bottom: 4),
+                        child: Text(item.label, style: Get.textTheme.bodyMedium),
                       ),
                     ),
-                  )
-                  .toList(),
-            ),
-          ),
+                  ).toList(),
+            );
+          })
         ],
       ),
     );
