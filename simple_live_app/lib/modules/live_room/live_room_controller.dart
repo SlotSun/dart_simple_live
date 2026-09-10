@@ -18,10 +18,12 @@ import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/app/utils/sandbox.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
+import 'package:simple_live_app/models/db/follow_user_block.dart';
 import 'package:simple_live_app/models/db/history.dart';
 import 'package:simple_live_app/modules/live_room/player/player_controller.dart';
 import 'package:simple_live_app/modules/settings/danmu_settings_page.dart';
 import 'package:simple_live_app/services/db_service.dart';
+import 'package:simple_live_app/services/follow_block_service.dart';
 import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/services/history_service.dart';
 import 'package:simple_live_app/src/rust/api/danmaku_mask.dart';
@@ -72,6 +74,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
   /// 聊天信息
   RxList<LiveMessage> messages = RxList<LiveMessage>();
+
+  /// 当前直播间屏蔽项
+  Rx<FollowUserBlock?> followUserBlock = Rx<FollowUserBlock?>(null);
 
   /// 清晰度数据
   RxList<LivePlayQuality> qualites = RxList<LivePlayQuality>();
@@ -312,6 +317,32 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
         }
       }
 
+      // 当前直播间关键词屏蔽检查
+      for (var keyword in followUserBlock.value!.blockWords) {
+        Pattern? pattern;
+        if (Utils.isRegexFormat(keyword)) {
+          String removedSlash = Utils.removeRegexFormat(keyword);
+          try {
+            pattern = RegExp(removedSlash);
+          } catch (e) {
+            Log.d("关键词：$keyword 正则格式错误");
+          }
+        } else {
+          pattern = keyword;
+        }
+        if (pattern != null && msg.message.contains(pattern)) {
+          Log.d("关键词：$keyword\n已屏蔽${site.id}_$roomId消息内容：${msg.message}");
+          return;
+        }
+      }
+      // 当前直播间发言用户屏蔽
+      // todo: 更精细化的uid匹配
+      var accountInBlock = followUserBlock.value!.blockAccounts
+          .any((item) => item.name == msg.userName);
+      if(accountInBlock){
+        return;
+      }
+
       //  messages.length>n 预加载部分弹幕后启用去重功能
       if (AppSettingsController.instance.danmakuMaskEnable.value&&
           messages.length > 50) {
@@ -404,16 +435,16 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
           }
         }
       }
-
-      getSuperChatMessage();
-
+      
       addHistory();
       // 确认房间关注状态
       followed.value =
           FollowService.instance.getFollowExist("${site.id}_$roomId");
       online.value = detail.value!.online;
       liveStatus.value = detail.value!.status || detail.value!.isRecord;
+      followUserBlock.value = FollowBlockService.instance.getBlock(siteId: site.id, roomId: roomId);
       if (liveStatus.value) {
+        getSuperChatMessage();
         getPlayQualites();
         addSysMsg("开始连接弹幕服务器");
         initDanmau();
