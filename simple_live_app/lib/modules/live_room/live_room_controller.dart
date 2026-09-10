@@ -379,6 +379,29 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     }
   }
 
+  /// 添加当前房间屏蔽词
+  void addCurBlockWord(String word){
+    // 为剥离getx做准备
+    if (!followUserBlock.value!.blockWords.contains(word)) {
+      followUserBlock.value!.blockWords.add(word);
+      FollowBlockService.instance.addBlockWord(siteId: site.id, roomId: roomId, word: word);
+    }
+    SmartDialog.showToast("已屏蔽词:$word");
+  }
+  /// 添加当前房间屏蔽用户
+  void addCurBlockAccount(String accName){
+    bool exists = followUserBlock.value!.blockAccounts.any((acc) => acc.name == accName);
+    if (!exists) {
+      //todo: temp use uid == 0
+      var accInMessage = messages.firstWhereOrNull((e) => e.userName == accName);
+      var accId = accInMessage?.userId ?? "0";
+      var acc = FollowUserBlockAccount(uid: accId, name: accName);
+      followUserBlock.value!.blockAccounts.add(acc);
+      FollowBlockService.instance.addBlockAccount(siteId: site.id, roomId: roomId, account: acc);
+    }
+    SmartDialog.showToast("已屏蔽用户:$accName");
+  }
+
   /// 添加一条系统消息
   void addSysMsg(String msg) {
     messages.add(

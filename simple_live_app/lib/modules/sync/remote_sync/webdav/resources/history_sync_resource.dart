@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:archive/archive.dart';
-import 'package:simple_live_app/app/utils/duration_2_str_utils.dart';
+import 'package:simple_live_app/app/utils/extensions/duration_2_str_utils.dart';
 import 'package:simple_live_app/models/db/history.dart';
 import 'package:simple_live_app/modules/sync/remote_sync/webdav/interface/sync_resource.dart';
 import 'package:simple_live_app/services/db_service.dart';

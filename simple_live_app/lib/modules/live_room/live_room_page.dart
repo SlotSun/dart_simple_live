@@ -13,6 +13,7 @@ import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/modules/live_room/live_room_controller.dart';
 import 'package:simple_live_app/modules/live_room/player/player_controls.dart';
 import 'package:simple_live_app/services/follow_service.dart';
+import 'package:simple_live_app/widgets/context_menu.dart';
 import 'package:simple_live_app/widgets/desktop_refresh_button.dart';
 import 'package:simple_live_app/widgets/follow_user_item.dart';
 import 'package:simple_live_app/widgets/keep_alive_wrapper.dart';
@@ -592,7 +593,20 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                   )
                 ],
               ),
+              contextMenuBuilder: _contextMenuBuilder,
             ),
+    );
+  }
+
+  Widget _contextMenuBuilder(
+      BuildContext context, EditableTextState editableTextState) {
+    return customContextMenuBuilder(
+      context,
+      editableTextState,
+      {
+        '屏蔽用户': (s) => controller.addCurBlockAccount(s),
+        '屏蔽关键词': (s) => controller.addCurBlockWord(s),
+      },
     );
   }
 

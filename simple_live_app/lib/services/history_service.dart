@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/log.dart';
-import 'package:simple_live_app/app/utils/duration_2_str_utils.dart';
+import 'package:simple_live_app/app/utils/extensions/duration_2_str_utils.dart';
 import 'package:simple_live_app/models/db/history.dart';
 
 import 'db_service.dart';

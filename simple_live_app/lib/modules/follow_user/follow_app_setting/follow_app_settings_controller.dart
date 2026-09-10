@@ -9,7 +9,7 @@ import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
-import 'package:simple_live_app/app/utils/duration_2_str_utils.dart';
+import 'package:simple_live_app/app/utils/extensions/duration_2_str_utils.dart';
 import 'package:simple_live_app/app/utils/dynamic_filter.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
