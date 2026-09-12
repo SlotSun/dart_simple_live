@@ -173,6 +173,7 @@ class FollowInfoController extends BasePageController<FollowUser> {
       face: detail.userAvatar,
       addTime: current.addTime,
       watchDuration: current.watchDuration,
+      watchDurationSec: current.watchDurationSec,
       tag: current.tag,
     );
     newFollow.liveStatus.value = current.liveStatus.value;

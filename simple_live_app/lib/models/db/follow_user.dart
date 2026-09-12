@@ -44,6 +44,7 @@ class FollowUser implements Mappable {
   @HiveField(5)
   DateTime addTime;
 
+  @Deprecated('Use watchDurationSec instead')
   @HiveField(6)
   String? watchDuration; // "00:00:00"
 

@@ -290,7 +290,7 @@ class FollowService extends GetxService {
       follow.watchDurationSec = history.watchDuration!.toDuration().inSeconds;
       await addFollow(follow);
     }
-    Log.i("已更新当前播放的观看时长：${follow.watchDuration}");
+    Log.i("已更新当前播放的观看时长：${follow.watchDurationSec}");
   }
 
   void initTimer() {
@@ -420,7 +420,7 @@ class FollowService extends GetxService {
 
       // 动态权重
       double normDurationA =
-          a.watchDuration!.toDuration().inSeconds.toDouble() /
+          a.watchDurationSec.toDouble() /
               maxDurationInSeconds;
       int rankA = historyRankMap[a.id] ?? maxRank;
       double normRecencyA = (maxRank - rankA).toDouble() / maxRank;
@@ -431,7 +431,7 @@ class FollowService extends GetxService {
               wDormantA;
 
       double normDurationB =
-          b.watchDuration!.toDuration().inSeconds.toDouble() /
+          b.watchDurationSec.toDouble() /
               maxDurationInSeconds;
       int rankB = historyRankMap[b.id] ?? maxRank;
       double normRecencyB = (maxRank - rankB).toDouble() / maxRank;
@@ -559,7 +559,7 @@ class FollowService extends GetxService {
       ascending: false,
     );
     var watchDurationCondition = SortCondition<FollowUser>(
-      valueGetter: (item) => item.watchDuration?.toDuration() ?? Duration.zero,
+      valueGetter: (item) => item.watchDurationSec,
       ascending: false,
     );
     var siteIdCondition = SortCondition<FollowUser>(
@@ -761,6 +761,7 @@ class FollowService extends GetxService {
             "userName": item.userName,
             "face": item.face,
             "watchDuration": item.watchDuration,
+            "watchDurationSec": item.watchDurationSec,
             "addTime": item.addTime.toString(),
             "remark": item.remark,
             "romanName": item.romanName,

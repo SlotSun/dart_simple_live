@@ -80,11 +80,11 @@ class HistoryService extends GetxService {
   }
 
   // 获取历史记录中存储的累计观看时长
-  String getHistoryDuration({required String followUserId}) {
-    var historyWatchDuration = "00:00:00";
+  int getHistoryDurationSec({required String followUserId}) {
+    var historyWatchDurationSec = 0;
     History? history = DBService.instance.getHistory(followUserId);
-    historyWatchDuration = history?.watchDuration ?? "00:00:00";
-    return historyWatchDuration;
+    historyWatchDurationSec = history?.watchDuration?.toDuration().inSeconds ?? 0;
+    return historyWatchDurationSec;
   }
 
   // history crud

@@ -192,11 +192,8 @@ class FollowSyncResource implements SyncResource<FollowBundle> {
           }
         } else {
           // 两边都是正常记录，合并观看时长
-          localItem.watchDurationSec =
-              (remoteItem.watchDuration ?? "00:00:00").toDuration().inSeconds +
-                  localItem.syncDuration;
-          localItem.watchDuration =
-              Duration(seconds: localItem.watchDurationSec).toHMSString();
+          localItem.watchDurationSec = remoteItem.watchDurationSec + localItem.syncDuration;
+          localItem.watchDuration = Duration(seconds: localItem.watchDurationSec).toHMSString();
           localItem.syncDuration = 0;
           result[localItem.id] = localItem;
         }
