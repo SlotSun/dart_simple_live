@@ -254,8 +254,7 @@ class RemoteSyncRoomPage extends GetView<RemoteSyncRoomController> {
                     ),
                     subtitle: Text("${user.app} - v${user.version}"),
                     trailing: Visibility(
-                      visible: controller.signalR.hubConnection?.connectionId ==
-                          user.connectionId,
+                      visible: controller.signalR.hubConnection?.connectionId == user.connectionId,
                       child: const Text(
                         "本机",
                       ),

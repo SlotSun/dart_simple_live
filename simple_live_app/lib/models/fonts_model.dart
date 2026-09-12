@@ -1,4 +1,4 @@
-﻿class FontsModel{
+class FontsModel {
   String version;
   int versionNum;
   String versionDesc;
@@ -9,5 +9,4 @@
     required this.versionDesc,
     required this.downloadUrl,
   });
-
 }

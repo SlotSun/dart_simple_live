@@ -7,8 +7,7 @@ import 'api/danmaku_mask.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
-import 'frb_generated.io.dart'
-    if (dart.library.js_interop) 'frb_generated.web.dart';
+import 'frb_generated.io.dart' if (dart.library.js_interop) 'frb_generated.web.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 /// Main entrypoint of the Rust API
@@ -50,12 +49,10 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   static void dispose() => instance.disposeImpl();
 
   @override
-  ApiImplConstructor<RustLibApiImpl, RustLibWire> get apiImplConstructor =>
-      RustLibApiImpl.new;
+  ApiImplConstructor<RustLibApiImpl, RustLibWire> get apiImplConstructor => RustLibApiImpl.new;
 
   @override
-  WireConstructor<RustLibWire> get wireConstructor =>
-      RustLibWire.fromExternalLibrary;
+  WireConstructor<RustLibWire> get wireConstructor => RustLibWire.fromExternalLibrary;
 
   @override
   Future<void> executeRustInitializers() async {
@@ -63,8 +60,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   }
 
   @override
-  ExternalLibraryLoaderConfig get defaultExternalLibraryLoaderConfig =>
-      kDefaultExternalLibraryLoaderConfig;
+  ExternalLibraryLoaderConfig get defaultExternalLibraryLoaderConfig => kDefaultExternalLibraryLoaderConfig;
 
   @override
   String get codegenVersion => '2.13.0';
@@ -72,8 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   @override
   int get rustContentHash => -1540820557;
 
-  static const kDefaultExternalLibraryLoaderConfig =
-      ExternalLibraryLoaderConfig(
+  static const kDefaultExternalLibraryLoaderConfig = ExternalLibraryLoaderConfig(
     stem: 'rust_lib_simple_live_app',
     ioDirectory: 'rust/target/release/',
     webPrefix: 'pkg/',
@@ -83,9 +78,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
 abstract class RustLibApi extends BaseApi {
   Future<Uint8List> crateApiDanmakuMaskDanmakuMaskAllowListBatch(
-      {required DanmakuMask that,
-      required List<String> texts,
-      required BigInt nowMs});
+      {required DanmakuMask that, required List<String> texts, required BigInt nowMs});
 
   void crateApiDanmakuMaskDanmakuMaskDispose({required DanmakuMask that});
 
@@ -100,11 +93,9 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> crateApiSimpleInitApp();
 
-  RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_DanmakuMask;
+  RustArcIncrementStrongCountFnType get rust_arc_increment_strong_count_DanmakuMask;
 
-  RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_DanmakuMask;
+  RustArcDecrementStrongCountFnType get rust_arc_decrement_strong_count_DanmakuMask;
 
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_DanmakuMaskPtr;
 }
@@ -119,9 +110,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Future<Uint8List> crateApiDanmakuMaskDanmakuMaskAllowListBatch(
-      {required DanmakuMask that,
-      required List<String> texts,
-      required BigInt nowMs}) {
+      {required DanmakuMask that, required List<String> texts, required BigInt nowMs}) {
     return handler.executeNormal(NormalTask(
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
@@ -129,8 +118,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that, serializer);
         sse_encode_list_String(texts, serializer);
         sse_encode_u_64(nowMs, serializer);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 1, port: port_);
+        pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 1, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -142,8 +130,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     ));
   }
 
-  TaskConstMeta get kCrateApiDanmakuMaskDanmakuMaskAllowListBatchConstMeta =>
-      const TaskConstMeta(
+  TaskConstMeta get kCrateApiDanmakuMaskDanmakuMaskAllowListBatchConstMeta => const TaskConstMeta(
         debugName: "DanmakuMask_allow_list_batch",
         argNames: ["that", "texts", "nowMs"],
       );
@@ -167,8 +154,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     ));
   }
 
-  TaskConstMeta get kCrateApiDanmakuMaskDanmakuMaskDisposeConstMeta =>
-      const TaskConstMeta(
+  TaskConstMeta get kCrateApiDanmakuMaskDanmakuMaskDisposeConstMeta => const TaskConstMeta(
         debugName: "DanmakuMask_dispose",
         argNames: ["that"],
       );
@@ -196,27 +182,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         decodeErrorData: null,
       ),
       constMeta: kCrateApiDanmakuMaskDanmakuMaskNewConstMeta,
-      argValues: [
-        baseWindowMs,
-        bucketCount,
-        useNormalization,
-        useFrequencyControl,
-        maxFrequency
-      ],
+      argValues: [baseWindowMs, bucketCount, useNormalization, useFrequencyControl, maxFrequency],
       apiImpl: this,
     ));
   }
 
-  TaskConstMeta get kCrateApiDanmakuMaskDanmakuMaskNewConstMeta =>
-      const TaskConstMeta(
+  TaskConstMeta get kCrateApiDanmakuMaskDanmakuMaskNewConstMeta => const TaskConstMeta(
         debugName: "DanmakuMask_new",
-        argNames: [
-          "baseWindowMs",
-          "bucketCount",
-          "useNormalization",
-          "useFrequencyControl",
-          "maxFrequency"
-        ],
+        argNames: ["baseWindowMs", "bucketCount", "useNormalization", "useFrequencyControl", "maxFrequency"],
       );
 
   @override
@@ -238,8 +211,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     ));
   }
 
-  TaskConstMeta get kCrateApiDanmakuMaskDanmakuMaskResetConstMeta =>
-      const TaskConstMeta(
+  TaskConstMeta get kCrateApiDanmakuMaskDanmakuMaskResetConstMeta => const TaskConstMeta(
         debugName: "DanmakuMask_reset",
         argNames: ["that"],
       );
@@ -249,8 +221,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return handler.executeNormal(NormalTask(
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 5, port: port_);
+        pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 5, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -267,34 +238,28 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         argNames: [],
       );
 
-  RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_DanmakuMask => wire
-          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask;
+  RustArcIncrementStrongCountFnType get rust_arc_increment_strong_count_DanmakuMask =>
+      wire.rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask;
 
-  RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_DanmakuMask => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask;
+  RustArcDecrementStrongCountFnType get rust_arc_decrement_strong_count_DanmakuMask =>
+      wire.rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask;
 
   @protected
-  DanmakuMask
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
-          dynamic raw) {
+  DanmakuMask dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
+      dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return DanmakuMaskImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
-  DanmakuMask
-      dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
-          dynamic raw) {
+  DanmakuMask dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
+      dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return DanmakuMaskImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
-  DanmakuMask
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
-          dynamic raw) {
+  DanmakuMask dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return DanmakuMaskImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
@@ -360,30 +325,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  DanmakuMask
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
-          SseDeserializer deserializer) {
+  DanmakuMask sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
+      SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    return DanmakuMaskImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+    return DanmakuMaskImpl.frbInternalSseDecode(sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
-  DanmakuMask
-      sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
-          SseDeserializer deserializer) {
+  DanmakuMask sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
+      SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    return DanmakuMaskImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+    return DanmakuMaskImpl.frbInternalSseDecode(sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
-  DanmakuMask
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
-          SseDeserializer deserializer) {
+  DanmakuMask sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
+      SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    return DanmakuMaskImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+    return DanmakuMaskImpl.frbInternalSseDecode(sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
@@ -460,31 +419,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
-          DanmakuMask self, SseSerializer serializer) {
+  void sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
+      DanmakuMask self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-        (self as DanmakuMaskImpl).frbInternalSseEncode(move: true), serializer);
+    sse_encode_usize((self as DanmakuMaskImpl).frbInternalSseEncode(move: true), serializer);
   }
 
   @protected
-  void
-      sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
-          DanmakuMask self, SseSerializer serializer) {
+  void sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
+      DanmakuMask self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-        (self as DanmakuMaskImpl).frbInternalSseEncode(move: false),
-        serializer);
+    sse_encode_usize((self as DanmakuMaskImpl).frbInternalSseEncode(move: false), serializer);
   }
 
   @protected
-  void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
-          DanmakuMask self, SseSerializer serializer) {
+  void sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDanmakuMask(
+      DanmakuMask self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-        (self as DanmakuMaskImpl).frbInternalSseEncode(move: null), serializer);
+    sse_encode_usize((self as DanmakuMaskImpl).frbInternalSseEncode(move: null), serializer);
   }
 
   @protected
@@ -509,8 +461,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_list_prim_u_8_strict(
-      Uint8List self, SseSerializer serializer) {
+  void sse_encode_list_prim_u_8_strict(Uint8List self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
@@ -561,28 +512,22 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 @sealed
 class DanmakuMaskImpl extends RustOpaque implements DanmakuMask {
   // Not to be used by end users
-  DanmakuMaskImpl.frbInternalDcoDecode(List<dynamic> wire)
-      : super.frbInternalDcoDecode(wire, _kStaticData);
+  DanmakuMaskImpl.frbInternalDcoDecode(List<dynamic> wire) : super.frbInternalDcoDecode(wire, _kStaticData);
 
   // Not to be used by end users
   DanmakuMaskImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
       : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
-    rustArcIncrementStrongCount:
-        RustLib.instance.api.rust_arc_increment_strong_count_DanmakuMask,
-    rustArcDecrementStrongCount:
-        RustLib.instance.api.rust_arc_decrement_strong_count_DanmakuMask,
-    rustArcDecrementStrongCountPtr:
-        RustLib.instance.api.rust_arc_decrement_strong_count_DanmakuMaskPtr,
+    rustArcIncrementStrongCount: RustLib.instance.api.rust_arc_increment_strong_count_DanmakuMask,
+    rustArcDecrementStrongCount: RustLib.instance.api.rust_arc_decrement_strong_count_DanmakuMask,
+    rustArcDecrementStrongCountPtr: RustLib.instance.api.rust_arc_decrement_strong_count_DanmakuMaskPtr,
   );
 
   /// 批量判断是否允许
   /// 返回 Vec<u8>：1 = 允许，0 = 屏蔽
-  Future<Uint8List> allowListBatch(
-          {required List<String> texts, required BigInt nowMs}) =>
-      RustLib.instance.api.crateApiDanmakuMaskDanmakuMaskAllowListBatch(
-          that: this, texts: texts, nowMs: nowMs);
+  Future<Uint8List> allowListBatch({required List<String> texts, required BigInt nowMs}) =>
+      RustLib.instance.api.crateApiDanmakuMaskDanmakuMaskAllowListBatch(that: this, texts: texts, nowMs: nowMs);
 
   void dispose() => RustLib.instance.api.crateApiDanmakuMaskDanmakuMaskDispose(
         that: this,

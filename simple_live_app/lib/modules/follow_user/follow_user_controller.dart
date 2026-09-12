@@ -135,14 +135,11 @@ class FollowUserController extends BasePageController<FollowUser> {
 
   // 用户自定义顺序dialog
   Future<void> showSortDialog() async {
-    var res = await Utils.showMapOptionDialog(sortMap, sortMethod.value,
-        title: "排序方式");
+    var res = await Utils.showMapOptionDialog(sortMap, sortMethod.value, title: "排序方式");
     if (res != null) {
       sortMethod.value = res;
       AppSettingsController.instance.setFollowSortMethod(sortMethod.value);
-      if (filterMode.value.tag == "未开播" ||
-          filterMode.value.tag == "全部" ||
-          filterMode.value.tag == "直播中") {
+      if (filterMode.value.tag == "未开播" || filterMode.value.tag == "全部" || filterMode.value.tag == "直播中") {
         FollowService.instance.liveListSort();
       }
       filterData();
@@ -155,8 +152,7 @@ class FollowUserController extends BasePageController<FollowUser> {
   }
 
   void removeFollow(FollowUser follow) async {
-    var result = await Utils.showAlertDialog("确定要取消关注${follow.userName}吗?",
-        title: "取消关注");
+    var result = await Utils.showAlertDialog("确定要取消关注${follow.userName}吗?", title: "取消关注");
     if (!result) {
       return;
     }
@@ -220,9 +216,7 @@ class FollowUserController extends BasePageController<FollowUser> {
       tagList.first,
       ...tagList.skip(3),
     ];
-    Rx<FollowUserTag> checkTag = tagList.indexOf(filterMode.value) < 3
-        ? copiedList.first.obs
-        : filterMode.value.obs;
+    Rx<FollowUserTag> checkTag = tagList.indexOf(filterMode.value) < 3 ? copiedList.first.obs : filterMode.value.obs;
     final ScrollController scrollController = ScrollController();
     Get.dialog(
       AlertDialog(
@@ -283,8 +277,7 @@ class FollowUserController extends BasePageController<FollowUser> {
                         return Container(
                           decoration: BoxDecoration(
                             border: Border(
-                              bottom: BorderSide(
-                                  color: Colors.grey.shade300, width: 1.0),
+                              bottom: BorderSide(color: Colors.grey.shade300, width: 1.0),
                             ),
                           ),
                           child: RadioListTile<FollowUserTag>(

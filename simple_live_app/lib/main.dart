@@ -51,9 +51,7 @@ void main() async {
   await MigrationService.migrateData();
   MediaKit.ensureInitialized();
   await Hive.initFlutter(
-    (!Platform.isAndroid && !Platform.isIOS)
-        ? (await getApplicationSupportDirectory()).path
-        : null,
+    (!Platform.isAndroid && !Platform.isIOS) ? (await getApplicationSupportDirectory()).path : null,
   );
   //初始化服务
   await initServices();
@@ -123,8 +121,7 @@ Future initServices() async {
 
 void initCoreLog() {
   //日志信息
-  CoreLog.enableLog =
-      !kReleaseMode || AppSettingsController.instance.logEnable.value;
+  CoreLog.enableLog = !kReleaseMode || AppSettingsController.instance.logEnable.value;
   CoreLog.requestLogType = RequestLogType.short;
   CoreLog.onPrintLog = (level, msg) {
     switch (level) {
@@ -152,10 +149,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isDynamicColor = AppStyleSettingController.instance.isDynamic.value;
-    Color styleColor =
-        Color(AppStyleSettingController.instance.styleColor.value);
-    return DynamicColorBuilder(
-        builder: ((ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+    Color styleColor = Color(AppStyleSettingController.instance.styleColor.value);
+    return DynamicColorBuilder(builder: ((ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
       ColorScheme? lightColorScheme;
       ColorScheme? darkColorScheme;
       if (lightDynamic != null && darkDynamic != null && isDynamicColor) {
@@ -166,8 +161,7 @@ class MyApp extends StatelessWidget {
           seedColor: styleColor,
           brightness: Brightness.light,
         );
-        darkColorScheme = ColorScheme.fromSeed(
-            seedColor: styleColor, brightness: Brightness.dark);
+        darkColorScheme = ColorScheme.fromSeed(seedColor: styleColor, brightness: Brightness.dark);
       }
       return Obx(
         () => GetMaterialApp(
@@ -178,8 +172,7 @@ class MyApp extends StatelessWidget {
           darkTheme: AppStyle.darkTheme(
             fontFamily: AppStyleSettingController.instance.curFontName.value,
           ).copyWith(colorScheme: darkColorScheme),
-          themeMode: ThemeMode
-              .values[Get.find<AppSettingsController>().themeMode.value],
+          themeMode: ThemeMode.values[Get.find<AppSettingsController>().themeMode.value],
           initialRoute: RoutePath.kIndex,
           getPages: AppPages.routes,
           //国际化
@@ -187,21 +180,16 @@ class MyApp extends StatelessWidget {
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
           supportedLocales: const [Locale("zh", "CN")],
           logWriterCallback: (text, {bool? isError}) {
-            Log.addDebugLog(
-                text, (isError ?? false) ? Colors.red : Colors.grey);
+            Log.addDebugLog(text, (isError ?? false) ? Colors.red : Colors.grey);
             Log.writeLog(text, (isError ?? false) ? Level.error : Level.info);
           },
           //debugShowCheckedModeBanner: false,
-          navigatorObservers: [
-            FlutterSmartDialog.observer,
-            if (Platform.isAndroid) AppAnalyticsObserver.observer
-          ],
+          navigatorObservers: [FlutterSmartDialog.observer, if (Platform.isAndroid) AppAnalyticsObserver.observer],
           builder: FlutterSmartDialog.init(
             loadingBuilder: ((msg) => const AppLoaddingWidget()),
             //字体大小不跟随系统变化
             builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(context)
-                  .copyWith(textScaler: const TextScaler.linear(1.0)),
+              data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
               child: Stack(
                 children: [
                   //侧键返回
@@ -209,8 +197,7 @@ class MyApp extends StatelessWidget {
                     excludeFromSemantics: true,
                     gestures: <Type, GestureRecognizerFactory>{
                       FourthButtonTapGestureRecognizer:
-                          GestureRecognizerFactoryWithHandlers<
-                              FourthButtonTapGestureRecognizer>(
+                          GestureRecognizerFactoryWithHandlers<FourthButtonTapGestureRecognizer>(
                         () => FourthButtonTapGestureRecognizer(),
                         (FourthButtonTapGestureRecognizer instance) {
                           instance.onTapDown = (TapDownDetails details) async {
@@ -229,15 +216,13 @@ class MyApp extends StatelessWidget {
                     child: KeyboardListener(
                       focusNode: FocusNode(),
                       onKeyEvent: (KeyEvent event) async {
-                        if (event is KeyDownEvent &&
-                            event.logicalKey == LogicalKeyboardKey.escape) {
+                        if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
                           // ESC退出全屏
                           // 如果处于全屏状态，退出全屏
                           if (!Platform.isAndroid && !Platform.isIOS) {
                             if (await windowManager.isFullScreen()) {
                               await windowManager.setFullScreen(false);
-                              EventBus.instance
-                                  .emit(EventBus.kEscapePressed, 0);
+                              EventBus.instance.emit(EventBus.kEscapePressed, 0);
                               return;
                             }
                           }

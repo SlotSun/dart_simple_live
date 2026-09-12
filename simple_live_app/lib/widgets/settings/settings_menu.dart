@@ -38,23 +38,21 @@ class SettingsMenu<T> extends StatelessWidget {
               subtitle!,
               style: Get.textTheme.bodySmall!.copyWith(color: Colors.grey),
             ),
-      trailing: trailing ?? Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            valueMap[value]!.tr,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium!
-                .copyWith(color: Colors.grey),
+      trailing: trailing ??
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                valueMap[value]!.tr,
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.grey),
+              ),
+              AppStyle.hGap4,
+              const Icon(
+                Icons.chevron_right,
+                color: Colors.grey,
+              ),
+            ],
           ),
-          AppStyle.hGap4,
-          const Icon(
-            Icons.chevron_right,
-            color: Colors.grey,
-          ),
-        ],
-      ),
       onTap: () => openMenu(context),
     );
   }

@@ -7,8 +7,7 @@ import 'package:simple_live_app/app/app_style.dart';
 class _MenuCheckController<T> extends GetxController {
   final RxList<T> selectedItems;
 
-  _MenuCheckController(List<T> initial)
-      : selectedItems = RxList<T>.from(initial);
+  _MenuCheckController(List<T> initial) : selectedItems = RxList<T>.from(initial);
 
   void toggle(T item) {
     if (selectedItems.contains(item)) {
@@ -73,10 +72,7 @@ class SettingsMenuCheck<T> extends StatelessWidget {
         children: [
           Text(
             '$displaySelectedCount/$displayItemsCount',
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium!
-                .copyWith(color: Colors.grey),
+            style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.grey),
           ),
           AppStyle.hGap4,
           const Icon(
@@ -116,8 +112,7 @@ class SettingsMenuCheck<T> extends StatelessWidget {
     _openMenu(Get.context!, menuItems, menuInitialSelection);
   }
 
-  void _openMenu(
-      BuildContext context, List<T> items, List<T> initialSelection) {
+  void _openMenu(BuildContext context, List<T> items, List<T> initialSelection) {
     final controller = _MenuCheckController<T>(initialSelection);
 
     showModalBottomSheet(

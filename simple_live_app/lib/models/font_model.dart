@@ -21,14 +21,10 @@ class FontModel {
     return FontModel(
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
-      files:
-          (json['files'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-              [],
+      files: (json['files'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
       desc: json['desc'] as String? ?? '',
       official: json['official'] as String? ?? '',
-      license: json['license'] != null
-          ? FontLicense.fromJson(json['license'] as Map<String, dynamic>)
-          : null,
+      license: json['license'] != null ? FontLicense.fromJson(json['license'] as Map<String, dynamic>) : null,
       isDownloaded: json['isDownloaded'] as bool? ?? false,
     );
   }

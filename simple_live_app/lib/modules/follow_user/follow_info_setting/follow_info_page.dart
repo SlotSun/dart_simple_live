@@ -48,8 +48,7 @@ class FollowInfoPage extends GetView<FollowInfoController> {
                 children: [
                   CircleAvatar(
                     radius: 28,
-                    backgroundImage:
-                        NetworkImage(controller.followUser.value!.face),
+                    backgroundImage: NetworkImage(controller.followUser.value!.face),
                   ),
                   AppStyle.hGap12,
                   Expanded(
@@ -57,8 +56,7 @@ class FollowInfoPage extends GetView<FollowInfoController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          controller.followUser.value!.remark?.isNotEmpty ==
-                                  true
+                          controller.followUser.value!.remark?.isNotEmpty == true
                               ? '${controller.followUser.value!.userName} (${controller.followUser.value!.remark!})'
                               : controller.followUser.value!.userName,
                           style: const TextStyle(
@@ -78,11 +76,7 @@ class FollowInfoPage extends GetView<FollowInfoController> {
                                 '${site.name}  房间号：${controller.followUser.value!.roomId}',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.color
-                                      ?.withValues(alpha: .7),
+                                  color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: .7),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -126,8 +120,7 @@ class FollowInfoPage extends GetView<FollowInfoController> {
             padding: AppStyle.edgeInsetsA12,
             child: Obx(() {
               return ListTile(
-                title:
-                    Text('备注设置', style: Theme.of(context).textTheme.bodyLarge),
+                title: Text('备注设置', style: Theme.of(context).textTheme.bodyLarge),
                 visualDensity: VisualDensity.compact,
                 shape: RoundedRectangleBorder(
                   borderRadius: AppStyle.radius8,
@@ -140,10 +133,7 @@ class FollowInfoPage extends GetView<FollowInfoController> {
                       controller.followUser.value?.remark?.isNotEmpty == true
                           ? controller.followUser.value!.remark!
                           : '无',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium!
-                          .copyWith(color: Colors.grey),
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.grey),
                     ),
                     AppStyle.hGap4,
                     const Icon(
@@ -153,15 +143,13 @@ class FollowInfoPage extends GetView<FollowInfoController> {
                   ],
                 ),
                 onTap: () {
-                  final textController = TextEditingController(
-                      text: controller.followUser.value?.remark);
+                  final textController = TextEditingController(text: controller.followUser.value?.remark);
                   Get.dialog(
                     AlertDialog(
                       title: const Text("修改备注"),
                       content: TextField(
                         controller: textController,
-                        decoration: const InputDecoration(
-                            border: OutlineInputBorder(), hintText: "请输入备注名"),
+                        decoration: const InputDecoration(border: OutlineInputBorder(), hintText: "请输入备注名"),
                         autofocus: true,
                         onSubmitted: (value) {
                           controller.updateRemark(value.trim());

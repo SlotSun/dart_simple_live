@@ -13,8 +13,7 @@ class CustomLogInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    var time =
-        DateTime.now().millisecondsSinceEpoch - err.requestOptions.extra["ts"];
+    var time = DateTime.now().millisecondsSinceEpoch - err.requestOptions.extra["ts"];
     if (!kReleaseMode) {
       Log.e('''【HTTP请求错误-${err.type}】 耗时:${time}ms
 ${err.message}
@@ -46,8 +45,7 @@ Response Data：${err.response?.data}''', err.stackTrace);
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    var time = DateTime.now().millisecondsSinceEpoch -
-        response.requestOptions.extra["ts"];
+    var time = DateTime.now().millisecondsSinceEpoch - response.requestOptions.extra["ts"];
     if (!kReleaseMode) {
       Log.i(
         '''【HTTP请求响应】 耗时:${time}ms

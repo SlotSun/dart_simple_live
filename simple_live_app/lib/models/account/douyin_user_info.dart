@@ -11,8 +11,7 @@ class DouyinUserInfoModel {
     this.gender,
   });
 
-  factory DouyinUserInfoModel.fromJson(Map<String, dynamic> json) =>
-      DouyinUserInfoModel(
+  factory DouyinUserInfoModel.fromJson(Map<String, dynamic> json) => DouyinUserInfoModel(
         id: asT<String?>(json['id_str']),
         nickname: asT<String?>(json['nickname']),
         shortId: asT<String?>(json['short_id']),

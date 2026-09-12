@@ -21,8 +21,7 @@ class Log {
   }
 
   static void writeLog(Object content, [Level level = Level.info]) {
-    logFileWriter
-        ?.write("[${level.name.toUpperCase()}] $_currentTime：$content");
+    logFileWriter?.write("[${level.name.toUpperCase()}] $_currentTime：$content");
   }
 
   static RxList<DebugLogModel> debugLogs = <DebugLogModel>[].obs;
@@ -71,8 +70,7 @@ class Log {
     }
   }
 
-  static void e(String message, StackTrace stackTrace,
-      [bool writeFile = true]) {
+  static void e(String message, StackTrace stackTrace, [bool writeFile = true]) {
     addDebugLog('$message\r\n\r\n$stackTrace', Colors.red);
     logger.e("${DateTime.now().toString()}\n$message", stackTrace: stackTrace);
     if (writeFile) {
@@ -137,8 +135,7 @@ class LogFileWriter {
     write("Platform: ${Platform.operatingSystem}");
     write("Version: ${Platform.operatingSystemVersion}");
     write("Local: ${Platform.localeName}");
-    write(
-        "App Version: ${Utils.packageInfo.version}+${Utils.packageInfo.buildNumber}");
+    write("App Version: ${Utils.packageInfo.version}+${Utils.packageInfo.buildNumber}");
     if (Platform.isAndroid) {
       write((await deviceInfo.androidInfo).data.toString());
     } else if (Platform.isIOS) {

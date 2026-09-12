@@ -8,12 +8,10 @@ import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/modules/category/category_list_controller.dart';
 
-class CategoryController extends GetxController
-    with GetSingleTickerProviderStateMixin {
+class CategoryController extends GetxController with GetSingleTickerProviderStateMixin {
   late TabController tabController;
   CategoryController() {
-    tabController =
-        TabController(length: Sites.supportSites.length, vsync: this);
+    tabController = TabController(length: Sites.supportSites.length, vsync: this);
   }
   StreamSubscription<dynamic>? streamSubscription;
   @override
@@ -36,8 +34,7 @@ class CategoryController extends GetxController
   void refreshOrScrollTop() {
     var tabIndex = tabController.index;
     BasePageController controller;
-    controller =
-        Get.find<CategoryListController>(tag: Sites.supportSites[tabIndex].id);
+    controller = Get.find<CategoryListController>(tag: Sites.supportSites[tabIndex].id);
     controller.scrollToTopOrRefresh();
   }
 

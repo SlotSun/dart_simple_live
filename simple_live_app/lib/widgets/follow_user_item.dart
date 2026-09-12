@@ -50,9 +50,7 @@ class FollowUserItem extends StatelessWidget {
                         width: 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          color: item.liveStatus.value == 2
-                              ? Colors.green
-                              : Colors.grey,
+                          color: item.liveStatus.value == 2 ? Colors.green : Colors.grey,
                           borderRadius: AppStyle.radius12,
                         ),
                       ),
@@ -62,8 +60,7 @@ class FollowUserItem extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.normal,
-                          color:
-                              item.liveStatus.value == 2 ? null : Colors.grey,
+                          color: item.liveStatus.value == 2 ? null : Colors.grey,
                         ),
                       ),
                     ],

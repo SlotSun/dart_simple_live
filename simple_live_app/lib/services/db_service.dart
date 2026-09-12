@@ -45,8 +45,7 @@ class DBService extends GetxService {
       return getFollowTag(tag)!;
     }
     String? lastKey = tagBox.keys.lastOrNull;
-    final String uniqueId =
-        FractionalIndexing.generateKeyBetween(lastKey, null);
+    final String uniqueId = FractionalIndexing.generateKeyBetween(lastKey, null);
     final followUserTag = FollowUserTag(id: uniqueId, tag: tag, userId: []);
     await tagBox.put(uniqueId, followUserTag);
     return followUserTag;
@@ -83,9 +82,7 @@ class DBService extends GetxService {
   Future<int> cleanupTombstones(int beforeTimestamp) async {
     final keysToDelete = <String>[];
     for (var entry in followBox.toMap().entries) {
-      if (entry.value.deleted &&
-          entry.value.updateTime > 0 &&
-          entry.value.updateTime < beforeTimestamp) {
+      if (entry.value.deleted && entry.value.updateTime > 0 && entry.value.updateTime < beforeTimestamp) {
         keysToDelete.add(entry.key as String);
       }
     }

@@ -83,11 +83,9 @@ class FollowAppSettingsController extends BaseController {
   void updateTagOrder(int oldIndex, int newIndex) {
     if (newIndex > oldIndex) newIndex -= 1; // 处理索引调整
     final item = userTagList.removeAt(oldIndex);
-    String newTagKey = FractionalIndexing.generateKeyBetween(
-        newIndex > 0 ? userTagList[newIndex - 1].id : null,
+    String newTagKey = FractionalIndexing.generateKeyBetween(newIndex > 0 ? userTagList[newIndex - 1].id : null,
         newIndex < userTagList.length ? userTagList[newIndex].id : null);
-    final newTag =
-        FollowUserTag(id: newTagKey, tag: item.tag, userId: item.userId);
+    final newTag = FollowUserTag(id: newTagKey, tag: item.tag, userId: item.userId);
     FollowService.instance.updateFollowTagOrder(item, newTag);
     updateTagList();
   }
@@ -101,66 +99,62 @@ class FollowAppSettingsController extends BaseController {
   void showTagsManager() {
     Utils.showBottomSheet(
       title: '标签管理',
-      child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AppStyle.divider,
-            ListTile(
-              title: const Text("添加标签"),
-              leading: const Icon(Icons.add),
-              onTap: () {
-                editTagDialog("添加标签");
+      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        AppStyle.divider,
+        ListTile(
+          title: const Text("添加标签"),
+          leading: const Icon(Icons.add),
+          onTap: () {
+            editTagDialog("添加标签");
+          },
+        ),
+        AppStyle.divider,
+        // 列表内容
+        Expanded(
+          child: Obx(
+            () => ReorderableListView.builder(
+              buildDefaultDragHandles: false,
+              itemCount: userTagList.length,
+              itemBuilder: (context, index) {
+                // 偏移
+                FollowUserTag item = userTagList[index];
+                return ListTile(
+                  key: ValueKey(item.id),
+                  title: GestureDetector(
+                    child: Text(item.tag),
+                    onLongPress: () {
+                      {
+                        editTagDialog("修改标签", followUserTag: item);
+                      }
+                    },
+                  ),
+                  leading: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      removeTag(item);
+                    },
+                  ),
+                  trailing: ReorderableDelayedDragStartListener(
+                    index: index,
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12.0),
+                      child: Icon(Icons.drag_handle),
+                    ),
+                  ),
+                );
+              },
+              onReorderItem: (int oldIndex, int newIndex) {
+                updateTagOrder(oldIndex, newIndex);
               },
             ),
-            AppStyle.divider,
-            // 列表内容
-            Expanded(
-              child: Obx(
-                () => ReorderableListView.builder(
-                  buildDefaultDragHandles: false,
-                  itemCount: userTagList.length,
-                  itemBuilder: (context, index) {
-                    // 偏移
-                    FollowUserTag item = userTagList[index];
-                    return ListTile(
-                      key: ValueKey(item.id),
-                      title: GestureDetector(
-                        child: Text(item.tag),
-                        onLongPress: () {
-                          {
-                            editTagDialog("修改标签", followUserTag: item);
-                          }
-                        },
-                      ),
-                      leading: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          removeTag(item);
-                        },
-                      ),
-                      trailing: ReorderableDelayedDragStartListener(
-                        index: index,
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12.0),
-                          child: Icon(Icons.drag_handle),
-                        ),
-                      ),
-                    );
-                  },
-                  onReorderItem: (int oldIndex, int newIndex) {
-                    updateTagOrder(oldIndex, newIndex);
-                  },
-                ),
-              ),
-            ),
-          ]),
+          ),
+        ),
+      ]),
     );
   }
 
   void editTagDialog(String title, {FollowUserTag? followUserTag}) {
-    final TextEditingController tagEditController =
-        TextEditingController(text: followUserTag?.tag);
+    final TextEditingController tagEditController = TextEditingController(text: followUserTag?.tag);
     bool upMode = title == "添加标签" ? true : false;
     Get.dialog(
       AlertDialog(
@@ -197,9 +191,7 @@ class FollowAppSettingsController extends BaseController {
                   ),
                 ),
                 onSubmitted: (tag) {
-                  upMode
-                      ? addTag(tagEditController.text)
-                      : updateTagName(followUserTag!, tagEditController.text);
+                  upMode ? addTag(tagEditController.text) : updateTagName(followUserTag!, tagEditController.text);
                   Get.back();
                 },
               ),
@@ -262,10 +254,8 @@ class FollowAppSettingsController extends BaseController {
     var histories = HistoryService.instance.getHistories();
     if (histories.isEmpty || followList.isEmpty) return [];
     // 筛选出历史记录里已关注的
-    final followedIds =
-        followList.map((follow) => follow.id).toSet(); // set性能略优
-    final followedHistories =
-        histories.where((history) => followedIds.contains(history.id)).toList();
+    final followedIds = followList.map((follow) => follow.id).toSet(); // set性能略优
+    final followedHistories = histories.where((history) => followedIds.contains(history.id)).toList();
     if (followedHistories.isEmpty) return [];
 
     List<Condition> conditions = [
@@ -283,12 +273,10 @@ class FollowAppSettingsController extends BaseController {
       ),
     ];
     // 根据动态条件筛选出需要清理的 关注id
-    final df =
-        dynamicFilter(followedHistories, conditions, takeLast: takeLast.value);
+    final df = dynamicFilter(followedHistories, conditions, takeLast: takeLast.value);
     final uidsToClean = df.map((history) => history.id).toSet();
 
-    final autoCleanPool =
-        followList.where((follow) => uidsToClean.contains(follow.id)).toList();
+    final autoCleanPool = followList.where((follow) => uidsToClean.contains(follow.id)).toList();
     return autoCleanPool;
   }
 }

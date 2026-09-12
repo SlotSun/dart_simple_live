@@ -65,9 +65,7 @@ class PageGridView extends StatelessWidget {
             right: 0,
             child: // 加载更多按钮
                 Visibility(
-              visible: (Platform.isWindows ||
-                      Platform.isLinux ||
-                      Platform.isMacOS) &&
+              visible: (Platform.isWindows || Platform.isLinux || Platform.isMacOS) &&
                   pageController.canLoadMore.value &&
                   !pageController.pageLoadding.value &&
                   !pageController.pageEmpty.value,
@@ -84,9 +82,7 @@ class PageGridView extends StatelessWidget {
             right: 12,
             child: // 加载更多按钮
                 Visibility(
-              visible: (Platform.isWindows ||
-                      Platform.isLinux ||
-                      Platform.isMacOS) &&
+              visible: (Platform.isWindows || Platform.isLinux || Platform.isMacOS) &&
                   pageController.canLoadMore.value &&
                   !pageController.pageLoadding.value &&
                   !pageController.pageEmpty.value &&

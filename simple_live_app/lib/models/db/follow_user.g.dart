@@ -77,7 +77,5 @@ class FollowUserAdapter extends TypeAdapter<FollowUser> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is FollowUserAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+      other is FollowUserAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }

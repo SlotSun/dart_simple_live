@@ -18,9 +18,7 @@ class FollowSnapshotAdapter extends TypeAdapter<FollowSnapshot> {
     };
     return FollowSnapshot(
       expireAt: fields[0] == null ? 0 : (fields[0] as num).toInt(),
-      followSnapshotItems: fields[1] == null
-          ? []
-          : (fields[1] as List).cast<FollowSnapshotItem>(),
+      followSnapshotItems: fields[1] == null ? [] : (fields[1] as List).cast<FollowSnapshotItem>(),
     );
   }
 
@@ -40,9 +38,7 @@ class FollowSnapshotAdapter extends TypeAdapter<FollowSnapshot> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is FollowSnapshotAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+      other is FollowSnapshotAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }
 
 class FollowSnapshotItemAdapter extends TypeAdapter<FollowSnapshotItem> {
@@ -86,7 +82,5 @@ class FollowSnapshotItemAdapter extends TypeAdapter<FollowSnapshotItem> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is FollowSnapshotItemAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+      other is FollowSnapshotItemAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }

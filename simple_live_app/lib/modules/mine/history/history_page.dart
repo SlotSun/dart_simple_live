@@ -90,8 +90,7 @@ class HistoryPage extends GetView<HistoryController> {
                 AppNavigator.toLiveRoomDetail(site: site, roomId: item.roomId);
               },
               onLongPress: () async {
-                var result =
-                    await Utils.showAlertDialog("确定要删除此记录吗?", title: "删除记录");
+                var result = await Utils.showAlertDialog("确定要删除此记录吗?", title: "删除记录");
                 if (!result) {
                   return;
                 }

@@ -30,10 +30,7 @@ class SettingsSwitch extends StatelessWidget {
       subtitle: subtitle != null
           ? Text(
               subtitle!,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall!
-                  .copyWith(color: Colors.grey),
+              style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.grey),
             )
           : null,
       value: value,

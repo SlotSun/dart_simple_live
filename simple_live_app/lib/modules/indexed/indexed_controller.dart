@@ -46,8 +46,7 @@ class IndexedController extends GetxController {
       }
     } else {
       if (index.value == i) {
-        EventBus.instance
-            .emit<int>(EventBus.kBottomNavigationBarClicked, items[i].index);
+        EventBus.instance.emit<int>(EventBus.kBottomNavigationBarClicked, items[i].index);
       }
     }
 
@@ -57,9 +56,7 @@ class IndexedController extends GetxController {
   @override
   void onInit() {
     Future.delayed(Duration.zero, showFirstRun);
-    items.value = AppSettingsController.instance.homeSort
-        .map((key) => Constant.allHomePages[key]!)
-        .toList();
+    items.value = AppSettingsController.instance.homeSort.map((key) => Constant.allHomePages[key]!).toList();
     setIndex(0);
     super.onInit();
   }

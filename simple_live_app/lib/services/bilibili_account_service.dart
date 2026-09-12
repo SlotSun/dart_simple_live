@@ -11,8 +11,7 @@ import 'package:simple_live_app/services/local_storage_service.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 
 class BiliBiliAccountService extends GetxService {
-  static BiliBiliAccountService get instance =>
-      Get.find<BiliBiliAccountService>();
+  static BiliBiliAccountService get instance => Get.find<BiliBiliAccountService>();
 
   var logined = false.obs;
 
@@ -22,8 +21,7 @@ class BiliBiliAccountService extends GetxService {
 
   @override
   void onInit() {
-    cookie = LocalStorageService.instance
-        .getValue(LocalStorageService.kBilibiliCookie, "");
+    cookie = LocalStorageService.instance.getValue(LocalStorageService.kBilibiliCookie, "");
     logined.value = cookie.isNotEmpty;
     loadUserInfo();
     super.onInit();
@@ -62,8 +60,7 @@ class BiliBiliAccountService extends GetxService {
 
   void setCookie(String cookie) {
     this.cookie = cookie;
-    LocalStorageService.instance
-        .setValue(LocalStorageService.kBilibiliCookie, cookie);
+    LocalStorageService.instance.setValue(LocalStorageService.kBilibiliCookie, cookie);
     logined.value = cookie.isNotEmpty;
   }
 
@@ -72,8 +69,7 @@ class BiliBiliAccountService extends GetxService {
     uid = 0;
     name.value = "未登录";
     setSite();
-    LocalStorageService.instance
-        .setValue(LocalStorageService.kBilibiliCookie, "");
+    LocalStorageService.instance.setValue(LocalStorageService.kBilibiliCookie, "");
     logined.value = false;
 
     if (Platform.isAndroid || Platform.isIOS) {

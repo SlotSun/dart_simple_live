@@ -8,12 +8,10 @@ import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/modules/home/home_list_controller.dart';
 import 'package:simple_live_app/routes/route_path.dart';
 
-class HomeController extends GetxController
-    with GetSingleTickerProviderStateMixin {
+class HomeController extends GetxController with GetSingleTickerProviderStateMixin {
   late TabController tabController;
   HomeController() {
-    tabController =
-        TabController(length: Sites.supportSites.length, vsync: this);
+    tabController = TabController(length: Sites.supportSites.length, vsync: this);
   }
 
   StreamSubscription<dynamic>? streamSubscription;
@@ -38,8 +36,7 @@ class HomeController extends GetxController
   void refreshOrScrollTop() {
     var tabIndex = tabController.index;
     BasePageController controller;
-    controller =
-        Get.find<HomeListController>(tag: Sites.supportSites[tabIndex].id);
+    controller = Get.find<HomeListController>(tag: Sites.supportSites[tabIndex].id);
     controller.scrollToTopOrRefresh();
   }
 

@@ -1,4 +1,4 @@
-﻿T? asT<T>(dynamic value) {
+T? asT<T>(dynamic value) {
   if (value is T) {
     return value;
   }

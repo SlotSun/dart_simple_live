@@ -80,8 +80,7 @@ class AccountController extends GetxController {
   // 需要用户手动复制抖音的Cookie
   void douyinTap() async {
     if (PlatformService.instance.douyinLogined.value) {
-      var result =
-          await Utils.showAlertDialog("确定要清除抖音Cookie吗？", title: "清除Cookie");
+      var result = await Utils.showAlertDialog("确定要清除抖音Cookie吗？", title: "清除Cookie");
       if (result) {
         PlatformService.instance.douyinLogout();
       }

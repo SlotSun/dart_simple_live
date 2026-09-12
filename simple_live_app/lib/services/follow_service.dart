@@ -87,8 +87,7 @@ class FollowService extends GetxService {
     super.onInit();
   }
 
-  Future<void> updateTagName(
-      FollowUserTag followUserTag, String newTagName) async {
+  Future<void> updateTagName(FollowUserTag followUserTag, String newTagName) async {
     final FollowUserTag newTag = followUserTag.copyWith(tag: newTagName);
     updateFollowUserTag(newTag);
     // update item's tag when update tagName
@@ -208,8 +207,7 @@ class FollowService extends GetxService {
     if (toRemove.isNotEmpty) {
       DBService.instance.updateFollowTag(tag);
     }
-    listSortByMethod(curTagFollowList,
-        AppSettingsController.instance.followSortMethod.value);
+    listSortByMethod(curTagFollowList, AppSettingsController.instance.followSortMethod.value);
   }
 
   void updateFollowTagOrder(FollowUserTag oldTag, FollowUserTag newTag) {
@@ -279,8 +277,7 @@ class FollowService extends GetxService {
 
   // 更新关注的历史记录
   Future<void> updateFollowHistory(History history) async {
-    var follow =
-        followList.where((follow) => follow.id == history.id).firstOrNull;
+    var follow = followList.where((follow) => follow.id == history.id).firstOrNull;
     if (follow == null) {
       return;
     } else {
@@ -298,9 +295,7 @@ class FollowService extends GetxService {
       updateTimer?.cancel();
       _refreshCycle = 0;
       updateTimer = Timer.periodic(
-        Duration(
-            minutes:
-                AppSettingsController.instance.autoUpdateFollowDuration.value),
+        Duration(minutes: AppSettingsController.instance.autoUpdateFollowDuration.value),
         (timer) {
           CoreLog.i("Update Follow Timer - Cycle: $_refreshCycle");
           loadData(updateStatus: true, cycle: _refreshCycle);
@@ -330,9 +325,7 @@ class FollowService extends GetxService {
     if (followSnapshot != null &&
         followSnapshot.expireAt > DateTime.now().microsecondsSinceEpoch &&
         followSnapshotEnable) {
-      final snapshotMap = {
-        for (var item in followSnapshot.followSnapshotItems) item.id: item
-      };
+      final snapshotMap = {for (var item in followSnapshot.followSnapshotItems) item.id: item};
       for (var item in list) {
         final resItem = snapshotMap[item.id];
         if (resItem != null) {
@@ -343,7 +336,7 @@ class FollowService extends GetxService {
       Log.i("FollowService: follow-snapshot has recovered, expireAt: ${followSnapshot.expireAt}");
     }
     followList.assignAll(list);
-    if(_snap){
+    if (_snap) {
       liveListSort();
     }
     _buildDormantList();
@@ -377,7 +370,7 @@ class FollowService extends GetxService {
 
   Future<void> loadData({bool updateStatus = true, int? cycle}) async {
     // snapshot 恢复跳过第一次状态更新
-    if(_snap){
+    if (_snap) {
       _snap = false;
       return;
     }
@@ -390,9 +383,7 @@ class FollowService extends GetxService {
 
   void multiRoundPriority() {
     final historyList = DBService.instance.getHistories();
-    final Map<String, int> historyRankMap = {
-      for (var i = 0; i < historyList.length; i++) historyList[i].id: i
-    };
+    final Map<String, int> historyRankMap = {for (var i = 0; i < historyList.length; i++) historyList[i].id: i};
     final int maxRank = historyList.isNotEmpty ? historyList.length : 1;
 
     Duration maxDuration = const Duration();
@@ -402,8 +393,7 @@ class FollowService extends GetxService {
         maxDuration = duration;
       }
     }
-    final double maxDurationInSeconds =
-        maxDuration.inSeconds > 0 ? maxDuration.inSeconds.toDouble() : 1.0;
+    final double maxDurationInSeconds = maxDuration.inSeconds > 0 ? maxDuration.inSeconds.toDouble() : 1.0;
 
     // 休眠用户 ID 集合
     final dormantIds = dormantFollowList.map((u) => u.id).toSet();
@@ -419,27 +409,21 @@ class FollowService extends GetxService {
       const double wOffline = 1 - wOnline;
 
       // 动态权重
-      double normDurationA =
-          a.watchDurationSec.toDouble() /
-              maxDurationInSeconds;
+      double normDurationA = a.watchDurationSec.toDouble() / maxDurationInSeconds;
       int rankA = historyRankMap[a.id] ?? maxRank;
       double normRecencyA = (maxRank - rankA).toDouble() / maxRank;
       double wDormantA = dormantIds.contains(a.id) ? 0.0 : 1.0;
-      double scoreA =
-          ((wDuration * normDurationA) + (wRecency * normRecencyA)) *
-              (a.liveStatus.value == 2 ? wOnline : wOffline) *
-              wDormantA;
+      double scoreA = ((wDuration * normDurationA) + (wRecency * normRecencyA)) *
+          (a.liveStatus.value == 2 ? wOnline : wOffline) *
+          wDormantA;
 
-      double normDurationB =
-          b.watchDurationSec.toDouble() /
-              maxDurationInSeconds;
+      double normDurationB = b.watchDurationSec.toDouble() / maxDurationInSeconds;
       int rankB = historyRankMap[b.id] ?? maxRank;
       double normRecencyB = (maxRank - rankB).toDouble() / maxRank;
       double wDormantB = dormantIds.contains(b.id) ? 0.0 : 1.0;
-      double scoreB =
-          ((wDuration * normDurationB) + (wRecency * normRecencyB)) *
-              (b.liveStatus.value == 2 ? wOnline : wOffline) *
-              wDormantB;
+      double scoreB = ((wDuration * normDurationB) + (wRecency * normRecencyB)) *
+          (b.liveStatus.value == 2 ? wOnline : wOffline) *
+          wDormantB;
 
       return scoreB.compareTo(scoreA);
     });
@@ -461,18 +445,15 @@ class FollowService extends GetxService {
       final middleUsers = followList.sublist(topNCount, middlePartEndIndex);
       if (cycle == 0) {
         usersToUpdate = topNUsers;
-        CoreLog.i(
-            "Update Follow: Cycle 0, updating top ${usersToUpdate.length}/$totalUsers users.");
+        CoreLog.i("Update Follow: Cycle 0, updating top ${usersToUpdate.length}/$totalUsers users.");
       } else {
         usersToUpdate = [...topNUsers, ...middleUsers];
-        CoreLog.i(
-            "Update Follow: Cycle 1, updating top+middle ${usersToUpdate.length}/$totalUsers users.");
+        CoreLog.i("Update Follow: Cycle 1, updating top+middle ${usersToUpdate.length}/$totalUsers users.");
       }
     } else {
       usersToUpdate = List.from(followList);
       if (cycle != null) {
-        CoreLog.i(
-            "Update Follow: List <= 100, updating all ${usersToUpdate.length} users.");
+        CoreLog.i("Update Follow: List <= 100, updating all ${usersToUpdate.length} users.");
       }
     }
     _totalToUpdate = usersToUpdate.length;
@@ -485,8 +466,7 @@ class FollowService extends GetxService {
       return;
     }
 
-    var threadCount =
-        AppSettingsController.instance.updateFollowThreadCount.value;
+    var threadCount = AppSettingsController.instance.updateFollowThreadCount.value;
 
     var pool = Pool(threadCount);
     var tasks = <Future>[];
@@ -500,11 +480,8 @@ class FollowService extends GetxService {
     // 增量检查：自动解冻 lastWatchTime >= cutoff 的用户
     final threshold = AppSettingsController.instance.dormancyThreshold.value;
     if (threshold > 0 && dormantFollowList.isNotEmpty) {
-      final cutoff = DateTime.now()
-          .subtract(Duration(days: threshold))
-          .millisecondsSinceEpoch ~/ 1000;
-      dormantFollowList.removeWhere((u) =>
-          u.lastWatchTime != null && u.lastWatchTime! >= cutoff);
+      final cutoff = DateTime.now().subtract(Duration(days: threshold)).millisecondsSinceEpoch ~/ 1000;
+      dormantFollowList.removeWhere((u) => u.lastWatchTime != null && u.lastWatchTime! >= cutoff);
     }
 
     // frequency of snapshot-saving and expireAt calculation depend on user-setting: auto-update
@@ -522,8 +499,7 @@ class FollowService extends GetxService {
   Future updateLiveInformation(FollowUser item) async {
     try {
       var site = Sites.allSites[item.siteId]!;
-      LiveRoomDetail detail =
-          await site.liveSite.getRoomDetail(roomId: item.roomId);
+      LiveRoomDetail detail = await site.liveSite.getRoomDetail(roomId: item.roomId);
       item.liveStatus.value = detail.status ? 2 : 1;
       item.cover.value = detail.status ? detail.cover : "";
       item.title.value = detail.title;
@@ -547,8 +523,7 @@ class FollowService extends GetxService {
   }
 
   void liveListSort() {
-    listSortByMethod(
-        followList, AppSettingsController.instance.followSortMethod.value);
+    listSortByMethod(followList, AppSettingsController.instance.followSortMethod.value);
     liveList.assignAll(followList.where((x) => x.liveStatus.value == 2));
     notLiveList.assignAll(followList.where((x) => x.liveStatus.value == 1));
   }
@@ -627,8 +602,7 @@ class FollowService extends GetxService {
       if (dir.isEmpty) {
         return;
       }
-      var jsonFile = File(
-          '$dir/SimpleLive_${DateTime.now().millisecondsSinceEpoch ~/ 1000}.json');
+      var jsonFile = File('$dir/SimpleLive_${DateTime.now().millisecondsSinceEpoch ~/ 1000}.json');
       var jsonText = generateJson();
       await jsonFile.writeAsString(jsonText);
       SmartDialog.showToast("已导出关注列表");
@@ -806,17 +780,13 @@ class FollowService extends GetxService {
         var roman = PinyinHelper.getShortPinyin(follow.remark!).normalize();
         follow.romanName = roman;
       } else {
-        follow.romanName =
-            PinyinHelper.getShortPinyin(follow.userName).normalize();
+        follow.romanName = PinyinHelper.getShortPinyin(follow.userName).normalize();
       }
       // 手动同步 watchDurationSec
-      var historyItem = historyListTemp
-          .where((history) => follow.id == history.id)
-          .firstOrNull;
+      var historyItem = historyListTemp.where((history) => follow.id == history.id).firstOrNull;
       // 用户可能存在删除历史记录可能
       if (historyItem != null) {
-        follow.watchDurationSec =
-            historyItem.watchDuration!.toDuration().inSeconds;
+        follow.watchDurationSec = historyItem.watchDuration!.toDuration().inSeconds;
       }
       await DBService.instance.addFollow(follow);
     }
@@ -840,16 +810,14 @@ class FollowService extends GetxService {
     }
     await DBService.instance.tagBox.clear();
     await DBService.instance.tagBox.putAll(res);
-    Log.i(
-        "Follow-Service: data check down，follows:${followUserListTemp.length}，tags:${tagMap.length}");
+    Log.i("Follow-Service: data check down，follows:${followUserListTemp.length}，tags:${tagMap.length}");
   }
 
   /// 清理墓碑记录：删除 updateTime 超过15天的墓碑
   Future<void> cleanupTombstones() async {
     // 墓碑保留15天 = 15 * 24 * 60 * 60 秒
     const int tombstoneTTL = 15 * 24 * 60 * 60;
-    final beforeTimestamp =
-        (DateTime.now().millisecondsSinceEpoch ~/ 1000) - tombstoneTTL;
+    final beforeTimestamp = (DateTime.now().millisecondsSinceEpoch ~/ 1000) - tombstoneTTL;
     final count = await DBService.instance.cleanupTombstones(beforeTimestamp);
     if (count > 0) {
       Log.i("Follow-Service: cleaned $count tombstone records");

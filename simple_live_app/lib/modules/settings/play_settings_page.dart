@@ -121,7 +121,7 @@ class PlaySettingsPage extends GetView<AppSettingsController> {
                 ),
                 AppStyle.divider,
                 Obx(
-                      () => SettingsSwitch(
+                  () => SettingsSwitch(
                       title: "禁用滑动控制-音量/亮度",
                       value: controller.verticalDragLock.value,
                       onChanged: (e) {

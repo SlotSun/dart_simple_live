@@ -12,8 +12,7 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 abstract class DanmakuMask implements RustOpaqueInterface {
   /// 批量判断是否允许
   /// 返回 Vec<u8>：1 = 允许，0 = 屏蔽
-  Future<Uint8List> allowListBatch(
-      {required List<String> texts, required BigInt nowMs});
+  Future<Uint8List> allowListBatch({required List<String> texts, required BigInt nowMs});
 
   @override
   void dispose();

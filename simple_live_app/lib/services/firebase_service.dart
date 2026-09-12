@@ -26,7 +26,7 @@ class FirebaseService extends GetxService {
         FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
         return true;
       };
-    }else{
+    } else {
       FlutterError.onError = FlutterError.dumpErrorToConsole;
     }
   }

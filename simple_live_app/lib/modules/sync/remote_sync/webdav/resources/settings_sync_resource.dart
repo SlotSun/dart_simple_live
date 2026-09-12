@@ -40,7 +40,7 @@ class SettingsSyncResource implements SyncResource<Map<String, dynamic>> {
       var platform = Platform.operatingSystem;
       if (data.containsKey(platform)) {
         data[platform].forEach(
-              (key, value) {
+          (key, value) {
             LocalStorageService.instance.setValue(key, value);
           },
         );
@@ -50,9 +50,7 @@ class SettingsSyncResource implements SyncResource<Map<String, dynamic>> {
       // 低于v1.8.5需要升级数据
       LocalStorageService.instance.setValue(
         LocalStorageService.kHiveDbVer,
-        (data as Map).containsKey(LocalStorageService.kHiveDbVer)
-            ? data[LocalStorageService.kHiveDbVer]
-            : "10805",
+        (data as Map).containsKey(LocalStorageService.kHiveDbVer) ? data[LocalStorageService.kHiveDbVer] : "10805",
       );
     } catch (e) {
       Log.e("同步用户设置失败：$e", StackTrace.current);
@@ -68,8 +66,7 @@ class SettingsSyncResource implements SyncResource<Map<String, dynamic>> {
   }
 
   @override
-  Map<String, dynamic> merge(Map<String, dynamic> local,
-      Map<String, dynamic> remote) {
+  Map<String, dynamic> merge(Map<String, dynamic> local, Map<String, dynamic> remote) {
     return {...local, ...remote};
   }
 }

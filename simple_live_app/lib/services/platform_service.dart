@@ -16,8 +16,7 @@ class PlatformService extends GetxService {
 
   // ==================== 抖音 ====================
 
-  final _douyinSite =
-      (Sites.allSites[Constant.kDouyin]!.liveSite as DouyinSite);
+  final _douyinSite = (Sites.allSites[Constant.kDouyin]!.liveSite as DouyinSite);
 
   var douyinLogined = false.obs;
   var douyinCookie = "";
@@ -25,11 +24,9 @@ class PlatformService extends GetxService {
   var douyinHlsFirst = false;
 
   void _initDouyin() {
-    douyinHlsFirst = LocalStorageService.instance
-        .getValue(LocalStorageService.kDouyinHlsFirst, false);
+    douyinHlsFirst = LocalStorageService.instance.getValue(LocalStorageService.kDouyinHlsFirst, false);
     _setDouyinHlsFirst();
-    douyinCookie = LocalStorageService.instance
-        .getValue(LocalStorageService.kDouyinCookie, "");
+    douyinCookie = LocalStorageService.instance.getValue(LocalStorageService.kDouyinCookie, "");
     douyinLogined.value = douyinCookie.isNotEmpty;
     loadDouyinUserInfo();
   }
@@ -66,14 +63,12 @@ class PlatformService extends GetxService {
 
   void setDouyinCookie(String cookie) {
     douyinCookie = cookie;
-    LocalStorageService.instance
-        .setValue(LocalStorageService.kDouyinCookie, cookie);
+    LocalStorageService.instance.setValue(LocalStorageService.kDouyinCookie, cookie);
   }
 
   void douyinLogout() async {
     douyinCookie = "";
-    LocalStorageService.instance
-        .setValue(LocalStorageService.kDouyinCookie, "");
+    LocalStorageService.instance.setValue(LocalStorageService.kDouyinCookie, "");
     douyinLogined.value = false;
     douyinName.value = "未登录";
     _setDouyinSiteCookie();
@@ -85,14 +80,12 @@ class PlatformService extends GetxService {
 
   // ==================== 虎牙 ====================
 
-  static const String defaultHuyaSdkUa =
-      "HYSDK(Windows,30000002)_APP(pc_exe&7090000&official)_SDK(trans&2.35.0.5996)";
+  static const String defaultHuyaSdkUa = "HYSDK(Windows,30000002)_APP(pc_exe&7090000&official)_SDK(trans&2.35.0.5996)";
 
   var huyaSdkUa = "".obs;
 
   void _initHuya() {
-    huyaSdkUa.value = LocalStorageService.instance
-        .getValue(LocalStorageService.kHuyaSdkUa, "");
+    huyaSdkUa.value = LocalStorageService.instance.getValue(LocalStorageService.kHuyaSdkUa, "");
     _applyHuyaSdkUa();
   }
 
@@ -114,8 +107,7 @@ class PlatformService extends GetxService {
         return;
       }
       huyaSdkUa.value = ua;
-      await LocalStorageService.instance
-          .setValue(LocalStorageService.kHuyaSdkUa, ua);
+      await LocalStorageService.instance.setValue(LocalStorageService.kHuyaSdkUa, ua);
       HuyaSite.HYSDK_UA = ua;
       SmartDialog.dismiss();
       SmartDialog.showToast("虎牙配置已更新");

@@ -105,8 +105,7 @@ extension PermissionActions on Permission {
   ///
   /// Returns the new [PermissionStatus].
   Future<PermissionStatus> request() async {
-    final permissionStatus =
-        (await [this].request())[this] ?? PermissionStatus.denied;
+    final permissionStatus = (await [this].request())[this] ?? PermissionStatus.denied;
 
     if (permissionStatus.isDenied) {
       _onDenied?.call();
@@ -196,6 +195,5 @@ extension PermissionListActions on List<Permission> {
   /// been granted before.
   ///
   /// Returns a [Map] containing the status per requested [Permission].
-  Future<Map<Permission, PermissionStatus>> request() =>
-      _handler.requestPermissions(this);
+  Future<Map<Permission, PermissionStatus>> request() => _handler.requestPermissions(this);
 }

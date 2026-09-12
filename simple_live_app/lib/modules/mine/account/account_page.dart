@@ -59,9 +59,7 @@ class AccountPage extends GetView<AccountController> {
               ),
               title: const Text("虎牙直播"),
               subtitle: Text(
-                PlatformService.instance.huyaSdkUa.value.isEmpty
-                    ? "点击拉取最新配置"
-                    : "已自定义 HYSDK_UA",
+                PlatformService.instance.huyaSdkUa.value.isEmpty ? "点击拉取最新配置" : "已自定义 HYSDK_UA",
               ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () async {

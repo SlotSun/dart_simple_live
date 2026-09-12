@@ -71,10 +71,7 @@ class SettingsNumber extends StatelessWidget {
             Text(
               displayValue ?? "$value$unit",
               textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium!
-                  .copyWith(color: Colors.grey),
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.grey),
             ),
             IconButton(
               padding: AppStyle.edgeInsetsA4,

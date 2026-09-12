@@ -11,12 +11,10 @@ class RemoteSyncWebDAVConfigPage extends StatefulWidget {
   const RemoteSyncWebDAVConfigPage({super.key});
 
   @override
-  State<RemoteSyncWebDAVConfigPage> createState() =>
-      _RemoteSyncWebDAVConfigPageState();
+  State<RemoteSyncWebDAVConfigPage> createState() => _RemoteSyncWebDAVConfigPageState();
 }
 
-class _RemoteSyncWebDAVConfigPageState
-    extends State<RemoteSyncWebDAVConfigPage> {
+class _RemoteSyncWebDAVConfigPageState extends State<RemoteSyncWebDAVConfigPage> {
   late TextEditingController _urlController;
   late TextEditingController _userNameController;
   late TextEditingController _passwordController;
@@ -50,14 +48,12 @@ class _RemoteSyncWebDAVConfigPageState
               Utils.showInformationHelpDialog(
                 content: [
                   const Text("此功能可以将您的数据备份到 WebDAV 服务器中或者进行数据恢复.\n"),
-                  const Text(
-                      "WebDAV 服务器地址请以 http:// 或 https:// 开头，如坚果云(点击复制)："),
+                  const Text("WebDAV 服务器地址请以 http:// 或 https:// 开头，如坚果云(点击复制)："),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: InkWell(
                       onTap: () {
-                        Clipboard.setData(const ClipboardData(
-                            text: "https://dav.jianguoyun.com/dav/"));
+                        Clipboard.setData(const ClipboardData(text: "https://dav.jianguoyun.com/dav/"));
                         SmartDialog.showToast("复制成功");
                       },
                       child: const Text("https://dav.jianguoyun.com/dav/"),

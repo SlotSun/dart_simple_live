@@ -16,7 +16,6 @@ class SuperChatCard extends StatefulWidget {
 }
 
 class _SuperChatCardState extends State<SuperChatCard> {
-
   @override
   void initState() {
     super.initState();
@@ -85,8 +84,7 @@ class _SuperChatCardState extends State<SuperChatCard> {
             ),
             Container(
               decoration: BoxDecoration(
-                color:
-                    Utils.convertHexColor(widget.message.backgroundBottomColor),
+                color: Utils.convertHexColor(widget.message.backgroundBottomColor),
               ),
               padding: AppStyle.edgeInsetsA8,
               child: SelectableText(

@@ -34,7 +34,7 @@ class HistoryService extends GetxService {
     _updateHistory();
     _stopwatch.reset();
     History? history = DBService.instance.getHistory(roomId);
-    if(history != null){
+    if (history != null) {
       _loadHistory(history);
     }
   }
@@ -70,8 +70,7 @@ class HistoryService extends GetxService {
     // 累加到当前历史记录
     _elapsed = _stopwatch.elapsed;
     Duration curTime = _oldWatchedDuration + _elapsed;
-    Log.i(
-        "已观看时间：${_oldWatchedDuration.toHMSString()}_增加时间：${_elapsed.toHMSString()}");
+    Log.i("已观看时间：${_oldWatchedDuration.toHMSString()}_增加时间：${_elapsed.toHMSString()}");
     curLiveRoomHistory?.watchDuration = curTime.toHMSString();
     curLiveRoomHistory?.syncDuration += _elapsed.inSeconds;
     curLiveRoomHistory?.updateTime = DateTime.now();

@@ -20,9 +20,7 @@ class FollowUserBlockAdapter extends TypeAdapter<FollowUserBlock> {
       id: fields[0] as String,
       roomId: fields[1] as String,
       siteId: fields[2] as String,
-      blockAccounts: fields[3] == null
-          ? []
-          : (fields[3] as List).cast<FollowUserBlockAccount>(),
+      blockAccounts: fields[3] == null ? [] : (fields[3] as List).cast<FollowUserBlockAccount>(),
       blockWords: fields[4] == null ? [] : (fields[4] as List).cast<String>(),
       updateTime: fields[5] == null ? 0 : (fields[5] as num).toInt(),
     );
@@ -52,13 +50,10 @@ class FollowUserBlockAdapter extends TypeAdapter<FollowUserBlock> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is FollowUserBlockAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+      other is FollowUserBlockAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }
 
-class FollowUserBlockAccountAdapter
-    extends TypeAdapter<FollowUserBlockAccount> {
+class FollowUserBlockAccountAdapter extends TypeAdapter<FollowUserBlockAccount> {
   @override
   final typeId = 6;
 
@@ -90,7 +85,5 @@ class FollowUserBlockAccountAdapter
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is FollowUserBlockAccountAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+      other is FollowUserBlockAccountAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }

@@ -181,8 +181,7 @@ class AppStyle {
   static double get statusBarHeight => MediaQuery.of(Get.context!).padding.top;
 
   /// 底部导航条的高度
-  static double get bottomBarHeight =>
-      MediaQuery.of(Get.context!).padding.bottom;
+  static double get bottomBarHeight => MediaQuery.of(Get.context!).padding.bottom;
 
   static Divider get divider => Divider(
         height: 1,

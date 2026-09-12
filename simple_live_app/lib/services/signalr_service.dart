@@ -16,39 +16,26 @@ class SignalRService {
 
   SignalRConnectionState state = SignalRConnectionState.connecting;
 
-  final _stateStreamController =
-      StreamController<SignalRConnectionState>.broadcast();
-  Stream<SignalRConnectionState> get stateStream =>
-      _stateStreamController.stream;
+  final _stateStreamController = StreamController<SignalRConnectionState>.broadcast();
+  Stream<SignalRConnectionState> get stateStream => _stateStreamController.stream;
 
-  final _onFavoriteStreamController =
-      StreamController<(bool, String)>.broadcast();
-  Stream<(bool, String)> get onFavoriteStream =>
-      _onFavoriteStreamController.stream;
+  final _onFavoriteStreamController = StreamController<(bool, String)>.broadcast();
+  Stream<(bool, String)> get onFavoriteStream => _onFavoriteStreamController.stream;
 
-  final _onHistoryStreamController =
-      StreamController<(bool, String)>.broadcast();
-  Stream<(bool, String)> get onHistoryStream =>
-      _onHistoryStreamController.stream;
+  final _onHistoryStreamController = StreamController<(bool, String)>.broadcast();
+  Stream<(bool, String)> get onHistoryStream => _onHistoryStreamController.stream;
 
-  final _onShieldWordStreamController =
-      StreamController<(bool, String)>.broadcast();
-  Stream<(bool, String)> get onShieldWordStream =>
-      _onShieldWordStreamController.stream;
+  final _onShieldWordStreamController = StreamController<(bool, String)>.broadcast();
+  Stream<(bool, String)> get onShieldWordStream => _onShieldWordStreamController.stream;
 
-  final _onBiliAccountStreamController =
-      StreamController<(bool, String)>.broadcast();
-  Stream<(bool, String)> get onBiliAccountStream =>
-      _onBiliAccountStreamController.stream;
+  final _onBiliAccountStreamController = StreamController<(bool, String)>.broadcast();
+  Stream<(bool, String)> get onBiliAccountStream => _onBiliAccountStreamController.stream;
 
   final _onRoomDestroyedStreamController = StreamController<String>.broadcast();
-  Stream<String> get onRoomDestroyedStream =>
-      _onRoomDestroyedStreamController.stream;
+  Stream<String> get onRoomDestroyedStream => _onRoomDestroyedStreamController.stream;
 
-  final _onRoomUserUpdatedStreamController =
-      StreamController<List<RoomUser>>.broadcast();
-  Stream<List<RoomUser>> get onRoomUserUpdatedStream =>
-      _onRoomUserUpdatedStreamController.stream;
+  final _onRoomUserUpdatedStreamController = StreamController<List<RoomUser>>.broadcast();
+  Stream<List<RoomUser>> get onRoomUserUpdatedStream => _onRoomUserUpdatedStreamController.stream;
 
   HubConnection? hubConnection;
   Future<void> connect() async {
@@ -103,8 +90,7 @@ class SignalRService {
     String app = "Slive";
     String platform = Platform.operatingSystem;
     String version = Utils.packageInfo.version;
-    var resp = await hubConnection
-        ?.invoke("CreateRoom", args: [app, platform, version]);
+    var resp = await hubConnection?.invoke("CreateRoom", args: [app, platform, version]);
     return Resp<String>.fromObject(resp);
   }
 
@@ -115,8 +101,7 @@ class SignalRService {
     String app = "Simple Live";
     String platform = Platform.operatingSystem;
     String version = Utils.packageInfo.version;
-    var resp = await hubConnection
-        ?.invoke("JoinRoom", args: [roomId, app, platform, version]);
+    var resp = await hubConnection?.invoke("JoinRoom", args: [roomId, app, platform, version]);
     return Resp.fromObject(resp);
   }
 
@@ -129,8 +114,7 @@ class SignalRService {
     if (state != SignalRConnectionState.connected) {
       throw Exception("not connected");
     }
-    var resp =
-        await hubConnection?.invoke(action, args: [roomName, overlay, content]);
+    var resp = await hubConnection?.invoke(action, args: [roomName, overlay, content]);
     return Resp.fromObject(resp);
   }
 

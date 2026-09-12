@@ -13,8 +13,7 @@ import 'package:simple_live_core/simple_live_core.dart';
 class SearchListView extends StatelessWidget {
   final String tag;
   const SearchListView(this.tag, {super.key});
-  SearchListController get controller =>
-      Get.find<SearchListController>(tag: tag);
+  SearchListController get controller => Get.find<SearchListController>(tag: tag);
   @override
   Widget build(BuildContext context) {
     var roomRowCount = MediaQuery.of(context).size.width ~/ 200;
@@ -77,8 +76,7 @@ class SearchListView extends StatelessWidget {
                       ],
                     ),
                     onTap: () {
-                      AppNavigator.toLiveRoomDetail(
-                          site: controller.site, roomId: item.roomId);
+                      AppNavigator.toLiveRoomDetail(site: controller.site, roomId: item.roomId);
                     },
                   );
                 },

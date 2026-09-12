@@ -16,8 +16,7 @@ class SyncScanQRControlelr extends BaseController {
   bool pause = false;
   void onQRViewCreated(QRViewController controller) {
     qrController = controller;
-    barcodeStreamSubscription =
-        qrController!.scannedDataStream.listen((scanData) async {
+    barcodeStreamSubscription = qrController!.scannedDataStream.listen((scanData) async {
       Log.d(scanData.toString());
       if (pause) {
         return;

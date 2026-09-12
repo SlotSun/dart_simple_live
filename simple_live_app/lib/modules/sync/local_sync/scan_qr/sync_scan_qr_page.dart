@@ -47,15 +47,13 @@ class ScanRectangle extends StatefulWidget {
   State<ScanRectangle> createState() => _ScanRectangleState();
 }
 
-class _ScanRectangleState extends State<ScanRectangle>
-    with SingleTickerProviderStateMixin {
+class _ScanRectangleState extends State<ScanRectangle> with SingleTickerProviderStateMixin {
   late AnimationController animeController;
   late Animation<Offset> animation;
 
   @override
   void initState() {
-    animeController =
-        AnimationController(duration: const Duration(seconds: 2), vsync: this);
+    animeController = AnimationController(duration: const Duration(seconds: 2), vsync: this);
     animeController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         animeController.reverse();

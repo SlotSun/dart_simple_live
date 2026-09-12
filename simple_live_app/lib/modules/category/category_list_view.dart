@@ -14,8 +14,7 @@ import 'package:sticky_headers/sticky_headers.dart';
 class CategoryListView extends StatelessWidget {
   final String tag;
   const CategoryListView(this.tag, {super.key});
-  CategoryListController get controller =>
-      Get.find<CategoryListController>(tag: tag);
+  CategoryListController get controller => Get.find<CategoryListController>(tag: tag);
   @override
   Widget build(BuildContext context) {
     return KeepAliveWrapper(
@@ -42,8 +41,7 @@ class CategoryListView extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         item.name,
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
                     content: Obx(

@@ -5,9 +5,9 @@ import 'package:material_ui/material_ui.dart';
 
 class LiveIcons {
   static const String _family = 'iconfont';
-  
+
   LiveIcons._();
-  
+
   static const IconData douyu = IconData(0xe613, fontFamily: _family); // douyu
   static const IconData huya = IconData(0xe614, fontFamily: _family); // 虎牙
 }

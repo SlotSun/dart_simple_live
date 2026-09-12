@@ -57,8 +57,7 @@ class DanmuSettingsView extends GetView<AppSettingsController> {
             children: [
               SettingsAction(
                 title: "关键词屏蔽",
-                onTap: onTapDanmuShield ??
-                    () => Get.toNamed(RoutePath.kSettingsDanmuShield),
+                onTap: onTapDanmuShield ?? () => Get.toNamed(RoutePath.kSettingsDanmuShield),
               ),
               Obx(
                 () => SettingsSwitch(
@@ -137,8 +136,7 @@ class DanmuSettingsView extends GetView<AppSettingsController> {
                   onChanged: (e) {
                     controller.setDanmuSize(e.toDouble());
                     updateDanmuOption(
-                      danmakuController?.option
-                          .copyWith(fontSize: e.toDouble()),
+                      danmakuController?.option.copyWith(fontSize: e.toDouble()),
                     );
                   },
                 ),
@@ -151,18 +149,8 @@ class DanmuSettingsView extends GetView<AppSettingsController> {
                   min: 0,
                   max: 8,
                   step: 1,
-                  displayValue: [
-                    "极细",
-                    "很细",
-                    "细",
-                    "正常",
-                    "小粗",
-                    "偏粗",
-                    "粗",
-                    "很粗",
-                    "极粗"
-                  ][controller.danmuFontWeight.value]
-                      .toString(),
+                  displayValue:
+                      ["极细", "很细", "细", "正常", "小粗", "偏粗", "粗", "很粗", "极粗"][controller.danmuFontWeight.value].toString(),
                   onChanged: (e) {
                     controller.setDanmuFontWeight(e);
                     updateDanmuOption(
@@ -260,8 +248,7 @@ class DanmuSettingsView extends GetView<AppSettingsController> {
               ),
               Obx(
                 () => SettingsSwitch(
-                  value: AppSettingsController
-                      .instance.danmuTextNormalization.value,
+                  value: AppSettingsController.instance.danmuTextNormalization.value,
                   title: "文本归一化",
                   onChanged: (e) {
                     AppSettingsController.instance.setDanmuTextNormalization(e);
@@ -270,8 +257,7 @@ class DanmuSettingsView extends GetView<AppSettingsController> {
               ),
               Obx(
                 () => SettingsSwitch(
-                  value: AppSettingsController
-                      .instance.danmuFrequencyControl.value,
+                  value: AppSettingsController.instance.danmuFrequencyControl.value,
                   title: "弹幕显示频率",
                   onChanged: (e) {
                     AppSettingsController.instance.setDanmuFrequencyControl(e);
@@ -280,12 +266,10 @@ class DanmuSettingsView extends GetView<AppSettingsController> {
               ),
               Obx(
                 () => Visibility(
-                  visible: AppSettingsController
-                      .instance.danmuFrequencyControl.value,
+                  visible: AppSettingsController.instance.danmuFrequencyControl.value,
                   child: SettingsNumber(
                     title: "显示频率(次)",
-                    value: AppSettingsController
-                        .instance.danmuMaxFrequency.value,
+                    value: AppSettingsController.instance.danmuMaxFrequency.value,
                     step: 1,
                     max: 10,
                     min: 1,

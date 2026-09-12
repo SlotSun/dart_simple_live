@@ -61,15 +61,12 @@ class RemoteSyncWebDAVController extends BaseController {
   // webDAV 逻辑
   // 初始化webDAV
   void doWebDAVInit() {
-    uri = LocalStorageService.instance
-        .getValue(LocalStorageService.kWebDAVUri, "");
+    uri = LocalStorageService.instance.getValue(LocalStorageService.kWebDAVUri, "");
     if (uri.isEmpty) {
       notLogin.value = true;
     } else {
-      user.value = LocalStorageService.instance
-          .getValue(LocalStorageService.kWebDAVUser, "");
-      password = LocalStorageService.instance
-          .getValue(LocalStorageService.kWebDAVPassword, "");
+      user.value = LocalStorageService.instance.getValue(LocalStorageService.kWebDAVUser, "");
+      password = LocalStorageService.instance.getValue(LocalStorageService.kWebDAVPassword, "");
       webDavBackupDirectory.value = LocalStorageService.instance.getValue(
         LocalStorageService.kWebDAVDirectory,
         "/simple_live_app",
@@ -114,20 +111,16 @@ class RemoteSyncWebDAVController extends BaseController {
   }
 
   // WebDAV登录
-  void doWebDAVLogin(
-      String webDAVUri, String webDAVUser, String webDAVPassword) async {
+  void doWebDAVLogin(String webDAVUri, String webDAVUser, String webDAVPassword) async {
     // 确认登录
     davClient = DAVClient(webDAVUri, webDAVUser, webDAVPassword);
     await checkIsLogin();
     if (!notLogin.value) {
       // 保存到本地
-      LocalStorageService.instance
-          .setValue(LocalStorageService.kWebDAVUri, webDAVUri);
-      LocalStorageService.instance
-          .setValue(LocalStorageService.kWebDAVUser, webDAVUser);
+      LocalStorageService.instance.setValue(LocalStorageService.kWebDAVUri, webDAVUri);
+      LocalStorageService.instance.setValue(LocalStorageService.kWebDAVUser, webDAVUser);
       user.value = webDAVUser;
-      LocalStorageService.instance
-          .setValue(LocalStorageService.kWebDAVPassword, webDAVPassword);
+      LocalStorageService.instance.setValue(LocalStorageService.kWebDAVPassword, webDAVPassword);
       Get.back();
       SmartDialog.showToast("登录成功！");
     } else {
@@ -142,10 +135,8 @@ class RemoteSyncWebDAVController extends BaseController {
     if (result) {
       // 清除本地账号数据
       LocalStorageService.instance.setValue(LocalStorageService.kWebDAVUri, "");
-      LocalStorageService.instance
-          .setValue(LocalStorageService.kWebDAVUser, "");
-      LocalStorageService.instance
-          .setValue(LocalStorageService.kWebDAVPassword, "");
+      LocalStorageService.instance.setValue(LocalStorageService.kWebDAVUser, "");
+      LocalStorageService.instance.setValue(LocalStorageService.kWebDAVPassword, "");
       notLogin.value = true;
     }
   }
@@ -159,16 +150,14 @@ class RemoteSyncWebDAVController extends BaseController {
       SmartDialog.showToast("上传成功");
       DateTime uploadTime = DateTime.now();
       lastUploadTime.value = Utils.parseTime(uploadTime);
-      LocalStorageService.instance.setValue(
-          LocalStorageService.kWebDAVLastUploadTime,
-          uploadTime.millisecondsSinceEpoch);
+      LocalStorageService.instance
+          .setValue(LocalStorageService.kWebDAVLastUploadTime, uploadTime.millisecondsSinceEpoch);
     } catch (e, s) {
       Log.e("备份失败：$e", s);
       SmartDialog.dismiss();
       SmartDialog.showToast("上传失败");
     }
   }
-
 
   // webDAV恢复到本地
   void doWebDAVRecovery() async {
@@ -179,10 +168,9 @@ class RemoteSyncWebDAVController extends BaseController {
       SmartDialog.showToast('同步完成');
       DateTime syncTime = DateTime.now();
       lastRecoverTime.value = Utils.parseTime(syncTime);
-      LocalStorageService.instance.setValue(
-          LocalStorageService.kWebDAVLastRecoverTime,
-          syncTime.millisecondsSinceEpoch);
-    }catch(e,s){
+      LocalStorageService.instance
+          .setValue(LocalStorageService.kWebDAVLastRecoverTime, syncTime.millisecondsSinceEpoch);
+    } catch (e, s) {
       Log.e("恢复数据：$e", s);
       SmartDialog.dismiss();
       SmartDialog.showToast('同步失败');
@@ -197,20 +185,17 @@ class RemoteSyncWebDAVController extends BaseController {
       SmartDialog.showToast('同步完成');
       DateTime syncTime = DateTime.now();
       lastRecoverTime.value = Utils.parseTime(syncTime);
-      LocalStorageService.instance.setValue(
-          LocalStorageService.kWebDAVLastRecoverTime,
-          syncTime.millisecondsSinceEpoch);
-      LocalStorageService.instance.setValue(
-          LocalStorageService.kWebDAVLastUploadTime,
-          syncTime.millisecondsSinceEpoch);
-    }catch(e,s){
+      LocalStorageService.instance
+          .setValue(LocalStorageService.kWebDAVLastRecoverTime, syncTime.millisecondsSinceEpoch);
+      LocalStorageService.instance.setValue(LocalStorageService.kWebDAVLastUploadTime, syncTime.millisecondsSinceEpoch);
+    } catch (e, s) {
       Log.e("双向同步数据：$e", s);
       SmartDialog.dismiss();
       SmartDialog.showToast('双向同步失败');
     }
   }
 
-  Future<void> _sync({required SyncMode mode}) async{
+  Future<void> _sync({required SyncMode mode}) async {
     SyncExecutor.instance.buildExecutorAttr(
       davClient,
       isSyncFollows: isSyncFollows.value,

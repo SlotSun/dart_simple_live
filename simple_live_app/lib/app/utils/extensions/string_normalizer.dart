@@ -1,4 +1,4 @@
-﻿extension StringNormalizer on String {
+extension StringNormalizer on String {
   static final Map<String, String> _toneMap = {
     // a
     'ā': 'a', 'á': 'a', 'ǎ': 'a', 'à': 'a',

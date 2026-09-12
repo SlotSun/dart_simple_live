@@ -33,8 +33,7 @@ class DouyinSearchController extends BaseController {
     if (keyword.isEmpty) {
       return;
     }
-    searchUrl =
-        "https://www.douyin.com/search/${Uri.encodeComponent(keyword)}?type=live";
+    searchUrl = "https://www.douyin.com/search/${Uri.encodeComponent(keyword)}?type=live";
     if (Platform.isAndroid || Platform.isIOS) {
       webViewController!.loadUrl(
         urlRequest: URLRequest(
@@ -52,15 +51,11 @@ class DouyinSearchController extends BaseController {
     pageLoadding.value = true;
   }
 
-  Future<bool?> onCreateWindow(InAppWebViewController controller,
-      CreateWindowAction createWindowAction) async {
+  Future<bool?> onCreateWindow(InAppWebViewController controller, CreateWindowAction createWindowAction) async {
     if (createWindowAction.request.url?.host == "live.douyin.com") {
       {
         var regExp = RegExp(r"live\.douyin\.com/([\d|\w]+)");
-        var id = regExp
-                .firstMatch(createWindowAction.request.url.toString())
-                ?.group(1) ??
-            "";
+        var id = regExp.firstMatch(createWindowAction.request.url.toString())?.group(1) ?? "";
 
         AppNavigator.toLiveRoomDetail(site: site, roomId: id);
         return false;

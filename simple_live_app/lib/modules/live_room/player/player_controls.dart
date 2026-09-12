@@ -50,7 +50,7 @@ Widget buildFullControls(
   LiveRoomController controller,
 ) {
   var padding = MediaQuery.of(videoState.context).padding;
-  GlobalKey volumeButtonkey = GlobalKey();
+  GlobalKey volumeButtonKey = GlobalKey();
   return buildDragToMoveArea(
     child: Stack(
       children: [
@@ -111,10 +111,7 @@ Widget buildFullControls(
           () => AnimatedPositioned(
             left: 0,
             right: 0,
-            top: (controller.showControlsState.value &&
-                    !controller.lockControlsState.value)
-                ? 0
-                : -(48 + padding.top),
+            top: (controller.showControlsState.value && !controller.lockControlsState.value) ? 0 : -(48 + padding.top),
             duration: const Duration(milliseconds: 200),
             child: Container(
               height: 48 + padding.top,
@@ -212,8 +209,7 @@ Widget buildFullControls(
           () => AnimatedPositioned(
             left: 0,
             right: 0,
-            bottom: (controller.showControlsState.value &&
-                    !controller.lockControlsState.value)
+            bottom: (controller.showControlsState.value && !controller.lockControlsState.value)
                 ? 0
                 : -(80 + padding.bottom),
             duration: const Duration(milliseconds: 200),
@@ -247,8 +243,7 @@ Widget buildFullControls(
                   Offstage(
                     offstage: controller.showDanmakuState.value,
                     child: IconButton(
-                      onPressed: () => controller.showDanmakuState.value =
-                          !controller.showDanmakuState.value,
+                      onPressed: () => controller.showDanmakuState.value = !controller.showDanmakuState.value,
                       icon: const ImageIcon(
                         AssetImage('assets/icons/icon_danmaku_open.png'),
                         size: 24,
@@ -259,8 +254,7 @@ Widget buildFullControls(
                   Offstage(
                     offstage: !controller.showDanmakuState.value,
                     child: IconButton(
-                      onPressed: () => controller.showDanmakuState.value =
-                          !controller.showDanmakuState.value,
+                      onPressed: () => controller.showDanmakuState.value = !controller.showDanmakuState.value,
                       icon: const ImageIcon(
                         AssetImage('assets/icons/icon_danmaku_close.png'),
                         size: 24,
@@ -282,10 +276,9 @@ Widget buildFullControls(
                   Visibility(
                     visible: !Platform.isAndroid && !Platform.isIOS,
                     child: IconButton(
-                      key: volumeButtonkey,
+                      key: volumeButtonKey,
                       onPressed: () {
-                        controller
-                            .showVolumeSlider(volumeButtonkey.currentContext!);
+                        controller.showVolumeSlider(volumeButtonKey.currentContext!);
                       },
                       icon: const Icon(
                         Icons.volume_down,
@@ -301,8 +294,7 @@ Widget buildFullControls(
                     child: Obx(
                       () => Text(
                         controller.currentQualityInfo.value,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 15),
+                        style: const TextStyle(color: Colors.white, fontSize: 15),
                       ),
                     ),
                   ),
@@ -348,9 +340,7 @@ Widget buildFullControls(
           () => AnimatedPositioned(
             top: 0,
             bottom: 0,
-            right: controller.showControlsState.value
-                ? padding.right + 12
-                : -(64 + padding.right),
+            right: controller.showControlsState.value ? padding.right + 12 : -(64 + padding.right),
             duration: const Duration(milliseconds: 200),
             child: buildLockButton(controller),
           ),
@@ -360,9 +350,7 @@ Widget buildFullControls(
           () => AnimatedPositioned(
             top: 0,
             bottom: 0,
-            left: controller.showControlsState.value
-                ? padding.left + 12
-                : -(64 + padding.right),
+            left: controller.showControlsState.value ? padding.left + 12 : -(64 + padding.right),
             duration: const Duration(milliseconds: 200),
             child: buildLockButton(controller),
           ),
@@ -405,9 +393,7 @@ Widget buildLockButton(LiveRoomController controller) {
         height: 40,
         child: Center(
           child: Icon(
-            controller.lockControlsState.value
-                ? Icons.lock_outline_rounded
-                : Icons.lock_open_outlined,
+            controller.lockControlsState.value ? Icons.lock_outline_rounded : Icons.lock_open_outlined,
             color: Colors.white,
             size: 20,
           ),
@@ -422,7 +408,7 @@ Widget buildControls(
   VideoState videoState,
   LiveRoomController controller,
 ) {
-  GlobalKey volumeButtonkey = GlobalKey();
+  GlobalKey volumeButtonKey = GlobalKey();
   return Stack(
     children: [
       Container(),
@@ -489,8 +475,7 @@ Widget buildControls(
                 Offstage(
                   offstage: controller.showDanmakuState.value,
                   child: IconButton(
-                    onPressed: () => controller.showDanmakuState.value =
-                        !controller.showDanmakuState.value,
+                    onPressed: () => controller.showDanmakuState.value = !controller.showDanmakuState.value,
                     icon: const ImageIcon(
                       AssetImage('assets/icons/icon_danmaku_open.png'),
                       size: 24,
@@ -501,8 +486,7 @@ Widget buildControls(
                 Offstage(
                   offstage: !controller.showDanmakuState.value,
                   child: IconButton(
-                    onPressed: () => controller.showDanmakuState.value =
-                        !controller.showDanmakuState.value,
+                    onPressed: () => controller.showDanmakuState.value = !controller.showDanmakuState.value,
                     icon: const ImageIcon(
                       AssetImage('assets/icons/icon_danmaku_close.png'),
                       size: 24,
@@ -524,10 +508,10 @@ Widget buildControls(
                 Visibility(
                   visible: !Platform.isAndroid && !Platform.isIOS,
                   child: IconButton(
-                    key: volumeButtonkey,
+                    key: volumeButtonKey,
                     onPressed: () {
                       controller.showVolumeSlider(
-                        volumeButtonkey.currentContext!,
+                        volumeButtonKey.currentContext!,
                       );
                     },
                     icon: const Icon(
@@ -546,8 +530,7 @@ Widget buildControls(
                     child: Obx(
                       () => Text(
                         controller.currentQualityInfo.value,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 15),
+                        style: const TextStyle(color: Colors.white, fontSize: 15),
                       ),
                     ),
                   ),
@@ -637,8 +620,7 @@ Widget buildDanmuView(VideoState videoState, LiveRoomController controller) {
           padding: controller.fullScreenState.value
               ? EdgeInsets.only(
                   top: AppSettingsController.instance.danmuTopMargin.value,
-                  bottom:
-                      AppSettingsController.instance.danmuBottomMargin.value,
+                  bottom: AppSettingsController.instance.danmuBottomMargin.value,
                 )
               : EdgeInsets.zero,
           child: controller.danmakuView!,
@@ -847,8 +829,7 @@ void showFollowUser(LiveRoomController controller) {
                 return Obx(
                   () => FollowUserItem(
                     item: item,
-                    playing: controller.rxSite.value.id == item.siteId &&
-                        controller.rxRoomId.value == item.roomId,
+                    playing: controller.rxSite.value.id == item.siteId && controller.rxRoomId.value == item.roomId,
                     onTap: () {
                       Utils.hideRightDialog();
                       controller.resetRoom(

@@ -70,8 +70,7 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
                   WidgetSpan(
                     child: GestureDetector(
                       onTap: () {
-                        launchUrlString(
-                            "https://mpv.io/manual/stable/#video-output-drivers");
+                        launchUrlString("https://mpv.io/manual/stable/#video-output-drivers");
                       },
                       child: const Text(
                         "MPV的文档",
@@ -93,8 +92,7 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
               children: [
                 Obx(
                   () => SettingsSwitch(
-                    value:
-                        AppSettingsController.instance.customPlayerOutput.value,
+                    value: AppSettingsController.instance.customPlayerOutput.value,
                     title: "自定义输出驱动与硬件加速",
                     onChanged: (e) {
                       AppSettingsController.instance.setCustomPlayerOutput(e);
@@ -105,8 +103,7 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
                 Obx(
                   () => SettingsMenu(
                     title: "视频输出驱动(--vo)",
-                    value:
-                        AppSettingsController.instance.videoOutputDriver.value,
+                    value: AppSettingsController.instance.videoOutputDriver.value,
                     valueMap: controller.videoOutputDrivers,
                     onChanged: (e) {
                       AppSettingsController.instance.setVideoOutputDriver(e);
@@ -117,8 +114,7 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
                 Obx(
                   () => SettingsMenu(
                     title: "音频输出驱动(--ao)",
-                    value:
-                        AppSettingsController.instance.audioOutputDriver.value,
+                    value: AppSettingsController.instance.audioOutputDriver.value,
                     valueMap: controller.audioOutputDrivers,
                     onChanged: (e) {
                       AppSettingsController.instance.setAudioOutputDriver(e);
@@ -129,8 +125,7 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
                 Obx(
                   () => SettingsMenu(
                     title: "硬件解码器(--hwdec)",
-                    value: AppSettingsController
-                        .instance.videoHardwareDecoder.value,
+                    value: AppSettingsController.instance.videoHardwareDecoder.value,
                     valueMap: controller.hardwareDecoder,
                     onChanged: (e) {
                       AppSettingsController.instance.setVideoHardwareDecoder(e);
@@ -139,8 +134,7 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
                 ),
                 Obx(
                   () => SettingsSwitch(
-                    value: AppSettingsController
-                        .instance.videoDoubleBuffering.value,
+                    value: AppSettingsController.instance.videoDoubleBuffering.value,
                     title: "自定义开启双重缓存",
                     onChanged: (e) {
                       AppSettingsController.instance.setVideoDoubleBuffering(e);
@@ -166,8 +160,7 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
                             confirm: "确认开启",
                           );
                           if (confirm) {
-                            AppSettingsController.instance
-                                .setEnableRtxVsr(true);
+                            AppSettingsController.instance.setEnableRtxVsr(true);
                           }
                         } else {
                           AppSettingsController.instance.setEnableRtxVsr(false);

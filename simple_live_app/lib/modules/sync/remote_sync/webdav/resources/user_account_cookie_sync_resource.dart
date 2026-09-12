@@ -11,10 +11,8 @@ class UserAccountCookieSyncResource implements SyncResource<Map<String, String?>
   @override
   Future<Map<String, String?>> loadLocal() async {
     return {
-      'cookie': LocalStorageService.instance
-          .getNullValue(LocalStorageService.kBilibiliCookie, null),
-      'douyin_cookie': LocalStorageService.instance
-          .getNullValue(LocalStorageService.kDouyinCookie, null),
+      'cookie': LocalStorageService.instance.getNullValue(LocalStorageService.kBilibiliCookie, null),
+      'douyin_cookie': LocalStorageService.instance.getNullValue(LocalStorageService.kDouyinCookie, null),
     };
   }
 
@@ -36,8 +34,7 @@ class UserAccountCookieSyncResource implements SyncResource<Map<String, String?>
       BiliBiliAccountService.instance.loadUserInfo();
     }
     if (data['douyin_cookie'] != null) {
-      await LocalStorageService.instance
-          .setValue(LocalStorageService.kDouyinCookie, data['douyin_cookie']);
+      await LocalStorageService.instance.setValue(LocalStorageService.kDouyinCookie, data['douyin_cookie']);
     }
   }
 
@@ -52,8 +49,7 @@ class UserAccountCookieSyncResource implements SyncResource<Map<String, String?>
   }
 
   @override
-  Map<String, String?> merge(
-      Map<String, String?> local, Map<String, String?> remote) {
+  Map<String, String?> merge(Map<String, String?> local, Map<String, String?> remote) {
     return {...local, ...remote};
   }
 }

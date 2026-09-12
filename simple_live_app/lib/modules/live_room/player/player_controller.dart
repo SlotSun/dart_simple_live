@@ -33,9 +33,7 @@ mixin PlayerMixin {
   late final player = Player(
     configuration: PlayerConfiguration(
       title: "Slive Player",
-      logLevel: AppSettingsController.instance.logEnable.value
-          ? MPVLogLevel.debug
-          : MPVLogLevel.error,
+      logLevel: AppSettingsController.instance.logEnable.value ? MPVLogLevel.debug : MPVLogLevel.error,
     ),
   );
 
@@ -110,8 +108,7 @@ mixin PlayerMixin {
                 hwdec: 'mediacodec',
               )
             : VideoControllerConfiguration(
-                enableHardwareAcceleration:
-                    AppSettingsController.instance.hardwareDecode.value,
+                enableHardwareAcceleration: AppSettingsController.instance.hardwareDecode.value,
                 androidAttachSurfaceAfterVideoParameters: false,
               ),
   );
@@ -329,8 +326,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
   void exitFull() async {
     // todo: 还应该关闭所有的dialog
     if (Platform.isAndroid || Platform.isIOS) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge,
-          overlays: SystemUiOverlay.values);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: SystemUiOverlay.values);
       setPortraitOrientation();
     } else {
       bool isMaximized = await windowManager.isMaximized();
@@ -485,8 +481,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
     }
     danmakuStateBeforePIP = showDanmakuState.value;
     //关闭并清除弹幕
-    if (AppSettingsController.instance.pipHideDanmu.value &&
-        danmakuStateBeforePIP) {
+    if (AppSettingsController.instance.pipHideDanmu.value && danmakuStateBeforePIP) {
       showDanmakuState.value = false;
     }
     danmakuController?.clear();
@@ -518,8 +513,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
     });
   }
 }
-mixin PlayerGestureControlMixin
-    on PlayerStateMixin, PlayerMixin, PlayerSystemMixin {
+mixin PlayerGestureControlMixin on PlayerStateMixin, PlayerMixin, PlayerSystemMixin {
   /// 单击显示/隐藏控制器
   void onTap() {
     if (showControlsState.value) {
@@ -545,8 +539,7 @@ mixin PlayerGestureControlMixin
   void onHover(PointerHoverEvent event, BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final targetPosition = screenHeight * 0.25; // 计算屏幕顶部25%的位置
-    if (event.position.dy <= targetPosition ||
-        event.position.dy >= targetPosition * 3) {
+    if (event.position.dy <= targetPosition || event.position.dy >= targetPosition * 3) {
       if (!showControlsState.value) {
         showControls();
       }
@@ -578,7 +571,7 @@ mixin PlayerGestureControlMixin
     if (lockControlsState.value && fullScreenState.value) {
       return;
     }
-    if(AppSettingsController.instance.verticalDragLock.value){
+    if (AppSettingsController.instance.verticalDragLock.value) {
       return;
     }
     final dy = details.globalPosition.dy;
@@ -610,7 +603,7 @@ mixin PlayerGestureControlMixin
       return;
     }
     // todo: lockControls 可以临时解锁，滑动结束后再次上锁，让ai来做这些简单的工作
-    if(AppSettingsController.instance.verticalDragLock.value){
+    if (AppSettingsController.instance.verticalDragLock.value) {
       return;
     }
     if (verticalDragging == false) return;
@@ -699,7 +692,7 @@ mixin PlayerGestureControlMixin
     if (lockControlsState.value && fullScreenState.value) {
       return;
     }
-    if(AppSettingsController.instance.verticalDragLock.value){
+    if (AppSettingsController.instance.verticalDragLock.value) {
       return;
     }
     throttle = null;
@@ -710,12 +703,7 @@ mixin PlayerGestureControlMixin
 }
 
 class PlayerController extends BaseController
-    with
-        PlayerMixin,
-        PlayerStateMixin,
-        PlayerDanmakuMixin,
-        PlayerSystemMixin,
-        PlayerGestureControlMixin {
+    with PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin, PlayerSystemMixin, PlayerGestureControlMixin {
   @override
   void onInit() {
     initSystem();
@@ -761,27 +749,22 @@ class PlayerController extends BaseController
       Log.d("播放器日志：$event");
     });
     _widthSubscription = player.stream.width.listen((event) {
-      Log.d(
-          'width:$event  W:${(player.state.width)}  H:${(player.state.height)}');
+      Log.d('width:$event  W:${(player.state.width)}  H:${(player.state.height)}');
       if (player.state.width == null) {
         return;
       } else {
         // 可获取直播流size时且不为全屏模式时判断是否进入全屏模式
         isVertical.value = player.state.height! > player.state.width!;
-        if (AppSettingsController.instance.autoFullScreen.value &&
-            !fullScreenState.value) {
+        if (AppSettingsController.instance.autoFullScreen.value && !fullScreenState.value) {
           enterFullScreen();
         }
       }
     });
     _heightSubscription = player.stream.height.listen((event) {
-      Log.d(
-          'height:$event  W:${(player.state.width)}  H:${(player.state.height)}');
-      isVertical.value =
-          (player.state.height ?? 9) > (player.state.width ?? 16);
+      Log.d('height:$event  W:${(player.state.width)}  H:${(player.state.height)}');
+      isVertical.value = (player.state.height ?? 9) > (player.state.width ?? 16);
     });
-    _escSubscription =
-        EventBus.instance.listen(EventBus.kEscapePressed, (event) {
+    _escSubscription = EventBus.instance.listen(EventBus.kEscapePressed, (event) {
       exitFull();
     });
   }
@@ -802,8 +785,8 @@ class PlayerController extends BaseController
   }
 
   void mediaError(String error) {
-   // 弱网调整：用户自责
-   // WakelockPlus.disable();
+    // 弱网调整：用户自责
+    // WakelockPlus.disable();
   }
 
   Future<void> toggleOSDStats() async {
@@ -822,17 +805,14 @@ class PlayerController extends BaseController
       child: ListView(
         children: [
           Obx(() => SwitchListTile(
-              title: const Text("OSD 显示"),
-              value: showOSDStats.value,
-              onChanged: (value) => toggleOSDStats())),
+              title: const Text("OSD 显示"), value: showOSDStats.value, onChanged: (value) => toggleOSDStats())),
           ListTile(
             title: const Text("Resolution"),
             subtitle: Text('${player.state.width}x${player.state.height}'),
             onTap: () {
               Clipboard.setData(
                 ClipboardData(
-                  text:
-                      "Resolution\n${player.state.width}x${player.state.height}",
+                  text: "Resolution\n${player.state.width}x${player.state.height}",
                 ),
               );
             },

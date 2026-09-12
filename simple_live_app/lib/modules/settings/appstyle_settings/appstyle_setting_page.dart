@@ -24,14 +24,13 @@ class AppStyleSettingPage extends GetView<AppStyleSettingController> {
         AppStyle.hGap4,
         Visibility(
           visible: controller.fontState.value == DownloadState.downloaded,
-          child:
-        Tooltip(
-          message: "删除字体",
-          child: IconButton(
-            onPressed: controller.fontDelete,
-            icon: Icon(Icons.delete_outline_outlined),
+          child: Tooltip(
+            message: "删除字体",
+            child: IconButton(
+              onPressed: controller.fontDelete,
+              icon: Icon(Icons.delete_outline_outlined),
+            ),
           ),
-        ),
         ),
         Visibility(
           visible: controller.fontState.value == DownloadState.downloaded,
@@ -156,10 +155,7 @@ class AppStyleSettingPage extends GetView<AppStyleSettingController> {
                                     () => Center(
                                       child: Icon(
                                         Icons.check,
-                                        color:
-                                            controller.styleColor.value == e.v
-                                                ? Colors.white
-                                                : Colors.transparent,
+                                        color: controller.styleColor.value == e.v ? Colors.white : Colors.transparent,
                                       ),
                                     ),
                                   ),
@@ -237,9 +233,5 @@ extension ColorExt on Color {
     return (x * 255.0).round() & 0xff;
   }
 
-  int get v =>
-      _floatToInt8(a) << 24 |
-      _floatToInt8(r) << 16 |
-      _floatToInt8(g) << 8 |
-      _floatToInt8(b) << 0;
+  int get v => _floatToInt8(a) << 24 | _floatToInt8(r) << 16 | _floatToInt8(g) << 8 | _floatToInt8(b) << 0;
 }

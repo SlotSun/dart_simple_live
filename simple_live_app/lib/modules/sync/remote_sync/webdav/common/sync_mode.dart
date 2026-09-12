@@ -1,4 +1,4 @@
-﻿enum SyncMode {
+enum SyncMode {
   uploadAll,
   recoveryAll,
   bidirectional,

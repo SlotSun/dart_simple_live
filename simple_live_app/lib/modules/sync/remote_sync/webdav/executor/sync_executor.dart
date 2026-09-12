@@ -47,6 +47,7 @@ class SyncExecutor {
       FollowBlockSyncResource(),
     ]);
   }
+
   // fetch -> local-> remote -> select sync-mode
   // migration is needed after recover data from remote
   // migration depends on setting-kHiveDbVer, user did not select sync setting maybe
@@ -58,8 +59,7 @@ class SyncExecutor {
 
     for (final resource in _resources) {
       final local = await resource.loadLocal();
-      final remote =
-          remoteArchive == null ? null : resource.loadRemote(remoteArchive);
+      final remote = remoteArchive == null ? null : resource.loadRemote(remoteArchive);
 
       switch (mode) {
         case SyncMode.uploadAll:

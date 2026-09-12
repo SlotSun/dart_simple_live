@@ -18,15 +18,11 @@ class DebugLogPage extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () async {
-              var msg = Log.debugLogs
-                  .map((x) => "${x.datetime}\r\n${x.content}")
-                  .join('\r\n\r\n');
+              var msg = Log.debugLogs.map((x) => "${x.datetime}\r\n${x.content}").join('\r\n\r\n');
               var dir = await getApplicationDocumentsDirectory();
-              var logFile = File(
-                  '${dir.path}/${DateTime.now().millisecondsSinceEpoch}.log');
+              var logFile = File('${dir.path}/${DateTime.now().millisecondsSinceEpoch}.log');
               await logFile.writeAsString(msg);
-              SharePlus.instance
-                  .share(ShareParams(files: [XFile(logFile.path)]));
+              SharePlus.instance.share(ShareParams(files: [XFile(logFile.path)]));
             },
             icon: const Icon(Icons.save),
           ),

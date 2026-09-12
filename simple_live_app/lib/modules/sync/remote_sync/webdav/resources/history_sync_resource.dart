@@ -19,9 +19,7 @@ class HistorySyncResource implements SyncResource<List<History>> {
     final file = archive.findFile(fileName);
     if (file == null) return null;
     final jsonData = jsonDecode(utf8.decode(file.content));
-    return (jsonData['data'] as List)
-        .map((e) => History.fromJson(e))
-        .toList();
+    return (jsonData['data'] as List).map((e) => History.fromJson(e)).toList();
   }
 
   @override
@@ -59,20 +57,15 @@ class HistorySyncResource implements SyncResource<List<History>> {
       final localSyncSeconds = localItem.syncDuration;
 
       // 如果远端时长和本地基础时长一致，取更新时间新的
-      if (remoteItem.watchDuration == localItem.watchDuration &&
-          localSyncSeconds == 0) {
-        map[remoteItem.id] = remoteItem.updateTime.isAfter(localItem.updateTime)
-            ? remoteItem
-            : localItem;
+      if (remoteItem.watchDuration == localItem.watchDuration && localSyncSeconds == 0) {
+        map[remoteItem.id] = remoteItem.updateTime.isAfter(localItem.updateTime) ? remoteItem : localItem;
         continue;
       }
 
       // 合并最终时长 = 远端总时长 + 本地未同步增量
       final totalSeconds = remoteSeconds + localSyncSeconds;
 
-      final mergeItem = remoteItem.updateTime.isAfter(localItem.updateTime)
-          ? remoteItem
-          : localItem;
+      final mergeItem = remoteItem.updateTime.isAfter(localItem.updateTime) ? remoteItem : localItem;
 
       map[remoteItem.id] = localItem.copyWith(
         watchDuration: Duration(seconds: totalSeconds).toHMSString(),

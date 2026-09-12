@@ -127,10 +127,9 @@ class FollowSettingsPage extends GetView<FollowAppSettingsController> {
                         max: 42,
                         step: 1,
                         unit: "天",
-                        displayValue:
-                            controller.appC.dormancyThreshold.value == 0
-                                ? "关闭"
-                                : "${controller.appC.dormancyThreshold.value}天",
+                        displayValue: controller.appC.dormancyThreshold.value == 0
+                            ? "关闭"
+                            : "${controller.appC.dormancyThreshold.value}天",
                         onChanged: (e) {
                           controller.appC.setDormancyThreshold(e);
                         },

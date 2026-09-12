@@ -21,15 +21,9 @@ class FollowUserPage extends GetView<FollowUserController> {
 
   @override
   Widget build(BuildContext context) {
-    var count = MediaQuery
-        .of(context)
-        .size
-        .width ~/ 500;
+    var count = MediaQuery.of(context).size.width ~/ 500;
     if (count < 1) count = 1;
-    var c = MediaQuery
-        .of(context)
-        .size
-        .width ~/ 200;
+    var c = MediaQuery.of(context).size.width ~/ 200;
     if (c < 2) {
       c = 2;
     }
@@ -128,25 +122,23 @@ class FollowUserPage extends GetView<FollowUserController> {
               children: [
                 Expanded(
                   child: Obx(
-                        () =>
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Wrap(
-                            spacing: 12,
-                            children: controller.tagList.map(
-                                  (option) {
-                                return FilterButton(
-                                  text: option.tag,
-                                  selected: controller.filterMode.value ==
-                                      option,
-                                  onTap: () {
-                                    controller.setFilterMode(option);
-                                  },
-                                );
+                    () => SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Wrap(
+                        spacing: 12,
+                        children: controller.tagList.map(
+                          (option) {
+                            return FilterButton(
+                              text: option.tag,
+                              selected: controller.filterMode.value == option,
+                              onTap: () {
+                                controller.setFilterMode(option);
                               },
-                            ).toList(),
-                          ),
-                        ),
+                            );
+                          },
+                        ).toList(),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -170,8 +162,7 @@ class FollowUserPage extends GetView<FollowUserController> {
                             controller.removeFollow(item);
                           },
                           onTap: () {
-                            AppNavigator.toLiveRoomDetail(
-                                site: site, roomId: item.roomId);
+                            AppNavigator.toLiveRoomDetail(site: site, roomId: item.roomId);
                           },
                           onLongPress: () {
                             // 长按弹出操作：设置标签或查看详情
@@ -184,8 +175,7 @@ class FollowUserPage extends GetView<FollowUserController> {
                       child: Obx(
                         () {
                           // temp
-                          final hide = AppSettingsController
-                              .instance.hideRemoveFollowButton.value;
+                          final hide = AppSettingsController.instance.hideRemoveFollowButton.value;
                           return PageGridView(
                             pageController: controller,
                             padding: AppStyle.edgeInsetsA12,
@@ -207,9 +197,7 @@ class FollowUserPage extends GetView<FollowUserController> {
                               return LiveRoomCard(
                                 site,
                                 liveRoomItem,
-                                onFollowRemove: hide
-                                    ? null
-                                    : () => controller.removeFollow(item),
+                                onFollowRemove: hide ? null : () => controller.removeFollow(item),
                                 onLongPress: () {
                                   controller.showBottomMenu(item);
                                 },

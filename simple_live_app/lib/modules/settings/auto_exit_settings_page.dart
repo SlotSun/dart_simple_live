@@ -41,8 +41,7 @@ class AutoExitSettingsPage extends GetView<AppSettingsController> {
                     visible: controller.autoExitEnable.value,
                     child: SettingsAction(
                       title: "自动关闭时间",
-                      value:
-                          "${controller.autoExitDuration.value ~/ 60}小时${controller.autoExitDuration.value % 60}分钟",
+                      value: "${controller.autoExitDuration.value ~/ 60}小时${controller.autoExitDuration.value % 60}分钟",
                       subtitle: "从进入直播间开始倒计时",
                       onTap: () {
                         setTimer(context);

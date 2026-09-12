@@ -37,19 +37,13 @@ class FollowUserBlock {
   @HiveField(5, defaultValue: 0)
   int updateTime;
 
-  factory FollowUserBlock.fromJson(Map<String, dynamic> json) =>
-      FollowUserBlock(
+  factory FollowUserBlock.fromJson(Map<String, dynamic> json) => FollowUserBlock(
         id: json['id'],
         roomId: json['roomId'],
         siteId: json['siteId'],
-        blockAccounts: (json['blockAccounts'] as List<dynamic>?)
-                ?.map((e) => FollowUserBlockAccount.fromJson(e))
-                .toList() ??
-            [],
-        blockWords: (json['blockWords'] as List<dynamic>?)
-                ?.map((e) => e as String)
-                .toList() ??
-            [],
+        blockAccounts:
+            (json['blockAccounts'] as List<dynamic>?)?.map((e) => FollowUserBlockAccount.fromJson(e)).toList() ?? [],
+        blockWords: (json['blockWords'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
         updateTime: json['updateTime'] ?? 0,
       );
 
@@ -94,8 +88,7 @@ class FollowUserBlockAccount {
   @HiveField(1)
   String name;
 
-  factory FollowUserBlockAccount.fromJson(Map<String, dynamic> json) =>
-      FollowUserBlockAccount(
+  factory FollowUserBlockAccount.fromJson(Map<String, dynamic> json) => FollowUserBlockAccount(
         uid: json['uid'],
         name: json['name'],
       );

@@ -52,8 +52,7 @@ class PageListView extends StatelessWidget {
               padding: padding,
               itemCount: pageController.list.length,
               itemBuilder: itemBuilder,
-              separatorBuilder:
-                  separatorBuilder ?? (context, i) => const SizedBox(),
+              separatorBuilder: separatorBuilder ?? (context, i) => const SizedBox(),
             ),
           ),
           Positioned(
@@ -62,9 +61,7 @@ class PageListView extends StatelessWidget {
             right: 0,
             child: // 加载更多按钮
                 Visibility(
-              visible: (Platform.isWindows ||
-                      Platform.isLinux ||
-                      Platform.isMacOS) &&
+              visible: (Platform.isWindows || Platform.isLinux || Platform.isMacOS) &&
                   pageController.canLoadMore.value &&
                   !pageController.pageLoadding.value &&
                   !pageController.pageEmpty.value,
@@ -81,9 +78,7 @@ class PageListView extends StatelessWidget {
             right: 12,
             child: // 加载更多按钮
                 Visibility(
-              visible: (Platform.isWindows ||
-                      Platform.isLinux ||
-                      Platform.isMacOS) &&
+              visible: (Platform.isWindows || Platform.isLinux || Platform.isMacOS) &&
                   pageController.canLoadMore.value &&
                   !pageController.pageLoadding.value &&
                   !pageController.pageEmpty.value &&

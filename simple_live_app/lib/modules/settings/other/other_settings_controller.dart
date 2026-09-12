@@ -91,7 +91,7 @@ class OtherSettingsController extends BaseController {
     super.onInit();
   }
 
-  void setFirebaseEnable(bool e){
+  void setFirebaseEnable(bool e) {
     AppSettingsController.instance.setFirebaseEnable(e);
     FirebaseService.setCrashlytics(e);
   }
@@ -221,8 +221,7 @@ class OtherSettingsController extends BaseController {
       LocalStorageService.instance.settingsBox.clear();
       LocalStorageService.instance.shieldBox.clear();
       LocalStorageService.instance.settingsBox.putAll(data["config"]);
-      LocalStorageService.instance.shieldBox
-          .putAll(data["shield"].cast<String, String>());
+      LocalStorageService.instance.shieldBox.putAll(data["shield"].cast<String, String>());
       SmartDialog.showToast("导入成功,重启生效");
     } catch (e) {
       Log.logPrint(e);

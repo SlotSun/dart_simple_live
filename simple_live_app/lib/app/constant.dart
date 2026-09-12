@@ -67,7 +67,7 @@ extension SortMethodStore on SortMethod {
   static SortMethod fromStore(String? v) {
     if (v == null) return SortMethod.watchDuration;
     return SortMethod.values.firstWhere(
-          (e) => e.name == v,
+      (e) => e.name == v,
       orElse: () => SortMethod.watchDuration,
     );
   }

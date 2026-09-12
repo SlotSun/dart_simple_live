@@ -14,8 +14,7 @@ class FollowBlockService extends GetxService {
     required String siteId,
     required String roomId,
   }) {
-    return DBService.instance
-        .getFollowUserBlockOrDefault(_getBlockId(siteId, roomId));
+    return DBService.instance.getFollowUserBlockOrDefault(_getBlockId(siteId, roomId));
   }
 
   /// 添加屏蔽账户
@@ -77,8 +76,7 @@ class FollowBlockService extends GetxService {
     required String siteId,
     required String roomId,
   }) async {
-    await DBService.instance
-        .deleteFollowUserBlock(_getBlockId(siteId, roomId));
+    await DBService.instance.deleteFollowUserBlock(_getBlockId(siteId, roomId));
   }
 
   //----------- 导入/导出 -----------

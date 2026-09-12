@@ -7,12 +7,7 @@ class NetImage extends StatelessWidget {
   final double? height;
   final BoxFit? fit;
   final double borderRadius;
-  const NetImage(this.picUrl,
-      {this.width,
-      this.height,
-      this.fit = BoxFit.cover,
-      this.borderRadius = 0,
-      super.key});
+  const NetImage(this.picUrl, {this.width, this.height, this.fit = BoxFit.cover, this.borderRadius = 0, super.key});
 
   @override
   Widget build(BuildContext context) {

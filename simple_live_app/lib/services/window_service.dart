@@ -29,14 +29,10 @@ class WindowService extends GetxService implements WindowListener {
 
   Future<void> resize() async {
     // 初始分辨率默认 1920×1080
-    final width = LocalStorageService.instance
-        .getValue(LocalStorageService.kWindowWidth, 1280.0);
-    final height = LocalStorageService.instance
-        .getValue(LocalStorageService.kWindowHeight, 720.0);
-    final x = LocalStorageService.instance
-        .getValue(LocalStorageService.kWindowX, 320.0);
-    final y = LocalStorageService.instance
-        .getValue(LocalStorageService.kWindowY, 180.0);
+    final width = LocalStorageService.instance.getValue(LocalStorageService.kWindowWidth, 1280.0);
+    final height = LocalStorageService.instance.getValue(LocalStorageService.kWindowHeight, 720.0);
+    final x = LocalStorageService.instance.getValue(LocalStorageService.kWindowX, 320.0);
+    final y = LocalStorageService.instance.getValue(LocalStorageService.kWindowY, 180.0);
     windowManager.setBounds(Rect.fromLTWH(x, y, width, height));
   }
 
@@ -103,13 +99,9 @@ class WindowService extends GetxService implements WindowListener {
   void onWindowUnmaximize() {}
 
   void _saveBounds(Rect bounds) {
-    LocalStorageService.instance
-        .setValue(LocalStorageService.kWindowX, bounds.left);
-    LocalStorageService.instance
-        .setValue(LocalStorageService.kWindowY, bounds.top);
-    LocalStorageService.instance
-        .setValue(LocalStorageService.kWindowWidth, bounds.width);
-    LocalStorageService.instance
-        .setValue(LocalStorageService.kWindowHeight, bounds.height);
+    LocalStorageService.instance.setValue(LocalStorageService.kWindowX, bounds.left);
+    LocalStorageService.instance.setValue(LocalStorageService.kWindowY, bounds.top);
+    LocalStorageService.instance.setValue(LocalStorageService.kWindowWidth, bounds.width);
+    LocalStorageService.instance.setValue(LocalStorageService.kWindowHeight, bounds.height);
   }
 }

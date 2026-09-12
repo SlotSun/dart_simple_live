@@ -19,14 +19,12 @@ import 'package:simple_live_app/models/db/follow_user.dart';
 /// * 如不需要参数，可以使用Get.toNamed
 class AppNavigator {
   /// 跳转至分类详情
-  static void toCategoryDetail(
-      {required Site site, required LiveSubCategory category}) {
+  static void toCategoryDetail({required Site site, required LiveSubCategory category}) {
     Get.toNamed(RoutePath.kCategoryDetail, arguments: [site, category]);
   }
 
   /// 跳转至直播间
-  static void toLiveRoomDetail(
-      {required Site site, required String roomId}) async {
+  static void toLiveRoomDetail({required Site site, required String roomId}) async {
     if (site.id == Constant.kBiliBili &&
         !BiliBiliAccountService.instance.logined.value &&
         AppSettingsController.instance.bilibiliLoginTip.value) {
@@ -66,8 +64,7 @@ class AppNavigator {
   }
 
   /// 跳转至同步设备
-  static Future toSyncDevice(
-      SyncClinet client, SyncClientInfoModel info) async {
+  static Future toSyncDevice(SyncClinet client, SyncClientInfoModel info) async {
     await Get.toNamed(
       RoutePath.kLocalSyncDevice,
       arguments: {

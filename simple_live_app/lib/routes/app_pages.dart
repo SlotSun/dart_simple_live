@@ -114,9 +114,7 @@ class AppPages {
       page: () => const DanmuSettingsPage(),
     ),
     //外观设置
-    GetPage(
-        name: RoutePath.kAppstyleSetting,
-        page: () => const AppStyleSettingPage()),
+    GetPage(name: RoutePath.kAppstyleSetting, page: () => const AppStyleSettingPage()),
     //播放设置
     GetPage(
       name: RoutePath.kSettingsPlay,
