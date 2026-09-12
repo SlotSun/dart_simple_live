@@ -1,11 +1,5 @@
 import 'dart:convert';
-
-T? asT<T>(dynamic value) {
-  if (value is T) {
-    return value;
-  }
-  return null;
-}
+import '../common/common_asT.dart';
 
 class BiliBiliUserInfoModel {
   BiliBiliUserInfoModel({
