@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
@@ -218,6 +220,18 @@ class DanmuSettingsView extends GetView<AppSettingsController> {
                   onChanged: (e) {
                     controller.setDanmuBottomMargin(e.toDouble());
                   },
+                ),
+              ),
+              Visibility(
+                visible: Platform.isWindows || Platform.isLinux || Platform.isMacOS,
+                child: Obx(
+                  () => SettingsSwitch(
+                    title: "弹幕随播放器大小缩放",
+                    value: controller.danmakuFontClamped.value,
+                    onChanged: (e) {
+                      controller.setDanmakuFontClamped(e);
+                    },
+                  ),
                 ),
               ),
             ],

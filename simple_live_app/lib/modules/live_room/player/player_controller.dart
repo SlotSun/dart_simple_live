@@ -318,6 +318,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
         await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
       }
       await windowManager.setFullScreen(true);
+      await WindowService.instance.danmakuFontClamped();
     }
     //danmakuController?.clear();
   }
@@ -337,6 +338,8 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
       windowManager.setFullScreen(false);
     }
     fullScreenState.value = false;
+
+    await WindowService.instance.danmakuFontClamped();
 
     //danmakuController?.clear();
   }

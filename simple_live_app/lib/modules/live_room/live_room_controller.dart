@@ -35,6 +35,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class LiveRoomController extends PlayerController with WidgetsBindingObserver {
+  StreamSubscription<dynamic>? subscription;
   final Site pSite;
   final String pRoomId;
   late LiveDanmaku liveDanmaku;
@@ -134,7 +135,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     loadData();
 
     scrollController.addListener(scrollListener);
-
+    subscription = EventBus.instance.listen(Constant.kUpdateDanmaku, (data) {
+      updateDanmuOption(danmakuController?.option.copyWith(fontSize: data as double));
+    });
     _initDanmakuMask();
     super.onInit();
   }
