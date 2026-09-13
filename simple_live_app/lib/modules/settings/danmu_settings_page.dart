@@ -226,10 +226,42 @@ class DanmuSettingsView extends GetView<AppSettingsController> {
                 visible: Platform.isWindows || Platform.isLinux || Platform.isMacOS,
                 child: Obx(
                   () => SettingsSwitch(
-                    title: "弹幕随播放器大小缩放",
+                    title: "弹幕随窗口大小缩放",
+                    subtitle: '以窗口高度为准,窗口变化后生效',
                     value: controller.danmakuFontClamped.value,
                     onChanged: (e) {
                       controller.setDanmakuFontClamped(e);
+                      // 直接调用 window_service.danmakuFontClamped() 多链路调用通知过重，用户手动即可
+                    },
+                  ),
+                ),
+              ),
+              Obx(
+                () => Visibility(
+                  visible: controller.danmakuFontClamped.value,
+                  child: SettingsNumber(
+                    title: '弹幕随窗口大小放大比率',
+                    subtitle: '范围：0~15,越大越快',
+                    value: controller.danmakuFontClampUpSens.value.toInt(),
+                    min: 0,
+                    max: 15,
+                    onChanged: (e) {
+                      controller.setDanmakuFontClampUpSens(e.toDouble());
+                    },
+                  ),
+                ),
+              ),
+              Obx(
+                () => Visibility(
+                  visible: controller.danmakuFontClamped.value,
+                  child: SettingsNumber(
+                    title: '弹幕随窗口大小缩放比率',
+                    subtitle: '范围：0~10,越大越快',
+                    value: controller.danmakuFontClampDownSens.value.toInt(),
+                    min: 0,
+                    max: 10,
+                    onChanged: (e) {
+                      controller.setDanmakuFontClampDownSens(e.toDouble());
                     },
                   ),
                 ),

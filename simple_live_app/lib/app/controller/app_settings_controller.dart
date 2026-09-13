@@ -48,6 +48,8 @@ class AppSettingsController extends GetxController {
     // and now, value was set 0..8, the value needs ..=FontWeight[index] after
     // migration, so marked it, next migration depends on canvas_danmaku upgrade
     danmakuFontClamped.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmakuFontClamped, false);
+    danmakuFontClampUpSens.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmakuFontClampUpSens, 9.0);
+    danmakuFontClampDownSens.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmakuFontClampDownSens, 5.0);
 
     hardwareDecode.value = LocalStorageService.instance.getValue(LocalStorageService.kHardwareDecode, true);
     chatTextSize.value = LocalStorageService.instance.getValue(LocalStorageService.kChatTextSize, 14.0);
@@ -333,6 +335,19 @@ class AppSettingsController extends GetxController {
   void setDanmakuFontClamped(bool e) {
     danmakuFontClamped.value = e;
     LocalStorageService.instance.setValue(LocalStorageService.kDanmakuFontClamped, e);
+  }
+  var danmakuFontResize = 16.0;
+
+  var danmakuFontClampUpSens = 9.0.obs;
+  void setDanmakuFontClampUpSens(double e) {
+    danmakuFontClampUpSens.value = e;
+    LocalStorageService.instance.setValue(LocalStorageService.kDanmakuFontClampUpSens, e);
+  }
+
+  var danmakuFontClampDownSens = 5.0.obs;
+  void setDanmakuFontClampDownSens(double e) {
+    danmakuFontClampDownSens.value = e;
+    LocalStorageService.instance.setValue(LocalStorageService.kDanmakuFontClampDownSens, e);
   }
 
   var qualityLevel = 1.obs;

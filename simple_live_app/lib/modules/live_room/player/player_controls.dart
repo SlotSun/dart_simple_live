@@ -598,10 +598,15 @@ Widget buildControls(
 
 Widget buildDanmuView(VideoState videoState, LiveRoomController controller) {
   var padding = MediaQuery.of(videoState.context).padding;
+  // completed: resizeDanmakuFontSize if clamped is true
+  // danmakuFontResize is temp
+  var reSize = AppSettingsController.instance.danmakuFontClamped.value
+      ? AppSettingsController.instance.danmakuFontResize
+      : AppSettingsController.instance.danmuSize.value;
   controller.danmakuView ??= DanmakuScreen(
     createdController: controller.initDanmakuController,
     option: DanmakuOption(
-      fontSize: AppSettingsController.instance.danmuSize.value,
+      fontSize: reSize,
       area: AppSettingsController.instance.danmuArea.value,
       duration: AppSettingsController.instance.danmuSpeed.value,
       opacity: AppSettingsController.instance.danmuOpacity.value,

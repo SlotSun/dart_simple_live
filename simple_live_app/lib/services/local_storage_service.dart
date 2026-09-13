@@ -77,6 +77,11 @@ class LocalStorageService extends GetxService {
   /// 弹幕随屏幕缩放
   static const String kDanmakuFontClamped = "DanmakuFontClamped";
 
+  /// 弹幕随屏蔽缩放速度比率：upSens_放大/downSens_缩小
+  static const String kDanmakuFontClampUpSens = "DanmakuFontClampUpSens";
+
+  static const String kDanmakuFontClampDownSens = "DanmakuFontClampDownSens";
+
   /// 弹幕去重参数--文本归一化
   static const String kDanmuTextNormalization = "DanmuTextNormalization";
 

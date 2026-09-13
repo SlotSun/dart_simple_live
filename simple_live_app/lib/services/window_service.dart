@@ -7,7 +7,6 @@ import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
-import 'package:simple_live_app/models/enum/danmaku_font_size_enum.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -40,6 +39,7 @@ class WindowService extends GetxService implements WindowListener {
     final x = LocalStorageService.instance.getValue(LocalStorageService.kWindowX, 320.0);
     final y = LocalStorageService.instance.getValue(LocalStorageService.kWindowY, 180.0);
     windowManager.setBounds(Rect.fromLTWH(x, y, width, height));
+    AppSettingsController.instance.danmakuFontResize = await danmakuFontClamped();
   }
 
   @override
@@ -125,7 +125,8 @@ class WindowService extends GetxService implements WindowListener {
   // 启用后，当 Resized/Maximize/full -> re 后调整
   // 通过service 通知 live_controller 更新 danmaku_option
   // 因为media_kit的 w/h 均为 null, 所以只能从外部window_manager设计
-  Future<void> danmakuFontClamped() async {
+  Future<double> danmakuFontClamped() async {
+    // 应该更进一步判断用户是否在直播间界面
     if (AppSettingsController.instance.danmakuFontClamped.value) {
       final bounds = await windowManager.getBounds();
       var windowH = bounds.height;
@@ -135,15 +136,18 @@ class WindowService extends GetxService implements WindowListener {
         value: AppSettingsController.instance.danmuSize.value,
         playerH: windowH,
         designH: 720.0,
-        upSens: DanmakuFontScale.medium.upSens,
-        downSens: DanmakuFontScale.medium.downSens,// 暂时写死2k，后续允许用户自定义调整
+        upSens: AppSettingsController.instance.danmakuFontClampUpSens.value / 10,
+        downSens: AppSettingsController.instance.danmakuFontClampDownSens.value / 10,
         minSize: 8,
         maxSize: 48,
       );
       EventBus.instance.emit(Constant.kUpdateDanmaku, reSizeFont);
       Log.i('player_danmaku_size: $reSizeFont');
+      return reSizeFont;
     } else {
-      return;
+      // 防御性，反复测试功能过程中弹幕
+      EventBus.instance.emit(Constant.kUpdateDanmaku, AppSettingsController.instance.danmuSize.value);
+      return AppSettingsController.instance.danmuSize.value;
     }
   }
 }

@@ -606,7 +606,7 @@ class Utils {
     double safeDownSens = downSens.clamp(0.0, 1.0);
     var ratio = playerH / designH;
     // 双向控制放缩比率
-    var adjustedRatio = ratio >= 1 ? math.pow(ratio, safeUpSens).toDouble() : 1 - (1 - ratio) * safeDownSens;
+    var adjustedRatio = ratio > 1 ? math.pow(ratio, safeUpSens).toDouble() : 1 - (1 - ratio) * safeDownSens;
 
     var result = value * adjustedRatio;
     var clamped = result.clamp(minSize, maxSize);

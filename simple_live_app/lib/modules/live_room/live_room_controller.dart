@@ -136,7 +136,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
     scrollController.addListener(scrollListener);
     subscription = EventBus.instance.listen(Constant.kUpdateDanmaku, (data) {
-      updateDanmuOption(danmakuController?.option.copyWith(fontSize: data as double));
+      if(danmakuController?.option.fontSize != data as double ){
+        updateDanmuOption(danmakuController?.option.copyWith(fontSize: data));
+      }
     });
     _initDanmakuMask();
     super.onInit();
