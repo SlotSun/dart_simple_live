@@ -16,7 +16,7 @@ mixin HuyaRequestParams {
   static const String AYYUID_REGEX = r'"yyid":"?(\d+)"?';
 
   static String HYSDK_UA =
-      "HYSDK(Windows,30000002)_APP(pc_exe&7090000&official)_SDK(trans&2.35.0.5996)";
+      "HYSDK(Windows,30000002)_APP(pc_exe&7100004&official)_SDK(trans&2.40.0.6448)";
 
   static Map<String, String> get requestHeaders {
     return {
