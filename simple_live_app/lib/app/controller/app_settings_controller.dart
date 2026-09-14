@@ -111,6 +111,11 @@ class AppSettingsController extends GetxController {
     );
     pipHideDanmu.value = LocalStorageService.instance.getValue(LocalStorageService.kPIPHideDanmu, true);
 
+    windowPipX.value = LocalStorageService.instance.getValue(LocalStorageService.kWindowPipX, 0.0);
+    windowPipY.value = LocalStorageService.instance.getValue(LocalStorageService.kWindowPipY, 0.0);
+    windowPipWidth.value = LocalStorageService.instance.getValue(LocalStorageService.kWindowPipWidth, 400.0);
+    windowPipHeight.value = LocalStorageService.instance.getValue(LocalStorageService.kWindowPipHeight, 225.0);
+
     bilibiliLoginTip.value = LocalStorageService.instance.getValue(LocalStorageService.kBilibiliLoginTip, true);
 
     playerBufferSize.value = LocalStorageService.instance.getValue(LocalStorageService.kPlayerBufferSize, 32);
@@ -506,6 +511,35 @@ class AppSettingsController extends GetxController {
   void setPIPHideDanmu(bool e) {
     pipHideDanmu.value = e;
     LocalStorageService.instance.setValue(LocalStorageService.kPIPHideDanmu, e);
+  }
+
+  /// window小窗size
+  var windowPipX = 0.0.obs;
+
+  void setWindowPipX(double e) {
+    windowPipX.value = e;
+    LocalStorageService.instance.setValue(LocalStorageService.kWindowPipX, e);
+  }
+
+  var windowPipY = 0.0.obs;
+
+  void setWindowPipY(double e) {
+    windowPipY.value = e;
+    LocalStorageService.instance.setValue(LocalStorageService.kWindowPipY, e);
+  }
+
+  var windowPipWidth = 320.0.obs;
+
+  void setWindowPipWidth(double e) {
+    windowPipWidth.value = e;
+    LocalStorageService.instance.setValue(LocalStorageService.kWindowPipWidth, e);
+  }
+
+  var windowPipHeight = 180.0.obs;
+
+  void setWindowPipHeight(double e) {
+    windowPipHeight.value = e;
+    LocalStorageService.instance.setValue(LocalStorageService.kWindowPipHeight, e);
   }
 
   var danmuTopMargin = 0.0.obs;

@@ -22,7 +22,7 @@ class WindowService extends GetxService implements WindowListener {
   Future<void> init() async {
     await resize();
     WindowOptions windowOptions = WindowOptions(
-      minimumSize: Size(280, 280),
+      minimumSize: Size(320, 280), // 防止无脑小窗导致界面报错
       center: false,
       title: "Slive",
     );
@@ -86,9 +86,11 @@ class WindowService extends GetxService implements WindowListener {
 
   @override
   Future<void> onWindowMoved() async {
+    final bounds = await windowManager.getBounds();
     if (!isPIP) {
-      final bounds = await windowManager.getBounds();
       _saveBounds(bounds);
+    } else {
+      _savePipBounds(bounds);
     }
   }
 
@@ -97,10 +99,12 @@ class WindowService extends GetxService implements WindowListener {
 
   @override
   Future<void> onWindowResized() async {
+    final bounds = await windowManager.getBounds();
     if (!isPIP) {
-      final bounds = await windowManager.getBounds();
       await danmakuFontClamped();
       _saveBounds(bounds);
+    } else {
+      _savePipBounds(bounds);
     }
   }
 
@@ -120,6 +124,13 @@ class WindowService extends GetxService implements WindowListener {
     LocalStorageService.instance.setValue(LocalStorageService.kWindowY, bounds.top);
     LocalStorageService.instance.setValue(LocalStorageService.kWindowWidth, bounds.width);
     LocalStorageService.instance.setValue(LocalStorageService.kWindowHeight, bounds.height);
+  }
+
+  void _savePipBounds(Rect bounds) {
+    AppSettingsController.instance.setWindowPipX(bounds.left);
+    AppSettingsController.instance.setWindowPipY(bounds.top);
+    AppSettingsController.instance.setWindowPipWidth(bounds.width);
+    AppSettingsController.instance.setWindowPipHeight(bounds.height);
   }
 
   // 启用后，当 Resized/Maximize/full -> re 后调整

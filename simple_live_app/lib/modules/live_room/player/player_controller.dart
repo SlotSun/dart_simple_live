@@ -360,14 +360,15 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
       // 获取视频窗口大小
       var width = player.state.width ?? 16;
       var height = player.state.height ?? 9;
-
+      var px = AppSettingsController.instance.windowPipX.value;
+      var py = AppSettingsController.instance.windowPipY.value;
+      var pWidth = AppSettingsController.instance.windowPipWidth.value;
+      var pHeight = AppSettingsController.instance.windowPipHeight.value;
       // 横屏还是竖屏
-      if (height > width) {
-        var aspectRatio = width / height;
-        windowManager.setSize(Size(400, 400 / aspectRatio));
+      if (height < width) {
+        windowManager.setBounds(Rect.fromLTWH(px, py, pWidth, pHeight));
       } else {
-        var aspectRatio = height / width;
-        windowManager.setSize(Size(280 / aspectRatio, 280));
+        windowManager.setBounds(Rect.fromLTWH(px, py, pHeight, pWidth));
       }
 
       windowManager.setAlwaysOnTop(true);

@@ -218,7 +218,7 @@ class LocalStorageService extends GetxService {
   /// WebDAV_最后一次备份时间
   static const String kWebDAVLastRecoverTime = "kWebDAVLastRecoverTime";
 
-  /// windows窗口size
+  /// window窗口size
   static const String kWindowX = "WindowX";
 
   static const String kWindowY = "WindowY";
@@ -226,6 +226,15 @@ class LocalStorageService extends GetxService {
   static const String kWindowWidth = "WindowWidth";
 
   static const String kWindowHeight = "WindowHeight";
+
+  /// window小窗size
+  static const String kWindowPipX = "WindowPipX";
+
+  static const String kWindowPipY = "WindowPipY";
+
+  static const String kWindowPipWidth = "WindowPipWidth";
+
+  static const String kWindowPipHeight = "WindowPipHeight";
 
   /// 关注列表排序方法
   static const String kFollowSortMethod = "FollowSortMethod";
