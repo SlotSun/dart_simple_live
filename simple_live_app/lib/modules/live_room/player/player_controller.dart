@@ -336,11 +336,9 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
         await windowManager.setTitleBarStyle(TitleBarStyle.normal);
       }
       windowManager.setFullScreen(false);
+      await WindowService.instance.danmakuFontClamped();
     }
     fullScreenState.value = false;
-
-    await WindowService.instance.danmakuFontClamped();
-
     //danmakuController?.clear();
   }
 
