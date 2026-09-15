@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'dart:ui';
 
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
@@ -14,37 +14,38 @@ class WindowService extends GetxService implements WindowListener {
   static WindowService get instance => Get.find<WindowService>();
 
   bool isPIP = false;
+  bool isMaxAuto = false;
+  bool isMaxState = false;
 
   WindowService() {
     windowManager.addListener(this);
   }
 
   Future<void> init() async {
-    await resize();
-    WindowOptions windowOptions = WindowOptions(
-      minimumSize: Size(320, 280), // 防止无脑小窗导致界面报错
-      center: false,
-      title: "Slive",
-    );
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
-      if (AppSettingsController.instance.windowMaxAuto.value && AppSettingsController.instance.windowMaxState.value) {
-        await windowManager.maximize();
-      }
-      await windowManager.show();
-      await windowManager.focus();
-    });
-  }
-
-  Future<void> resize() async {
-    // 初始分辨率默认 1920×1080
+    isMaxAuto = AppSettingsController.instance.windowMaxAuto.value;
+    isMaxState = AppSettingsController.instance.windowMaxState.value;
     final width = LocalStorageService.instance.getValue(LocalStorageService.kWindowWidth, 1280.0);
     final height = LocalStorageService.instance.getValue(LocalStorageService.kWindowHeight, 720.0);
     final x = LocalStorageService.instance.getValue(LocalStorageService.kWindowX, 320.0);
     final y = LocalStorageService.instance.getValue(LocalStorageService.kWindowY, 180.0);
-    await windowManager.setSize(Size(width,height));
-    await windowManager.setPosition(Offset(x, y));
-    AppSettingsController.instance.danmakuFontResize = await danmakuFontClamped();
 
+    AppSettingsController.instance.danmakuFontResize = await danmakuFontClamped();
+    await windowManager.setPosition(Offset(x, y));
+    WindowOptions windowOptions = WindowOptions(
+      size: Size(width, height),
+      minimumSize: Size(320, 280), // 防止无脑小窗导致界面报错
+      center: false,
+      title: "Slive",
+    );
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      // 最大化在显示之后 防止卡白屏
+      if (isMaxAuto && isMaxState) {
+        await WidgetsBinding.instance.endOfFrame;
+        await windowManager.maximize();
+      }
+      await windowManager.focus();
+    });
   }
 
   @override
