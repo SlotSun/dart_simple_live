@@ -27,6 +27,9 @@ class WindowService extends GetxService implements WindowListener {
       title: "Slive",
     );
     windowManager.waitUntilReadyToShow(windowOptions, () async {
+      if (AppSettingsController.instance.windowMaxAuto.value && AppSettingsController.instance.windowMaxState.value) {
+        await windowManager.maximize();
+      }
       await windowManager.show();
       await windowManager.focus();
     });
@@ -38,8 +41,10 @@ class WindowService extends GetxService implements WindowListener {
     final height = LocalStorageService.instance.getValue(LocalStorageService.kWindowHeight, 720.0);
     final x = LocalStorageService.instance.getValue(LocalStorageService.kWindowX, 320.0);
     final y = LocalStorageService.instance.getValue(LocalStorageService.kWindowY, 180.0);
-    windowManager.setBounds(Rect.fromLTWH(x, y, width, height));
+    await windowManager.setSize(Size(width,height));
+    await windowManager.setPosition(Offset(x, y));
     AppSettingsController.instance.danmakuFontResize = await danmakuFontClamped();
+
   }
 
   @override
@@ -70,11 +75,15 @@ class WindowService extends GetxService implements WindowListener {
 
   @override
   Future<void> onWindowLeaveFullScreen() async {
+    // issues 同上
     await danmakuFontClamped();
   }
 
   @override
   Future<void> onWindowMaximize() async {
+    if(AppSettingsController.instance.windowMaxAuto.value){
+      AppSettingsController.instance.setWindowMaxState(true);
+    }
     await danmakuFontClamped();
   }
 
@@ -86,12 +95,7 @@ class WindowService extends GetxService implements WindowListener {
 
   @override
   Future<void> onWindowMoved() async {
-    final bounds = await windowManager.getBounds();
-    if (!isPIP) {
-      _saveBounds(bounds);
-    } else {
-      _savePipBounds(bounds);
-    }
+    await windowStateChanged();
   }
 
   @override
@@ -99,13 +103,7 @@ class WindowService extends GetxService implements WindowListener {
 
   @override
   Future<void> onWindowResized() async {
-    final bounds = await windowManager.getBounds();
-    if (!isPIP) {
-      await danmakuFontClamped();
-      _saveBounds(bounds);
-    } else {
-      _savePipBounds(bounds);
-    }
+    await windowStateChanged();
   }
 
   @override
@@ -116,31 +114,43 @@ class WindowService extends GetxService implements WindowListener {
 
   @override
   Future<void> onWindowUnmaximize() async {
+    AppSettingsController.instance.setWindowMaxState(false);
     await danmakuFontClamped();
   }
 
-  void _saveBounds(Rect bounds) {
-    LocalStorageService.instance.setValue(LocalStorageService.kWindowX, bounds.left);
-    LocalStorageService.instance.setValue(LocalStorageService.kWindowY, bounds.top);
-    LocalStorageService.instance.setValue(LocalStorageService.kWindowWidth, bounds.width);
-    LocalStorageService.instance.setValue(LocalStorageService.kWindowHeight, bounds.height);
+  Future<void> windowStateChanged() async {
+    final size = await windowManager.getSize();
+    final position = await windowManager.getPosition();
+    if (!isPIP) {
+      await danmakuFontClamped();
+      _saveSizeAndPositon(size, position);
+    } else {
+      _savePipSizeAndPositon(size, position);
+    }
   }
 
-  void _savePipBounds(Rect bounds) {
-    AppSettingsController.instance.setWindowPipX(bounds.left);
-    AppSettingsController.instance.setWindowPipY(bounds.top);
-    AppSettingsController.instance.setWindowPipWidth(bounds.width);
-    AppSettingsController.instance.setWindowPipHeight(bounds.height);
+  void _saveSizeAndPositon(Size s, Offset position) {
+    LocalStorageService.instance.setValue(LocalStorageService.kWindowX, position.dx);
+    LocalStorageService.instance.setValue(LocalStorageService.kWindowY, position.dy);
+    LocalStorageService.instance.setValue(LocalStorageService.kWindowWidth, s.width);
+    LocalStorageService.instance.setValue(LocalStorageService.kWindowHeight, s.height);
+  }
+
+  void _savePipSizeAndPositon(Size s, Offset position) {
+    AppSettingsController.instance.setWindowPipX(position.dx);
+    AppSettingsController.instance.setWindowPipY(position.dy);
+    AppSettingsController.instance.setWindowPipWidth(s.width);
+    AppSettingsController.instance.setWindowPipHeight(s.height);
   }
 
   // 启用后，当 Resized/Maximize/full -> re 后调整
   // 通过service 通知 live_controller 更新 danmaku_option
   // 因为media_kit的 w/h 均为 null, 所以只能从外部window_manager设计
   Future<double> danmakuFontClamped() async {
-    // 应该更进一步判断用户是否在直播间界面
-    if (AppSettingsController.instance.danmakuFontClamped.value) {
-      final bounds = await windowManager.getBounds();
-      var windowH = bounds.height;
+    // 应该更进一步判断用户是否在直播间界面, 小窗模式恢复默认弹幕尺寸
+    if (AppSettingsController.instance.danmakuFontClamped.value && !isPIP) {
+      final size = await windowManager.getSize();
+      var windowH = size.height;
       Log.i('player_danmaku_size_h: $windowH');
       // 窗口设计分辨率默认 1280x720
       var reSizeFont =  Utils.scaleValue(

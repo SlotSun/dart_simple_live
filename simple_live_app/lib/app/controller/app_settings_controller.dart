@@ -111,6 +111,9 @@ class AppSettingsController extends GetxController {
     );
     pipHideDanmu.value = LocalStorageService.instance.getValue(LocalStorageService.kPIPHideDanmu, true);
 
+    windowMaxAuto.value = LocalStorageService.instance.getValue(LocalStorageService.kWindowMaxAuto, false);
+    windowMaxState.value = LocalStorageService.instance.getValue(LocalStorageService.kWindowMaxState, false);
+
     windowPipX.value = LocalStorageService.instance.getValue(LocalStorageService.kWindowPipX, 0.0);
     windowPipY.value = LocalStorageService.instance.getValue(LocalStorageService.kWindowPipY, 0.0);
     windowPipWidth.value = LocalStorageService.instance.getValue(LocalStorageService.kWindowPipWidth, 400.0);
@@ -511,6 +514,19 @@ class AppSettingsController extends GetxController {
   void setPIPHideDanmu(bool e) {
     pipHideDanmu.value = e;
     LocalStorageService.instance.setValue(LocalStorageService.kPIPHideDanmu, e);
+  }
+  /// window Setting
+  // 开屏自动最大化
+  var windowMaxAuto = false.obs;
+  void setWindowMaxAuto(bool e){
+    windowMaxAuto.value = e;
+    LocalStorageService.instance.setValue(LocalStorageService.kWindowMaxAuto, e);
+  }
+
+  var windowMaxState = false.obs;
+  void setWindowMaxState(bool e){
+    windowMaxState.value = e;
+    LocalStorageService.instance.setValue(LocalStorageService.kWindowMaxState, e);
   }
 
   /// window小窗size

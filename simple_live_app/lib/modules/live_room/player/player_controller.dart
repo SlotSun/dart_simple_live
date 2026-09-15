@@ -138,6 +138,9 @@ mixin PlayerStateMixin on PlayerMixin {
   /// 是否处于全屏状态
   RxBool fullScreenState = false.obs;
 
+  /// 是否处于窗口最大化状态
+  RxBool windowMaxState = false.obs;
+
   /// 显示手势Tip
   RxBool showGestureTip = false.obs;
 
@@ -312,13 +315,17 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
       }
     } else {
       // todo: animation isn't smooth...
-      bool isMaximized = await windowManager.isMaximized();
-      if (isMaximized) {
-        await windowManager.setFullScreen(true);
-        await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
-      }
-      await windowManager.setFullScreen(true);
+      // fix: pip->full->normal bug
+      // 不再考虑从什么状态切换，逻辑混乱，而是确定窗口状态直接设置属性
+      // 记忆进入全屏前的状态
+      windowMaxState.value = await windowManager.isMaximized();
+      // 读取窗口大小
+      smallWindowState.value = false; // no pip
+      WindowService.instance.isPIP = smallWindowState.value;
+      await windowManager.setFullScreen(true); // in full
+      await windowManager.setTitleBarStyle(TitleBarStyle.hidden); // no title
       await WindowService.instance.danmakuFontClamped();
+      await windowManager.setAlwaysOnTop(false);
     }
     //danmakuController?.clear();
   }
@@ -326,16 +333,19 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
   /// 退出全屏
   void exitFull() async {
     // todo: 还应该关闭所有的dialog
+    SmartDialog.dismiss();
     if (Platform.isAndroid || Platform.isIOS) {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: SystemUiOverlay.values);
       setPortraitOrientation();
     } else {
-      bool isMaximized = await windowManager.isMaximized();
-      if (isMaximized) {
-        await windowManager.setFullScreen(false);
-        await windowManager.setTitleBarStyle(TitleBarStyle.normal);
-      }
+      // 退回原来的大小
+      if(windowMaxState.value) await windowManager.maximize();
+      if(_lastWindowSize != null) await windowManager.setSize(_lastWindowSize!);
+      if(_lastWindowPosition != null) await windowManager.setPosition(_lastWindowPosition!);
+      Log.d('last_window_size:${_lastWindowSize!.width}__${_lastWindowSize!.height}');
+      Log.d('last_window_position:${_lastWindowPosition?.dx}__${_lastWindowPosition?.dy}');
       windowManager.setFullScreen(false);
+      windowManager.setTitleBarStyle(TitleBarStyle.normal);
       await WindowService.instance.danmakuFontClamped();
     }
     fullScreenState.value = false;
@@ -351,11 +361,12 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
       fullScreenState.value = true;
       smallWindowState.value = true;
       WindowService.instance.isPIP = smallWindowState.value;
-
+      // 进入小窗会自动恢复默认弹幕大小
       // 读取窗口大小
       _lastWindowSize = await windowManager.getSize();
       _lastWindowPosition = await windowManager.getPosition();
-
+      Log.d('last_window_size:${_lastWindowSize!.width}__${_lastWindowSize!.height}');
+      Log.d('last_window_position:${_lastWindowPosition?.dx}__${_lastWindowPosition?.dy}');
       windowManager.setTitleBarStyle(TitleBarStyle.hidden);
       // 获取视频窗口大小
       var width = player.state.width ?? 16;
@@ -366,9 +377,11 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
       var pHeight = AppSettingsController.instance.windowPipHeight.value;
       // 横屏还是竖屏
       if (height < width) {
-        windowManager.setBounds(Rect.fromLTWH(px, py, pWidth, pHeight));
+        windowManager.setSize(Size(pWidth, pHeight));
+        windowManager.setPosition(Offset(px, py));
       } else {
-        windowManager.setBounds(Rect.fromLTWH(px, py, pHeight, pWidth));
+        windowManager.setSize(Size(pHeight, pWidth));
+        windowManager.setPosition(Offset(px, py));
       }
 
       windowManager.setAlwaysOnTop(true);
