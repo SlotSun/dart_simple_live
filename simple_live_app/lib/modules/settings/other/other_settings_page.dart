@@ -171,19 +171,22 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
               ],
             ),
           ),
-          Padding(
-            padding: AppStyle.edgeInsetsA12.copyWith(top: 24),
-            child: Text(
-              "窗口管理",
-              style: Get.textTheme.titleSmall,
+          Visibility(
+            visible: Platform.isWindows || Platform.isLinux || Platform.isMacOS,
+            child: Padding(
+              padding: AppStyle.edgeInsetsA12.copyWith(top: 24),
+              child: Text(
+                "窗口管理",
+                style: Get.textTheme.titleSmall,
+              ),
             ),
           ),
-          SettingsCard(
-            child: Column(
-              children: [
-                Visibility(
-                  visible: Platform.isWindows || Platform.isLinux || Platform.isMacOS,
-                  child: Obx(
+          Visibility(
+            visible: Platform.isWindows || Platform.isLinux || Platform.isMacOS,
+            child: SettingsCard(
+              child: Column(
+                children: [
+                  Obx(
                     () => SettingsSwitch(
                       value: AppSettingsController.instance.windowMaxAuto.value,
                       title: "记忆窗口最大化",
@@ -191,8 +194,8 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
                       onChanged: controller.setWindowMaxAuto,
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           Padding(
