@@ -12,6 +12,7 @@ import 'package:hive_ce_flutter/adapters.dart';
 import 'package:logger/logger.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
@@ -42,16 +43,31 @@ import 'package:simple_live_app/widgets/status/app_loadding_widget.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:window_manager/window_manager.dart';
 
-void main() async {
+void main(List<String> arguments) async {
+  final action = arguments.isEmpty ? null : arguments.first.toLowerCase();
+  var path = (await getApplicationSupportDirectory()).path;
+  if (action == "-p" || action == "--portable") {
+    path = p.join(
+      p.dirname(Platform.resolvedExecutable),
+      'data_hive_ce',
+    );
+  } else if (action == "-h" || action == "--help") {
+    printHelp();
+    return;
+  } else if (action != null) {
+    print("未知指令: $action");
+    printHelp();
+    return;
+  }
   WidgetsFlutterBinding.ensureInitialized();
   // init-queue:
   // window(first)->migration->media_kit->Hive->services->start
   // window(second)->open
   await RustLib.init();
-  await MigrationService.migrateData();
+  // await MigrationService.migrateData();
   MediaKit.ensureInitialized();
   await Hive.initFlutter(
-    (!Platform.isAndroid && !Platform.isIOS) ? (await getApplicationSupportDirectory()).path : null,
+    (!Platform.isAndroid && !Platform.isIOS) ? path : null,
   );
   //初始化服务
   await initServices();
@@ -67,6 +83,12 @@ void main() async {
   );
   SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
   runApp(const MyApp());
+}
+
+void printHelp() {
+  print("-p ：便携版启动");
+  print("--portable：便携版启动");
+  print("-h：帮助");
 }
 
 Future initWindow() async {
