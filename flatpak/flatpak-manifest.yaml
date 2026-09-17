@@ -77,6 +77,6 @@ modules:
         path: "../"
       - type: git
         url: https://github.com/flutter/flutter.git
-        tag: 3.47.2
-        commit: d3b14c876900e553bc736ca19295fc09e3853e8e
+        tag: 3.47.4
+        commit: 9584c6713b324636289d067944a46fd6b49df14b
         dest: flutter
