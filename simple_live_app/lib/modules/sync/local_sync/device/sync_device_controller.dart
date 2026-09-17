@@ -87,8 +87,7 @@ class SyncDeviceController extends BaseController {
       }
       SmartDialog.showLoading(msg: "同步中...");
 
-      await request.syncBiliAccount(
-          client, BiliBiliAccountService.instance.cookie);
+      await request.syncBiliAccount(client, BiliBiliAccountService.instance.cookie);
       SmartDialog.showToast("已同步哔哩哔哩账号");
     } catch (e) {
       SmartDialog.showToast("同步失败:$e");

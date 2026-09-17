@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/constant.dart';
@@ -30,7 +30,7 @@ class IndexedSettingsPage extends GetView<IndexedSettingsController> {
               () => ReorderableListView(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                onReorder: controller.updateHomeSort,
+                onReorderItem: controller.updateHomeSort,
                 children: controller.homeSort.map(
                   (key) {
                     var e = Constant.allHomePages[key]!;
@@ -58,10 +58,8 @@ class IndexedSettingsPage extends GetView<IndexedSettingsController> {
               () => ReorderableListView(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                onReorder: controller.updateSiteSort,
-                children: controller.siteSort
-                    .where((key) => Sites.allSites[key]?.name != 'Twitch')
-                    .map(
+                onReorderItem: controller.updateSiteSort,
+                children: controller.siteSort.where((key) => Sites.allSites[key]?.name != 'Twitch').map(
                   (key) {
                     var e = Sites.allSites[key]!;
                     return ListTile(

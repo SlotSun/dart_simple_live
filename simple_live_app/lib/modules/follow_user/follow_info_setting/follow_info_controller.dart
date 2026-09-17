@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/controller/base_controller.dart';
@@ -41,8 +41,7 @@ class FollowInfoController extends BasePageController<FollowUser> {
   }
 
   void _initTagOptions() {
-    final List<FollowUserTag> options =
-        FollowService.instance.getTagOptionsWithAll();
+    final List<FollowUserTag> options = FollowService.instance.getTagOptionsWithAll();
     tagOptions.assignAll(options);
 
     // 设置选中项
@@ -112,8 +111,7 @@ class FollowInfoController extends BasePageController<FollowUser> {
     if (current == null) return;
 
     // 防呆
-    bool contain =
-        FollowService.instance.getFollowExist("${newSite.id}_$newRoomId");
+    bool contain = FollowService.instance.getFollowExist("${newSite.id}_$newRoomId");
     if (contain == true) {
       SmartDialog.showToast('目标主播已关注，无需迁移');
       return;
@@ -125,8 +123,7 @@ class FollowInfoController extends BasePageController<FollowUser> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-              '从：${Sites.allSites[current.siteId]?.name}  房间号：${current.roomId}'),
+          Text('从：${Sites.allSites[current.siteId]?.name}  房间号：${current.roomId}'),
           const SizedBox(height: 8),
           Text('到：${newSite.name}  房间号：$newRoomId'),
         ],
@@ -162,8 +159,7 @@ class FollowInfoController extends BasePageController<FollowUser> {
     final current = followUser.value;
     if (current == null) return;
     // 获取目标直播间详细信息 用于更新主播名和头像
-    LiveRoomDetail detail =
-        await targetSite.liveSite.getRoomDetail(roomId: targetRoomId);
+    LiveRoomDetail detail = await targetSite.liveSite.getRoomDetail(roomId: targetRoomId);
     // 复制并更新关键信息
     final FollowUser newFollow = FollowUser(
       id: '${targetSite.id}_$targetRoomId',
@@ -173,6 +169,7 @@ class FollowInfoController extends BasePageController<FollowUser> {
       face: detail.userAvatar,
       addTime: current.addTime,
       watchDuration: current.watchDuration,
+      watchDurationSec: current.watchDurationSec,
       tag: current.tag,
     );
     newFollow.liveStatus.value = current.liveStatus.value;

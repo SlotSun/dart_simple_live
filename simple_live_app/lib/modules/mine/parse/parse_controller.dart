@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -72,8 +72,7 @@ class ParseController extends GetxController {
         return;
       }
       SmartDialog.showLoading(msg: "");
-      var playUrl =
-          await site.liveSite.getPlayUrls(detail: detail, quality: result);
+      var playUrl = await site.liveSite.getPlayUrls(detail: detail, quality: result);
       SmartDialog.dismiss(status: SmartStatus.loading);
       await Get.dialog(SimpleDialog(
         title: const Text("选择线路"),

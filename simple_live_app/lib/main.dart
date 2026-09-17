@@ -4,15 +4,15 @@ import 'dart:io';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:hive_ce_flutter/adapters.dart';
 import 'package:logger/logger.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
@@ -29,8 +29,9 @@ import 'package:simple_live_app/routes/app_pages.dart';
 import 'package:simple_live_app/routes/route_path.dart';
 import 'package:simple_live_app/services/bilibili_account_service.dart';
 import 'package:simple_live_app/services/db_service.dart';
+import 'package:simple_live_app/services/follow_block_service.dart';
 import 'package:simple_live_app/services/platform_service.dart';
-import 'package:simple_live_app/services/firebase_service.dart';
+import 'package:simple_live_app/services/firebase_service.dart' as app;
 import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/services/history_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
@@ -42,18 +43,31 @@ import 'package:simple_live_app/widgets/status/app_loadding_widget.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:window_manager/window_manager.dart';
 
-void main() async {
+void main(List<String> arguments) async {
+  final action = arguments.isEmpty ? null : arguments.first.toLowerCase();
+  var path = (await getApplicationSupportDirectory()).path;
+  if (action == "-p" || action == "--portable") {
+    path = p.join(
+      p.dirname(Platform.resolvedExecutable),
+      'data_hive_ce',
+    );
+  } else if (action == "-h" || action == "--help") {
+    printHelp();
+    return;
+  } else if (action != null) {
+    print("未知指令: $action");
+    printHelp();
+    return;
+  }
   WidgetsFlutterBinding.ensureInitialized();
   // init-queue:
   // window(first)->migration->media_kit->Hive->services->start
   // window(second)->open
   await RustLib.init();
-  await MigrationService.migrateData();
+  // await MigrationService.migrateData();
   MediaKit.ensureInitialized();
   await Hive.initFlutter(
-    (!Platform.isAndroid && !Platform.isIOS)
-        ? (await getApplicationSupportDirectory()).path
-        : null,
+    (!Platform.isAndroid && !Platform.isIOS) ? path : null,
   );
   //初始化服务
   await initServices();
@@ -69,6 +83,12 @@ void main() async {
   );
   SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
   runApp(const MyApp());
+}
+
+void printHelp() {
+  print("-p ：便携版启动");
+  print("--portable：便携版启动");
+  print("-h：帮助");
 }
 
 Future initWindow() async {
@@ -103,6 +123,8 @@ Future initServices() async {
 
   Get.put(HistoryService());
 
+  Get.put(FollowBlockService());
+
   // 移动平台不使用 windowManager
   if (!Platform.isAndroid && !Platform.isIOS) {
     Get.put(WindowService());
@@ -113,7 +135,7 @@ Future initServices() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    Get.put(FirebaseService());
+    Get.put(app.FirebaseService());
   }
 
   initCoreLog();
@@ -121,8 +143,7 @@ Future initServices() async {
 
 void initCoreLog() {
   //日志信息
-  CoreLog.enableLog =
-      !kReleaseMode || AppSettingsController.instance.logEnable.value;
+  CoreLog.enableLog = !kReleaseMode || AppSettingsController.instance.logEnable.value;
   CoreLog.requestLogType = RequestLogType.short;
   CoreLog.onPrintLog = (level, msg) {
     switch (level) {
@@ -150,10 +171,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isDynamicColor = AppStyleSettingController.instance.isDynamic.value;
-    Color styleColor =
-        Color(AppStyleSettingController.instance.styleColor.value);
-    return DynamicColorBuilder(
-        builder: ((ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+    Color styleColor = Color(AppStyleSettingController.instance.styleColor.value);
+    return DynamicColorBuilder(builder: ((ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
       ColorScheme? lightColorScheme;
       ColorScheme? darkColorScheme;
       if (lightDynamic != null && darkDynamic != null && isDynamicColor) {
@@ -164,8 +183,7 @@ class MyApp extends StatelessWidget {
           seedColor: styleColor,
           brightness: Brightness.light,
         );
-        darkColorScheme = ColorScheme.fromSeed(
-            seedColor: styleColor, brightness: Brightness.dark);
+        darkColorScheme = ColorScheme.fromSeed(seedColor: styleColor, brightness: Brightness.dark);
       }
       return Obx(
         () => GetMaterialApp(
@@ -176,34 +194,24 @@ class MyApp extends StatelessWidget {
           darkTheme: AppStyle.darkTheme(
             fontFamily: AppStyleSettingController.instance.curFontName.value,
           ).copyWith(colorScheme: darkColorScheme),
-          themeMode: ThemeMode
-              .values[Get.find<AppSettingsController>().themeMode.value],
+          themeMode: ThemeMode.values[Get.find<AppSettingsController>().themeMode.value],
           initialRoute: RoutePath.kIndex,
           getPages: AppPages.routes,
           //国际化
           locale: const Locale("zh", "CN"),
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
           supportedLocales: const [Locale("zh", "CN")],
           logWriterCallback: (text, {bool? isError}) {
-            Log.addDebugLog(
-                text, (isError ?? false) ? Colors.red : Colors.grey);
+            Log.addDebugLog(text, (isError ?? false) ? Colors.red : Colors.grey);
             Log.writeLog(text, (isError ?? false) ? Level.error : Level.info);
           },
           //debugShowCheckedModeBanner: false,
-          navigatorObservers: [
-            FlutterSmartDialog.observer,
-            if (Platform.isAndroid) AppAnalyticsObserver.observer
-          ],
+          navigatorObservers: [FlutterSmartDialog.observer, if (Platform.isAndroid) AppAnalyticsObserver.observer],
           builder: FlutterSmartDialog.init(
             loadingBuilder: ((msg) => const AppLoaddingWidget()),
             //字体大小不跟随系统变化
             builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(context)
-                  .copyWith(textScaler: const TextScaler.linear(1.0)),
+              data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
               child: Stack(
                 children: [
                   //侧键返回
@@ -211,8 +219,7 @@ class MyApp extends StatelessWidget {
                     excludeFromSemantics: true,
                     gestures: <Type, GestureRecognizerFactory>{
                       FourthButtonTapGestureRecognizer:
-                          GestureRecognizerFactoryWithHandlers<
-                              FourthButtonTapGestureRecognizer>(
+                          GestureRecognizerFactoryWithHandlers<FourthButtonTapGestureRecognizer>(
                         () => FourthButtonTapGestureRecognizer(),
                         (FourthButtonTapGestureRecognizer instance) {
                           instance.onTapDown = (TapDownDetails details) async {
@@ -231,15 +238,13 @@ class MyApp extends StatelessWidget {
                     child: KeyboardListener(
                       focusNode: FocusNode(),
                       onKeyEvent: (KeyEvent event) async {
-                        if (event is KeyDownEvent &&
-                            event.logicalKey == LogicalKeyboardKey.escape) {
+                        if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
                           // ESC退出全屏
                           // 如果处于全屏状态，退出全屏
                           if (!Platform.isAndroid && !Platform.isIOS) {
                             if (await windowManager.isFullScreen()) {
                               await windowManager.setFullScreen(false);
-                              EventBus.instance
-                                  .emit(EventBus.kEscapePressed, 0);
+                              EventBus.instance.emit(EventBus.kEscapePressed, 0);
                               return;
                             }
                           }

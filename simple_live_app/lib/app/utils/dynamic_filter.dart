@@ -91,8 +91,7 @@ List<T> dynamicFilter<T extends Mappable>(
         try {
           itemMap = item.toMap();
         } catch (e, s) {
-          Log.e(
-              "Filter:Failed to convert item to map for default filtering.", s);
+          Log.e("Filter:Failed to convert item to map for default filtering.", s);
           return false;
         }
         return checkConditionOnMap(itemMap, c);
@@ -146,12 +145,10 @@ bool checkConditionOnMap(Map<String, dynamic> itemMap, Condition condition) {
     case FilterOperator.greaterThanOrEqual:
     case FilterOperator.lessThanOrEqual:
       {
-        if (transformedItemValue == null ||
-            !_isComparable(transformedItemValue, operand)) {
+        if (transformedItemValue == null || !_isComparable(transformedItemValue, operand)) {
           return false;
         }
-        final comparison =
-            (transformedItemValue as Comparable).compareTo(operand);
+        final comparison = (transformedItemValue as Comparable).compareTo(operand);
 
         if (condition.operator == FilterOperator.greaterThan) {
           return comparison > 0;

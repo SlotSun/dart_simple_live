@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/sites.dart';
@@ -90,8 +90,7 @@ class HistoryPage extends GetView<HistoryController> {
                 AppNavigator.toLiveRoomDetail(site: site, roomId: item.roomId);
               },
               onLongPress: () async {
-                var result =
-                    await Utils.showAlertDialog("确定要删除此记录吗?", title: "删除记录");
+                var result = await Utils.showAlertDialog("确定要删除此记录吗?", title: "删除记录");
                 if (!result) {
                   return;
                 }

@@ -1,5 +1,5 @@
 use regex::Regex;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use xxhash_rust::xxh3::xxh3_64;
 
 /// DanmakuMask: 滑动窗口 + 分桶 + 频控
@@ -11,7 +11,6 @@ pub struct DanmakuMask {
 
     use_normalization: bool,
     use_frequency_control: bool,
-    adaptive_window: bool,
 
     // 运行时状态
     window_ms: u32,
@@ -20,8 +19,10 @@ pub struct DanmakuMask {
     current_bucket: usize,  // Vec 索引
     last_shift_ms: u64,     // 上次滑动的时间戳（ms）
 
-    buckets: Vec<HashSet<u64>>,  // 每个桶存 hash
-    freq_map: HashMap<u64, u16>, // hash -> 频次
+    // 桶内记录每个 hash 的出现次数（保证频控计数准确）
+    buckets: Vec<HashMap<u64, u16>>,
+    // 全局滑动窗口内每个 hash 的总次数
+    freq_map: HashMap<u64, u16>,
 
     norm_re_space: Option<Regex>,
     norm_re_punct: Option<Regex>,
@@ -29,14 +30,12 @@ pub struct DanmakuMask {
 
 #[flutter_rust_bridge::frb(sync)]
 impl DanmakuMask {
-    /// 构造函数（会生成 Dart 构造器）
     pub fn new(
         base_window_ms: u32,
         bucket_count: u16,
         use_normalization: bool,
         use_frequency_control: bool,
         max_frequency: u16,
-        adaptive_window: bool,
     ) -> Self {
         let bucket_count_usize = bucket_count.max(1) as usize;
         let bucket_size_ms = base_window_ms / bucket_count.max(1) as u32;
@@ -52,13 +51,13 @@ impl DanmakuMask {
             max_frequency,
             use_normalization,
             use_frequency_control,
-            adaptive_window,
             window_ms: base_window_ms,
             bucket_size_ms,
             current_bucket: 0,
             last_shift_ms: 0,
+            // 用 HashMap 计数，避免去重时计数虚增
             buckets: (0..bucket_count_usize)
-                .map(|_| HashSet::with_capacity(128))
+                .map(|_| HashMap::with_capacity(128))
                 .collect(),
             freq_map: HashMap::with_capacity(1024),
             norm_re_space,
@@ -82,54 +81,32 @@ impl DanmakuMask {
         s
     }
 
+    /// 滑动窗口，清理过期桶
     fn shift_if_needed(&mut self, now_ms: u64) {
         if self.last_shift_ms == 0 {
             self.last_shift_ms = now_ms;
             return;
         }
 
-        while now_ms.saturating_sub(self.last_shift_ms)
-            >= self.bucket_size_ms as u64
-        {
+        while now_ms.saturating_sub(self.last_shift_ms) >= self.bucket_size_ms as u64 {
             self.last_shift_ms += self.bucket_size_ms as u64;
+            self.current_bucket = (self.current_bucket + 1) % self.bucket_count as usize;
 
-            self.current_bucket =
-                (self.current_bucket + 1) % self.bucket_count as usize;
-
+            // 清理即将被覆盖的桶（即将成为当前桶的那个旧桶）
             let expired = &mut self.buckets[self.current_bucket];
-            for &hash in expired.iter() {
+            for (&hash, &count) in expired.iter() {
                 if let Some(v) = self.freq_map.get_mut(&hash) {
-                    if *v <= 1 {
+                    // 减去该桶内的出现次数，避免计数残留
+                    if *v <= count {
                         self.freq_map.remove(&hash);
                     } else {
-                        *v -= 1;
+                        *v -= count;
                     }
                 }
             }
             expired.clear();
         }
     }
-
-    /// 根据压力自适应窗口
-    fn adapt_window(&mut self) {
-        if !self.adaptive_window {
-            return;
-        }
-
-        let total_items: usize =
-            self.buckets.iter().map(|b| b.len()).sum();
-
-        if total_items > 300 {
-            self.window_ms = (self.base_window_ms / 2).max(1500);
-        } else if total_items < 50 {
-            self.window_ms = self.base_window_ms;
-        }
-
-        self.bucket_size_ms =
-            self.window_ms / self.bucket_count.max(1) as u32;
-    }
-
-
 
     /// 重置状态
     pub fn reset(&mut self) {
@@ -139,12 +116,10 @@ impl DanmakuMask {
         self.freq_map.clear();
         self.current_bucket = 0;
         self.last_shift_ms = 0;
-        self.window_ms = self.base_window_ms;
-        self.bucket_size_ms =
-            self.window_ms / self.bucket_count.max(1) as u32;
+        // window_ms 和 bucket_size_ms 无需改变，它们由构造函数固定
     }
 
-    pub fn dispose(self){
+    pub fn dispose(self) {
         // 消费所有权
     }
 }
@@ -159,7 +134,6 @@ impl DanmakuMask {
         now_ms: u64,
     ) -> Vec<u8> {
         self.shift_if_needed(now_ms);
-        self.adapt_window();
 
         let mut results = Vec::with_capacity(texts.len());
 
@@ -167,21 +141,19 @@ impl DanmakuMask {
             let normalized = self.normalize(&text);
             let hash = xxh3_64(normalized.as_bytes());
 
-            let mut allowed = true;
+            // 确定当前实际允许的最大次数
+            let effective_max: u16 = if self.use_frequency_control {
+                self.max_frequency
+            } else {
+                1
+            };
 
-            if self.freq_map.contains_key(&hash) {
-                allowed = false;
-            }
-
-            if allowed && self.use_frequency_control {
-                let freq = *self.freq_map.get(&hash).unwrap_or(&0u16);
-                if freq >= self.max_frequency {
-                    allowed = false;
-                }
-            }
+            let freq = *self.freq_map.get(&hash).unwrap_or(&0);
+            let allowed = freq < effective_max;
 
             if allowed {
-                self.buckets[self.current_bucket].insert(hash);
+                let bucket = &mut self.buckets[self.current_bucket];
+                *bucket.entry(hash).or_insert(0) += 1;
                 *self.freq_map.entry(hash).or_insert(0) += 1;
             }
 

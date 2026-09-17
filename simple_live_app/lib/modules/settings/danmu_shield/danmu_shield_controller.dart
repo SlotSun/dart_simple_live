@@ -6,8 +6,7 @@ import 'package:simple_live_app/app/controller/base_controller.dart';
 
 class DanmuShieldController extends BaseController {
   final TextEditingController textEditingController = TextEditingController();
-  final AppSettingsController settingsController =
-      Get.find<AppSettingsController>();
+  final AppSettingsController settingsController = Get.find<AppSettingsController>();
   void add() {
     if (textEditingController.text.isEmpty) {
       SmartDialog.showToast("请输入关键词");

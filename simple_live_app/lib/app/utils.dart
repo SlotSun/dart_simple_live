@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +9,7 @@ import 'package:simple_live_app/app/app_style.dart';
 import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils/permission_handler.dart';
@@ -30,9 +31,7 @@ class Utils {
     }
 
     var dtNow = DateTime.now();
-    if (dt.year == dtNow.year &&
-        dt.month == dtNow.month &&
-        dt.day == dtNow.day) {
+    if (dt.year == dtNow.year && dt.month == dtNow.month && dt.day == dtNow.day) {
       return "${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
     }
 
@@ -132,47 +131,52 @@ class Utils {
       useSystem: useSystem,
       maskColor: Colors.transparent,
       animationTime: const Duration(milliseconds: 200),
-      builder: (context) => Container(
-        width: width + MediaQuery.of(context).padding.right,
-        padding: EdgeInsets.only(right: MediaQuery.of(context).padding.right),
-        decoration: BoxDecoration(
-          color: Get.theme.cardColor,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(4),
-            bottomLeft: Radius.circular(4),
-          ),
+      builder: (context) => Material(
+        color: Get.theme.cardColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(4),
+          bottomLeft: Radius.circular(4),
         ),
-        child: SafeArea(
-          left: false,
-          right: false,
-          child: MediaQuery(
-            data: const MediaQueryData(padding: EdgeInsets.zero),
-            child: Column(
-              children: [
-                ListTile(
-                  visualDensity: VisualDensity.compact,
-                  contentPadding: EdgeInsets.zero,
-                  leading: IconButton(
-                    onPressed: () {
-                      SmartDialog.dismiss(status: SmartStatus.allCustom).then(
-                        (value) => onDismiss?.call(),
-                      );
-                    },
-                    icon: const Icon(Icons.arrow_back),
-                  ),
-                  title: Text(
-                    title,
-                    style: Get.textTheme.titleMedium,
-                  ),
+        clipBehavior: Clip.antiAlias,
+        child: SizedBox(
+          width: width + MediaQuery.of(context).padding.right,
+          child: Padding(
+            padding: EdgeInsets.only(
+              right: MediaQuery.of(context).padding.right,
+            ),
+            child: SafeArea(
+              left: false,
+              right: false,
+              child: MediaQuery(
+                data: const MediaQueryData(padding: EdgeInsets.zero),
+                child: Column(
+                  children: [
+                    ListTile(
+                      visualDensity: VisualDensity.compact,
+                      contentPadding: EdgeInsets.zero,
+                      leading: IconButton(
+                        onPressed: () {
+                          SmartDialog.dismiss(status: SmartStatus.allCustom).then(
+                            (value) => onDismiss?.call(),
+                          );
+                        },
+                        icon: const Icon(Icons.arrow_back),
+                      ),
+                      title: Text(
+                        title,
+                        style: Get.textTheme.titleMedium,
+                      ),
+                    ),
+                    Divider(
+                      height: 1,
+                      color: Colors.grey.withAlpha(25),
+                    ),
+                    Expanded(
+                      child: child,
+                    ),
+                  ],
                 ),
-                Divider(
-                  height: 1,
-                  color: Colors.grey.withAlpha(25),
-                ),
-                Expanded(
-                  child: child,
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -234,8 +238,7 @@ class Utils {
     String cancel = '',
     TextValidate? validate,
   }) async {
-    final TextEditingController textEditingController =
-        TextEditingController(text: content);
+    final TextEditingController textEditingController = TextEditingController(text: content);
     var result = await Get.dialog(
       AlertDialog(
         title: Text(title),
@@ -565,9 +568,7 @@ class Utils {
   }
 
   static bool isRegexFormat(String keyword) {
-    return keyword.startsWith('/') &&
-        keyword.endsWith('/') &&
-        keyword.length > 2;
+    return keyword.startsWith('/') && keyword.endsWith('/') && keyword.length > 2;
   }
 
   static String removeRegexFormat(String keyword) {
@@ -585,5 +586,30 @@ class Utils {
       return "${(size / 1024 / 1024).toStringAsFixed(2)} MB";
     }
     return "${(size / 1024 / 1024 / 1024).toStringAsFixed(2)} GB";
+  }
+
+  /// 随屏幕缩放比例调整
+  static double scaleValue({
+    required double value,
+    required double playerH,
+    required double designH,
+    double upSens = 0.8,
+    double downSens = 0.5,
+    required double minSize,
+    required double maxSize,
+  }) {
+    if (designH <= 0 || minSize >= maxSize) {
+      return value;
+    }
+    // 限制
+    double safeUpSens = upSens.clamp(0.0, 1.5);
+    double safeDownSens = downSens.clamp(0.0, 1.0);
+    var ratio = playerH / designH;
+    // 双向控制放缩比率
+    var adjustedRatio = ratio > 1 ? math.pow(ratio, safeUpSens).toDouble() : 1 - (1 - ratio) * safeDownSens;
+
+    var result = value * adjustedRatio;
+    var clamped = result.clamp(minSize, maxSize);
+    return clamped.roundToDouble();
   }
 }

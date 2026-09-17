@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
@@ -49,8 +49,7 @@ class RemoteSyncWebDAVPage extends GetView<RemoteSyncWebDAVController> {
                           () => ListTile(
                             title: const Text("云端备份目录"),
                             leading: const Icon(Icons.drive_folder_upload),
-                            subtitle:
-                                Text(controller.webDavBackupDirectory.value),
+                            subtitle: Text(controller.webDavBackupDirectory.value),
                             trailing: const Icon(Icons.chevron_right),
                             onTap: _showEditBackupDirectory,
                           ),

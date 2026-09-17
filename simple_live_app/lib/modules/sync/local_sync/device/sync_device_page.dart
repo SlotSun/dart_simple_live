@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
@@ -21,8 +21,7 @@ class SyncDevicePage extends GetView<SyncDeviceController> {
             child: ListTile(
               leading: buildIcon(),
               title: Text(controller.info.name),
-              subtitle: Text(
-                  "${controller.info.type.toUpperCase()}   ${controller.info.address}"),
+              subtitle: Text("${controller.info.type.toUpperCase()}   ${controller.info.address}"),
             ),
           ),
           AppStyle.vGap12,

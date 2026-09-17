@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
@@ -89,8 +89,7 @@ class LocalSyncPage extends GetView<LocalSyncController> {
                 shrinkWrap: true,
                 padding: EdgeInsets.zero,
                 physics: const NeverScrollableScrollPhysics(),
-                separatorBuilder: (BuildContext context, int index) =>
-                    AppStyle.divider,
+                separatorBuilder: (BuildContext context, int index) => AppStyle.divider,
                 itemCount: SyncService.instance.scanClients.length,
                 itemBuilder: (BuildContext context, int index) {
                   var client = SyncService.instance.scanClients[index];

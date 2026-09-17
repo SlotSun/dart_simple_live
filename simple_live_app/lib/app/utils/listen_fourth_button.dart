@@ -24,12 +24,8 @@ class FourthButtonTapGestureRecognizer extends BaseTapGestureRecognizer {
   }
 
   @override
-  void handleTapCancel(
-      {required PointerDownEvent down,
-      PointerCancelEvent? cancel,
-      required String reason}) {}
+  void handleTapCancel({required PointerDownEvent down, PointerCancelEvent? cancel, required String reason}) {}
 
   @override
-  void handleTapUp(
-      {required PointerDownEvent down, required PointerUpEvent up}) {}
+  void handleTapUp({required PointerDownEvent down, required PointerUpEvent up}) {}
 }

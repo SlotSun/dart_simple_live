@@ -55,3 +55,7 @@ app.*.map.json
 
 # firebase
 firebase.json
+# Widget Preview related
+.widget_preview/
+/pubspec_overrides.yaml
+/.patchwork/

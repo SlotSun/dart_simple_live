@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
@@ -254,8 +254,7 @@ class RemoteSyncRoomPage extends GetView<RemoteSyncRoomController> {
                     ),
                     subtitle: Text("${user.app} - v${user.version}"),
                     trailing: Visibility(
-                      visible: controller.signalR.hubConnection?.connectionId ==
-                          user.connectionId,
+                      visible: controller.signalR.hubConnection?.connectionId == user.connectionId,
                       child: const Text(
                         "本机",
                       ),

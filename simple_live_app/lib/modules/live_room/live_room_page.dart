@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:floating/floating.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -13,6 +13,7 @@ import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/modules/live_room/live_room_controller.dart';
 import 'package:simple_live_app/modules/live_room/player/player_controls.dart';
 import 'package:simple_live_app/services/follow_service.dart';
+import 'package:simple_live_app/widgets/context_menu.dart';
 import 'package:simple_live_app/widgets/desktop_refresh_button.dart';
 import 'package:simple_live_app/widgets/follow_user_item.dart';
 import 'package:simple_live_app/widgets/keep_alive_wrapper.dart';
@@ -120,9 +121,7 @@ class LiveRoomPage extends GetView<LiveRoomController> {
             ),
             actions: buildAppbarActions(context),
           ),
-          body: orientation == Orientation.portrait
-              ? buildPhoneUI(context)
-              : buildTabletUI(context),
+          body: orientation == Orientation.portrait ? buildPhoneUI(context) : buildTabletUI(context),
         );
       },
     );
@@ -253,16 +252,18 @@ class LiveRoomPage extends GetView<LiveRoomController> {
     } else if (AppSettingsController.instance.scaleMode.value == 4) {
       boxFit = BoxFit.contain;
       aspectRatio = 4 / 3;
+    } else if (AppSettingsController.instance.scaleMode.value == 5) {
+      boxFit = BoxFit.contain;
+      double aspectByUser = AppSettingsController.instance.aspectByUser.value;
+      aspectRatio = aspectByUser;
     }
     return Stack(
       children: [
         Video(
           key: controller.globalPlayerKey,
           controller: controller.videoController,
-          pauseUponEnteringBackgroundMode:
-              AppSettingsController.instance.playerAutoPause.value,
-          resumeUponEnteringForegroundMode:
-              AppSettingsController.instance.playerAutoPause.value,
+          pauseUponEnteringBackgroundMode: AppSettingsController.instance.playerAutoPause.value,
+          resumeUponEnteringForegroundMode: AppSettingsController.instance.playerAutoPause.value,
           controls: (state) {
             return playerControls(state, controller);
           },
@@ -449,9 +450,7 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                 Tab(
                   child: Obx(
                     () => Text(
-                      controller.superChats.isNotEmpty
-                          ? "SC(${controller.superChats.length})"
-                          : "SC",
+                      controller.superChats.isNotEmpty ? "SC(${controller.superChats.length})" : "SC",
                     ),
                   ),
                 ),
@@ -474,9 +473,7 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                           separatorBuilder: (_, i) => Obx(
                             () => SizedBox(
                               // *2与原来的EdgeInsets.symmetric(vertical: )做兼容
-                              height: AppSettingsController
-                                      .instance.chatTextGap.value *
-                                  2,
+                              height: AppSettingsController.instance.chatTextGap.value * 2,
                             ),
                           ),
                           padding: AppStyle.edgeInsetsA12,
@@ -546,23 +543,19 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                         bottomRight: Radius.circular(12),
                       ),
                     ),
-                    padding:
-                        AppStyle.edgeInsetsA4.copyWith(left: 12, right: 12),
+                    padding: AppStyle.edgeInsetsA4.copyWith(left: 12, right: 12),
                     child: SelectableText.rich(
                       TextSpan(
                         text: "${message.userName}：",
                         style: TextStyle(
                           color: Colors.grey,
-                          fontSize:
-                              AppSettingsController.instance.chatTextSize.value,
+                          fontSize: AppSettingsController.instance.chatTextSize.value,
                         ),
                         children: [
                           TextSpan(
                             text: message.message,
                             style: TextStyle(
-                              color: Get.isDarkMode
-                                  ? Colors.white
-                                  : AppColors.black333,
+                              color: Get.isDarkMode ? Colors.white : AppColors.black333,
                             ),
                           )
                         ],
@@ -588,7 +581,19 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                   )
                 ],
               ),
+              contextMenuBuilder: _contextMenuBuilder,
             ),
+    );
+  }
+
+  Widget _contextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    return customContextMenuBuilder(
+      context,
+      editableTextState,
+      {
+        '屏蔽用户': (s) => controller.addCurBlockAccount(s),
+        '屏蔽关键词': (s) => controller.addCurBlockWord(s),
+      },
     );
   }
 
@@ -638,13 +643,11 @@ class LiveRoomPage extends GetView<LiveRoomController> {
               Obx(
                 () => SettingsNumber(
                   title: "文字大小",
-                  value:
-                      AppSettingsController.instance.chatTextSize.value.toInt(),
+                  value: AppSettingsController.instance.chatTextSize.value.toInt(),
                   min: 8,
                   max: 36,
                   onChanged: (e) {
-                    AppSettingsController.instance
-                        .setChatTextSize(e.toDouble());
+                    AppSettingsController.instance.setChatTextSize(e.toDouble());
                   },
                 ),
               ),
@@ -652,8 +655,7 @@ class LiveRoomPage extends GetView<LiveRoomController> {
               Obx(
                 () => SettingsNumber(
                   title: "上下间隔",
-                  value:
-                      AppSettingsController.instance.chatTextGap.value.toInt(),
+                  value: AppSettingsController.instance.chatTextGap.value.toInt(),
                   min: 0,
                   max: 12,
                   onChanged: (e) {
@@ -687,7 +689,11 @@ class LiveRoomPage extends GetView<LiveRoomController> {
             children: [
               SettingsAction(
                 title: "关键词屏蔽",
-                onTap: controller.showDanmuShield,
+                onTap: controller.showFollowBlockShield,
+              ),
+              SettingsAction(
+                title: "用户屏蔽",
+                onTap: () => controller.showFollowBlockShield(blockWords: false),
               ),
               AppStyle.divider,
               SettingsAction(
@@ -703,6 +709,11 @@ class LiveRoomPage extends GetView<LiveRoomController> {
               SettingsAction(
                 title: "画面尺寸",
                 onTap: controller.showPlayerSettingsSheet,
+              ),
+              AppStyle.divider,
+              SettingsAction(
+                title: "自定义画面尺寸",
+                onTap: controller.showAspectRatioSheet,
               ),
             ],
           ),
@@ -724,8 +735,7 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                 return Obx(
                   () => FollowUserItem(
                     item: item,
-                    playing: controller.rxSite.value.id == item.siteId &&
-                        controller.rxRoomId.value == item.roomId,
+                    playing: controller.rxSite.value.id == item.siteId && controller.rxRoomId.value == item.roomId,
                     onTap: () {
                       controller.resetRoom(
                         Sites.allSites[item.siteId]!,

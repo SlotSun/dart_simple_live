@@ -4,7 +4,7 @@ import 'package:archive/archive.dart';
 import 'package:fractional_indexing_dart/fractional_indexing_dart.dart';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/event_bus.dart';
-import 'package:simple_live_app/app/utils/duration_2_str_utils.dart';
+import 'package:simple_live_app/app/utils/extensions/duration_2_str_utils.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/modules/sync/remote_sync/webdav/interface/sync_resource.dart';
@@ -46,13 +46,9 @@ class FollowSyncResource implements SyncResource<FollowBundle> {
     if (followFile == null || tagFile == null) return null;
 
     final followJsonData = jsonDecode(utf8.decode(followFile.content));
-    var followRemoteList = (followJsonData['data'] as List)
-        .map((e) => FollowUser.fromJson(e))
-        .toList();
+    var followRemoteList = (followJsonData['data'] as List).map((e) => FollowUser.fromJson(e)).toList();
     final tagJsonData = jsonDecode(utf8.decode(tagFile.content));
-    var tagRemoteList = (tagJsonData['data'] as List)
-        .map((e) => FollowUserTag.fromJson(e))
-        .toList();
+    var tagRemoteList = (tagJsonData['data'] as List).map((e) => FollowUserTag.fromJson(e)).toList();
     return FollowBundle(
       follows: followRemoteList,
       tags: tagRemoteList,
@@ -110,8 +106,7 @@ class FollowSyncResource implements SyncResource<FollowBundle> {
         DateTime(2026, 1, 1).millisecondsSinceEpoch,
       ),
     );
-    var resFollows = _mergeFollowList(
-        localList: local.follows, remoteList: remote.follows, curLast: curLast);
+    var resFollows = _mergeFollowList(localList: local.follows, remoteList: remote.follows, curLast: curLast);
 
     // tags after merge, logic from data_check
     final Map<String, List<String>> tagMap = {
@@ -124,7 +119,6 @@ class FollowSyncResource implements SyncResource<FollowBundle> {
       }
     }
     final resTags = <FollowUserTag>[];
-    ;
     String? lastKey;
     for (var entry in tagMap.entries) {
       lastKey = FractionalIndexing.generateKeyBetween(lastKey, null);
@@ -166,14 +160,11 @@ class FollowSyncResource implements SyncResource<FollowBundle> {
         // 两边都有记录，需要合并
         if (localItem.deleted && remoteItem.deleted) {
           // 两边都是墓碑，保留 updateTime 更新的
-          result[localItem.id] = localItem.updateTime >= remoteItem.updateTime
-              ? localItem
-              : remoteItem;
+          result[localItem.id] = localItem.updateTime >= remoteItem.updateTime ? localItem : remoteItem;
         } else if (localItem.deleted) {
           // 本地是墓碑，远程是正常记录
           // 如果本地墓碑时间晚于远程添加时间，则保留墓碑
-          if (localItem.updateTime >=
-              remoteItem.addTime.millisecondsSinceEpoch ~/ 1000) {
+          if (localItem.updateTime >= remoteItem.addTime.millisecondsSinceEpoch ~/ 1000) {
             result[localItem.id] = localItem;
           } else {
             // 远程重新关注了，清除墓碑
@@ -184,8 +175,7 @@ class FollowSyncResource implements SyncResource<FollowBundle> {
         } else if (remoteItem.deleted) {
           // 远程是墓碑，本地是正常记录
           // 如果远程墓碑时间晚于本地添加时间，则应用远程墓碑
-          if (remoteItem.updateTime >=
-              localItem.addTime.millisecondsSinceEpoch ~/ 1000) {
+          if (remoteItem.updateTime >= localItem.addTime.millisecondsSinceEpoch ~/ 1000) {
             result[remoteItem.id] = remoteItem;
           } else {
             // 本地重新关注了，保留本地
@@ -193,11 +183,8 @@ class FollowSyncResource implements SyncResource<FollowBundle> {
           }
         } else {
           // 两边都是正常记录，合并观看时长
-          localItem.watchDurationSec =
-              (remoteItem.watchDuration ?? "00:00:00").toDuration().inSeconds +
-                  localItem.syncDuration;
-          localItem.watchDuration =
-              Duration(seconds: localItem.watchDurationSec).toHMSString();
+          localItem.watchDurationSec = remoteItem.watchDurationSec + localItem.syncDuration;
+          localItem.watchDuration = Duration(seconds: localItem.watchDurationSec).toHMSString();
           localItem.syncDuration = 0;
           result[localItem.id] = localItem;
         }

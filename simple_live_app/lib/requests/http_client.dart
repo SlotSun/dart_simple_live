@@ -49,8 +49,7 @@ class HttpClient {
       return result.data;
     } catch (e) {
       if (e is DioException && e.type == DioExceptionType.badResponse) {
-        throw HttpError(e.message ?? "",
-            statusCode: e.response?.statusCode ?? 0);
+        throw HttpError(e.message ?? "", statusCode: e.response?.statusCode ?? 0);
       } else {
         throw HttpError("发送GET请求失败");
       }
@@ -82,8 +81,7 @@ class HttpClient {
       return result.data;
     } catch (e) {
       if (e is DioException && e.type == DioExceptionType.badResponse) {
-        throw HttpError(e.message ?? "",
-            statusCode: e.response?.statusCode ?? 0);
+        throw HttpError(e.message ?? "", statusCode: e.response?.statusCode ?? 0);
       } else {
         throw HttpError("发送GET请求失败");
       }
@@ -115,8 +113,7 @@ class HttpClient {
       return result;
     } catch (e) {
       if (e is DioException && e.type == DioExceptionType.badResponse) {
-        throw HttpError(e.message ?? "",
-            statusCode: e.response?.statusCode ?? 0);
+        throw HttpError(e.message ?? "", statusCode: e.response?.statusCode ?? 0);
       } else {
         throw HttpError("发送GET请求失败");
       }
@@ -147,16 +144,14 @@ class HttpClient {
         options: Options(
           responseType: ResponseType.json,
           headers: header,
-          contentType:
-              formUrlEncoded ? Headers.formUrlEncodedContentType : null,
+          contentType: formUrlEncoded ? Headers.formUrlEncodedContentType : null,
         ),
         cancelToken: cancel,
       );
       return result.data;
     } catch (e) {
       if (e is DioException && e.type == DioExceptionType.badResponse) {
-        throw HttpError(e.message ?? "",
-            statusCode: e.response?.statusCode ?? 0);
+        throw HttpError(e.message ?? "", statusCode: e.response?.statusCode ?? 0);
       } else {
         throw HttpError("发送POST请求失败");
       }
@@ -236,8 +231,7 @@ class HttpClient {
       if (CancelToken.isCancel(e)) {
         throw HttpError("下载已取消");
       } else if (e.type == DioExceptionType.badResponse) {
-        throw HttpError(e.message ?? "",
-            statusCode: e.response?.statusCode ?? 0);
+        throw HttpError(e.message ?? "", statusCode: e.response?.statusCode ?? 0);
       } else {
         throw HttpError("下载请求失败");
       }

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
@@ -117,6 +117,15 @@ class PlaySettingsPage extends GetView<AppSettingsController> {
                       value: controller.douyinHlsFirst.value,
                       onChanged: (e) {
                         controller.setDouyinHlsFirst(e);
+                      }),
+                ),
+                AppStyle.divider,
+                Obx(
+                  () => SettingsSwitch(
+                      title: "禁用滑动控制-音量/亮度",
+                      value: controller.verticalDragLock.value,
+                      onChanged: (e) {
+                        controller.setVerticalDragLock(e);
                       }),
                 ),
               ],

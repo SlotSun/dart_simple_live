@@ -1,19 +1,20 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/app/log.dart';
-import 'package:path/path.dart' as p;
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/services/firebase_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
+import 'package:window_manager/window_manager.dart';
 
 class OtherSettingsController extends BaseController {
   RxList<LogFileModel> logFiles = <LogFileModel>[].obs;
@@ -91,7 +92,7 @@ class OtherSettingsController extends BaseController {
     super.onInit();
   }
 
-  void setFirebaseEnable(bool e){
+  void setFirebaseEnable(bool e) {
     AppSettingsController.instance.setFirebaseEnable(e);
     FirebaseService.setCrashlytics(e);
   }
@@ -145,7 +146,7 @@ class OtherSettingsController extends BaseController {
   }
 
   void saveLogFile(LogFileModel item) async {
-    var filePath = await FilePicker.platform.saveFile(
+    var filePath = await FilePicker.saveFile(
       allowedExtensions: ['log'],
       type: FileType.custom,
       fileName: item.name,
@@ -174,7 +175,7 @@ class OtherSettingsController extends BaseController {
       // FilePicker 直接写入
       var inlineSave = Platform.isAndroid || Platform.isIOS || kIsWeb;
 
-      var path = await FilePicker.platform.saveFile(
+      var path = await FilePicker.saveFile(
         allowedExtensions: ['json'],
         type: FileType.custom,
         fileName: "simple_live_config.json",
@@ -200,7 +201,7 @@ class OtherSettingsController extends BaseController {
 
   void importConfig() async {
     try {
-      var file = await FilePicker.platform.pickFiles(
+      var file = await FilePicker.pickFiles(
         allowedExtensions: ['json'],
         type: FileType.custom,
       );
@@ -221,8 +222,7 @@ class OtherSettingsController extends BaseController {
       LocalStorageService.instance.settingsBox.clear();
       LocalStorageService.instance.shieldBox.clear();
       LocalStorageService.instance.settingsBox.putAll(data["config"]);
-      LocalStorageService.instance.shieldBox
-          .putAll(data["shield"].cast<String, String>());
+      LocalStorageService.instance.shieldBox.putAll(data["shield"].cast<String, String>());
       SmartDialog.showToast("导入成功,重启生效");
     } catch (e) {
       Log.logPrint(e);
@@ -238,6 +238,14 @@ class OtherSettingsController extends BaseController {
         SmartDialog.showToast("重置成功,重启生效");
       }
     });
+  }
+
+  Future<void> setWindowMaxAuto(bool e) async {
+    AppSettingsController.instance.setWindowMaxAuto(e);
+    if(e){
+      var maxState = await windowManager.isMaximized();
+      AppSettingsController.instance.setWindowMaxState(maxState);
+    }
   }
 }
 

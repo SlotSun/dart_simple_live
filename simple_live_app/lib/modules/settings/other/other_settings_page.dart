@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
@@ -70,8 +70,7 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
                   WidgetSpan(
                     child: GestureDetector(
                       onTap: () {
-                        launchUrlString(
-                            "https://mpv.io/manual/stable/#video-output-drivers");
+                        launchUrlString("https://mpv.io/manual/stable/#video-output-drivers");
                       },
                       child: const Text(
                         "MPV的文档",
@@ -93,8 +92,7 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
               children: [
                 Obx(
                   () => SettingsSwitch(
-                    value:
-                        AppSettingsController.instance.customPlayerOutput.value,
+                    value: AppSettingsController.instance.customPlayerOutput.value,
                     title: "自定义输出驱动与硬件加速",
                     onChanged: (e) {
                       AppSettingsController.instance.setCustomPlayerOutput(e);
@@ -105,8 +103,7 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
                 Obx(
                   () => SettingsMenu(
                     title: "视频输出驱动(--vo)",
-                    value:
-                        AppSettingsController.instance.videoOutputDriver.value,
+                    value: AppSettingsController.instance.videoOutputDriver.value,
                     valueMap: controller.videoOutputDrivers,
                     onChanged: (e) {
                       AppSettingsController.instance.setVideoOutputDriver(e);
@@ -117,8 +114,7 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
                 Obx(
                   () => SettingsMenu(
                     title: "音频输出驱动(--ao)",
-                    value:
-                        AppSettingsController.instance.audioOutputDriver.value,
+                    value: AppSettingsController.instance.audioOutputDriver.value,
                     valueMap: controller.audioOutputDrivers,
                     onChanged: (e) {
                       AppSettingsController.instance.setAudioOutputDriver(e);
@@ -129,8 +125,7 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
                 Obx(
                   () => SettingsMenu(
                     title: "硬件解码器(--hwdec)",
-                    value: AppSettingsController
-                        .instance.videoHardwareDecoder.value,
+                    value: AppSettingsController.instance.videoHardwareDecoder.value,
                     valueMap: controller.hardwareDecoder,
                     onChanged: (e) {
                       AppSettingsController.instance.setVideoHardwareDecoder(e);
@@ -139,15 +134,68 @@ class OtherSettingsPage extends GetView<OtherSettingsController> {
                 ),
                 Obx(
                   () => SettingsSwitch(
-                    value: AppSettingsController
-                        .instance.videoDoubleBuffering.value,
+                    value: AppSettingsController.instance.videoDoubleBuffering.value,
                     title: "自定义开启双重缓存",
                     onChanged: (e) {
                       AppSettingsController.instance.setVideoDoubleBuffering(e);
                     },
                   ),
                 ),
+                if (Platform.isWindows) AppStyle.divider,
+                if (Platform.isWindows)
+                  Obx(
+                    () => SettingsSwitch(
+                      value: AppSettingsController.instance.enableRtxVsr.value,
+                      title: "NVIDIA RTX VSR",
+                      subtitle: "N卡视频超分增强",
+                      onChanged: (e) async {
+                        if (e) {
+                          final confirm = await Utils.showAlertDialog(
+                            "开启前请注意以下事项与硬件要求：\n\n"
+                            "1. 硬件限制：支持 NVIDIA GeForce RTX 20 / 30 / 40 系列及更新显卡，显卡驱动版本需在 545.84 以上。旧款 GTX 系列不受支持。\n\n"
+                            "2. 前置配置：开启前必须在【NVIDIA 控制面板】或【NVIDIA App】中开启【RTX 视频增强 - 超分辨率 (RTX Video Enhancements - Super Resolution)】。\n\n"
+                            "3. 功耗说明：开启后播放低分辨率直播流时将占用显卡 Tensor Core，显卡功耗与发热量会有所增加（可根据需要调整超分等级，建议 1~2 级或自动）。\n\n"
+                            "4. 自动处理：当直播源原生分辨率等于或大于显示分辨率时（如 4K 屏播放 4K 直播），显卡驱动会自动 Pass-through（跳过超分），不会二次放大。",
+                            title: "NVIDIA RTX VSR 功能说明",
+                            confirm: "确认开启",
+                          );
+                          if (confirm) {
+                            AppSettingsController.instance.setEnableRtxVsr(true);
+                          }
+                        } else {
+                          AppSettingsController.instance.setEnableRtxVsr(false);
+                        }
+                      },
+                    ),
+                  ),
               ],
+            ),
+          ),
+          Visibility(
+            visible: Platform.isWindows || Platform.isLinux || Platform.isMacOS,
+            child: Padding(
+              padding: AppStyle.edgeInsetsA12.copyWith(top: 24),
+              child: Text(
+                "窗口管理",
+                style: Get.textTheme.titleSmall,
+              ),
+            ),
+          ),
+          Visibility(
+            visible: Platform.isWindows || Platform.isLinux || Platform.isMacOS,
+            child: SettingsCard(
+              child: Column(
+                children: [
+                  Obx(
+                    () => SettingsSwitch(
+                      value: AppSettingsController.instance.windowMaxAuto.value,
+                      title: "记忆窗口最大化",
+                      subtitle: "测试性功能,副屏可能存在未知问题",
+                      onChanged: controller.setWindowMaxAuto,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Padding(

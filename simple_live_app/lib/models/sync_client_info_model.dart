@@ -1,11 +1,5 @@
 import 'dart:convert';
-
-T? asT<T>(dynamic value) {
-  if (value is T) {
-    return value;
-  }
-  return null;
-}
+import 'common/common_asT.dart';
 
 class SyncClientInfoModel {
   SyncClientInfoModel({
@@ -16,8 +10,7 @@ class SyncClientInfoModel {
     required this.type,
   });
 
-  factory SyncClientInfoModel.fromJson(Map<String, dynamic> json) =>
-      SyncClientInfoModel(
+  factory SyncClientInfoModel.fromJson(Map<String, dynamic> json) => SyncClientInfoModel(
         type: asT<String>(json['type'])!,
         name: asT<String>(json['name'])!,
         version: asT<String>(json['version'])!,

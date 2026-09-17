@@ -1,10 +1,7 @@
 import 'dart:async';
-
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/widgets.dart';
-
 import 'package:simple_live_app/app/log.dart';
-
-import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 

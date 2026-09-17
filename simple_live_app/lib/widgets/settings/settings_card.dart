@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:simple_live_app/app/app_style.dart';
 
 class SettingsCard extends StatelessWidget {
@@ -8,9 +8,7 @@ class SettingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).brightness == Brightness.dark
-          ? Colors.grey.withAlpha(50)
-          : Colors.white70,
+      color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.withAlpha(50) : Colors.white70,
       shape: RoundedRectangleBorder(
         borderRadius: AppStyle.radius8,
         side: BorderSide(

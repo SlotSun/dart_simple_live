@@ -45,7 +45,7 @@ class UrlParse {
       return [id, Sites.allSites[Constant.kHuya]!];
     }
     if (url.contains("live.douyin.com")) {
-      var regExp = RegExp(r"live\.douyin\.com/([\d|\w]+)");
+      var regExp = RegExp(r"live\.douyin\.com/([\d\w.]+)");
       id = regExp.firstMatch(url)?.group(1) ?? "";
 
       return [id, Sites.allSites[Constant.kDouyin]!];

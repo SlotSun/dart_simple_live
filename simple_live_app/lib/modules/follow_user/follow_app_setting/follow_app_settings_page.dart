@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
@@ -114,6 +114,24 @@ class FollowSettingsPage extends GetView<FollowAppSettingsController> {
                         subtitle: "恢复短时间内直播状态，降低风控风险",
                         onChanged: (e) {
                           controller.appC.setFollowSnapshotEnable(e);
+                        },
+                      ),
+                    ),
+                    AppStyle.divider,
+                    Obx(
+                      () => SettingsNumber(
+                        value: controller.appC.dormancyThreshold.value,
+                        title: "休眠阈值",
+                        subtitle: "超过设定天数未观看的主播将被标记为休眠",
+                        min: 0,
+                        max: 42,
+                        step: 1,
+                        unit: "天",
+                        displayValue: controller.appC.dormancyThreshold.value == 0
+                            ? "关闭"
+                            : "${controller.appC.dormancyThreshold.value}天",
+                        onChanged: (e) {
+                          controller.appC.setDormancyThreshold(e);
                         },
                       ),
                     ),

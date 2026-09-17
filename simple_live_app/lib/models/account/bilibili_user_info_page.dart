@@ -1,11 +1,5 @@
 import 'dart:convert';
-
-T? asT<T>(dynamic value) {
-  if (value is T) {
-    return value;
-  }
-  return null;
-}
+import '../common/common_asT.dart';
 
 class BiliBiliUserInfoModel {
   BiliBiliUserInfoModel({
@@ -19,8 +13,7 @@ class BiliBiliUserInfoModel {
     this.rank,
   });
 
-  factory BiliBiliUserInfoModel.fromJson(Map<String, dynamic> json) =>
-      BiliBiliUserInfoModel(
+  factory BiliBiliUserInfoModel.fromJson(Map<String, dynamic> json) => BiliBiliUserInfoModel(
         mid: asT<int?>(json['mid']),
         uname: asT<String?>(json['uname']),
         userid: asT<String?>(json['userid']),

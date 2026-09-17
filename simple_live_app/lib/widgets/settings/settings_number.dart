@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/app_style.dart';
 
@@ -71,10 +71,7 @@ class SettingsNumber extends StatelessWidget {
             Text(
               displayValue ?? "$value$unit",
               textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium!
-                  .copyWith(color: Colors.grey),
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.grey),
             ),
             IconButton(
               padding: AppStyle.edgeInsetsA4,

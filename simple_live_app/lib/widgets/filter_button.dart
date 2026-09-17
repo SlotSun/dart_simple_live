@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:simple_live_app/app/app_style.dart';
 
 class FilterButton extends StatelessWidget {
@@ -20,10 +20,7 @@ class FilterButton extends StatelessWidget {
       child: Container(
         padding: AppStyle.edgeInsetsH12.copyWith(top: 4, bottom: 4),
         decoration: BoxDecoration(
-          border: Border.all(
-              color: selected
-                  ? Theme.of(context).textTheme.bodyMedium!.color!
-                  : Colors.grey),
+          border: Border.all(color: selected ? Theme.of(context).textTheme.bodyMedium!.color! : Colors.grey),
           borderRadius: AppStyle.radius24,
         ),
         child: Text(

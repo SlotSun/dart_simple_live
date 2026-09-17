@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -18,15 +18,11 @@ class DebugLogPage extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () async {
-              var msg = Log.debugLogs
-                  .map((x) => "${x.datetime}\r\n${x.content}")
-                  .join('\r\n\r\n');
+              var msg = Log.debugLogs.map((x) => "${x.datetime}\r\n${x.content}").join('\r\n\r\n');
               var dir = await getApplicationDocumentsDirectory();
-              var logFile = File(
-                  '${dir.path}/${DateTime.now().millisecondsSinceEpoch}.log');
+              var logFile = File('${dir.path}/${DateTime.now().millisecondsSinceEpoch}.log');
               await logFile.writeAsString(msg);
-              SharePlus.instance
-                  .share(ShareParams(files: [XFile(logFile.path)]));
+              SharePlus.instance.share(ShareParams(files: [XFile(logFile.path)]));
             },
             icon: const Icon(Icons.save),
           ),

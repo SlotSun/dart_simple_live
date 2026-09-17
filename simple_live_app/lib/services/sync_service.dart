@@ -73,8 +73,7 @@ class SyncService extends GetxService {
       // 地址直接从datagram中获取，能收到回复说明地址是可以连通的
       var address = datagram.address.address;
       //检查是否已经存在
-      var index =
-          scanClients.indexWhere((element) => element.address == address);
+      var index = scanClients.indexWhere((element) => element.address == address);
       if (index == -1) {
         scanClients.add(
           SyncClinet(
@@ -169,10 +168,7 @@ class SyncService extends GetxService {
         var ipList = <String>[];
         for (var interface in interfaces) {
           for (var addr in interface.addresses) {
-            if (addr.type.name == 'IPv4' &&
-                !addr.address.startsWith('127') &&
-                !addr.isMulticast &&
-                !addr.isLoopback) {
+            if (addr.type.name == 'IPv4' && !addr.address.startsWith('127') && !addr.isMulticast && !addr.isLoopback) {
               ipList.add(addr.address);
               break;
             }
@@ -224,8 +220,7 @@ class SyncService extends GetxService {
     return toJsonResponse({
       'status': true,
       'message': 'http server is running...',
-      "version":
-          'SimpeLive ${Platform.operatingSystem} v${Utils.packageInfo.version}',
+      "version": 'SimpeLive ${Platform.operatingSystem} v${Utils.packageInfo.version}',
     });
   }
 
@@ -245,8 +240,7 @@ class SyncService extends GetxService {
   /// 同步关注用户列表
   Future<shelf.Response> _syncFollowUserReuqest(shelf.Request request) async {
     try {
-      var overlay =
-          int.parse(request.requestedUri.queryParameters['overlay'] ?? '0');
+      var overlay = int.parse(request.requestedUri.queryParameters['overlay'] ?? '0');
 
       var body = await request.readAsString();
       Log.d('_syncFollowUserReuqest: $body');
@@ -274,11 +268,9 @@ class SyncService extends GetxService {
   }
 
   /// 同步标签列表
-  Future<shelf.Response> _syncFollowUserTagRequest(
-      shelf.Request request) async {
+  Future<shelf.Response> _syncFollowUserTagRequest(shelf.Request request) async {
     try {
-      var overlay =
-          int.parse(request.requestedUri.queryParameters['overlay'] ?? '0');
+      var overlay = int.parse(request.requestedUri.queryParameters['overlay'] ?? '0');
 
       var body = await request.readAsString();
       Log.d('_syncFollowUserTagRequest: $body');
@@ -308,8 +300,7 @@ class SyncService extends GetxService {
   /// 同步观看记录
   Future<shelf.Response> _syncHistoryReuqest(shelf.Request request) async {
     try {
-      var overlay =
-          int.parse(request.requestedUri.queryParameters['overlay'] ?? '0');
+      var overlay = int.parse(request.requestedUri.queryParameters['overlay'] ?? '0');
       var body = await request.readAsString();
       Log.d('_syncFollowUserReuqest: $body');
       var jsonBody = json.decode(body);
@@ -345,8 +336,7 @@ class SyncService extends GetxService {
   /// 同步弹幕屏蔽词
   Future<shelf.Response> _syncBlockedWordReuqest(shelf.Request request) async {
     try {
-      var overlay =
-          int.parse(request.requestedUri.queryParameters['overlay'] ?? '0');
+      var overlay = int.parse(request.requestedUri.queryParameters['overlay'] ?? '0');
       var body = await request.readAsString();
       Log.d('_syncBlockedWordReuqest: $body');
       var jsonBody = json.decode(body);

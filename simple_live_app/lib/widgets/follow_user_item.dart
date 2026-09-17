@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
@@ -50,9 +50,7 @@ class FollowUserItem extends StatelessWidget {
                         width: 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          color: item.liveStatus.value == 2
-                              ? Colors.green
-                              : Colors.grey,
+                          color: item.liveStatus.value == 2 ? Colors.green : Colors.grey,
                           borderRadius: AppStyle.radius12,
                         ),
                       ),
@@ -62,8 +60,7 @@ class FollowUserItem extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.normal,
-                          color:
-                              item.liveStatus.value == 2 ? null : Colors.grey,
+                          color: item.liveStatus.value == 2 ? null : Colors.grey,
                         ),
                       ),
                     ],

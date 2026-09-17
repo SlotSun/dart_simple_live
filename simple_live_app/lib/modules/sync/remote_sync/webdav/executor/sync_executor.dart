@@ -5,6 +5,7 @@ import 'package:archive/archive.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/modules/sync/remote_sync/webdav/interface/sync_resource.dart';
 import 'package:simple_live_app/modules/sync/remote_sync/webdav/resources/blockwords_sync_resource.dart';
+import 'package:simple_live_app/modules/sync/remote_sync/webdav/resources/follow_block_sync_resource.dart';
 import 'package:simple_live_app/modules/sync/remote_sync/webdav/resources/follow_sync_resource.dart';
 import 'package:simple_live_app/modules/sync/remote_sync/webdav/resources/history_sync_resource.dart';
 import 'package:simple_live_app/modules/sync/remote_sync/webdav/resources/settings_sync_resource.dart';
@@ -25,6 +26,7 @@ class SyncExecutor {
     BlockwordsSyncResource(),
     UserAccountCookieSyncResource(),
     SettingsSyncResource(),
+    FollowBlockSyncResource(),
   ];
 
   void buildExecutorAttr(
@@ -42,8 +44,10 @@ class SyncExecutor {
       if (isSyncBlockWord) BlockwordsSyncResource(),
       if (isSyncAccount) UserAccountCookieSyncResource(),
       if (isSyncSetting) SettingsSyncResource(),
+      FollowBlockSyncResource(),
     ]);
   }
+
   // fetch -> local-> remote -> select sync-mode
   // migration is needed after recover data from remote
   // migration depends on setting-kHiveDbVer, user did not select sync setting maybe
@@ -55,8 +59,7 @@ class SyncExecutor {
 
     for (final resource in _resources) {
       final local = await resource.loadLocal();
-      final remote =
-          remoteArchive == null ? null : resource.loadRemote(remoteArchive);
+      final remote = remoteArchive == null ? null : resource.loadRemote(remoteArchive);
 
       switch (mode) {
         case SyncMode.uploadAll:

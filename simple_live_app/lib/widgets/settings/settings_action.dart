@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/app_style.dart';
 
@@ -43,10 +43,7 @@ class SettingsAction extends StatelessWidget {
           if (value != null)
             Text(
               value!,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium!
-                  .copyWith(color: Colors.grey),
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.grey),
             ),
           AppStyle.hGap4,
           const Icon(

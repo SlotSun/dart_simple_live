@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
@@ -41,8 +41,7 @@ class AutoExitSettingsPage extends GetView<AppSettingsController> {
                     visible: controller.autoExitEnable.value,
                     child: SettingsAction(
                       title: "自动关闭时间",
-                      value:
-                          "${controller.autoExitDuration.value ~/ 60}小时${controller.autoExitDuration.value % 60}分钟",
+                      value: "${controller.autoExitDuration.value ~/ 60}小时${controller.autoExitDuration.value % 60}分钟",
                       subtitle: "从进入直播间开始倒计时",
                       onTap: () {
                         setTimer(context);

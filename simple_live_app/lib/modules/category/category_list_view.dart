@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_easyrefresh/easy_refresh.dart';
+import 'package:easy_refresh/easy_refresh.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/app_style.dart';
@@ -14,18 +14,17 @@ import 'package:sticky_headers/sticky_headers.dart';
 class CategoryListView extends StatelessWidget {
   final String tag;
   const CategoryListView(this.tag, {super.key});
-  CategoryListController get controller =>
-      Get.find<CategoryListController>(tag: tag);
+  CategoryListController get controller => Get.find<CategoryListController>(tag: tag);
   @override
   Widget build(BuildContext context) {
     return KeepAliveWrapper(
       child: Obx(
         () => EasyRefresh(
-          firstRefresh: true,
+          refreshOnStart: true,
           controller: controller.easyRefreshController,
           onRefresh: controller.refreshData,
           header: MaterialHeader(
-            completeDuration: const Duration(milliseconds: 400),
+            processedDuration: const Duration(milliseconds: 400),
           ),
           child: ListView.builder(
             padding: AppStyle.edgeInsetsA12,
@@ -42,8 +41,7 @@ class CategoryListView extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         item.name,
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
                     content: Obx(

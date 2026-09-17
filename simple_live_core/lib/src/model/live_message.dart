@@ -21,6 +21,9 @@ class LiveMessage {
   /// 用户名
   final String userName;
 
+  /// 用户 id
+  final String? userId;
+
   /// 信息
   final String message;
 
@@ -35,6 +38,7 @@ class LiveMessage {
     required this.userName,
     required this.message,
     this.data,
+    this.userId,
     required this.color,
   });
 

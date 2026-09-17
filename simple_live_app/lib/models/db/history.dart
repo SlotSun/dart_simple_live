@@ -1,5 +1,5 @@
 import 'package:hive_ce/hive_ce.dart';
-import 'package:simple_live_app/app/utils/duration_2_str_utils.dart';
+import 'package:simple_live_app/app/utils/extensions/duration_2_str_utils.dart';
 import 'package:simple_live_app/app/utils/dynamic_filter.dart';
 
 part 'history.g.dart';

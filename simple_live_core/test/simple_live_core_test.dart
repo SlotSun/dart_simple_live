@@ -91,7 +91,7 @@ void testSite(LiveSite site) async {
 
   LiveRoomDetail? roomDetail;
   test('getRoomDetail', () async {
-    roomDetail = await site.getRoomDetail(roomId: "1111");
+    roomDetail = await site.getRoomDetail(roomId: "danking");
     expect(roomDetail, isNotNull);
     expect(roomDetail?.roomId, isNotEmpty);
     // expect(roomDetail?.danmakuData, isNotNull);
@@ -152,8 +152,43 @@ void testSite(LiveSite site) async {
 void main() {
   CoreLog.requestLogType = RequestLogType.short;
 
-  group('bili tests', () {
-    testSite(BiliBiliSite());
+  group('huya tests', () {
+    var site = HuyaSite();
+    testSite(site);
+
+    test('getDanmaku - huya', () async {
+      var roomDetail = await site.getRoomDetail(roomId: "1995");
+      expect(roomDetail, isNotNull);
+      expect(roomDetail.danmakuData, isA<HuyaDanmakuArgs>());
+
+      var danmakuArgs = roomDetail.danmakuData as HuyaDanmakuArgs;
+      print('danmakuArgs: $danmakuArgs');
+
+      var danmaku = site.getDanmaku();
+      expect(danmaku, isNotNull);
+
+      var closed = false;
+      var ready = false;
+      danmaku.onReady = () {
+        print('ready');
+        ready = true;
+      };
+      danmaku.onClose = (msg) {
+        print('onClose $msg');
+        closed = true;
+      };
+      var msgCount = 0;
+      danmaku.onMessage = (LiveMessage msg) {
+        print('onMessage ${msg.type} ${msg.message}');
+        msgCount++;
+      };
+      await danmaku.start(danmakuArgs);
+      await Future.delayed(const Duration(seconds: 30));
+      expect(ready, isTrue);
+      expect(closed, isFalse);
+      expect(msgCount, greaterThan(0));
+      await danmaku.stop();
+    }, timeout: const Timeout(Duration(seconds: 40)));
   });
 }
 

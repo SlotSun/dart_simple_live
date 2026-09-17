@@ -39,12 +39,17 @@
     </screenshot>
   </screenshots>
   <releases>
-    <release version="1.8.9" date="2026-06-13">
+    <release version="1.8.11" date="2026-09-18">
       <description>
-        <p>- 项目计划在后续版本中开始使用Rust完全重构的slive-core包，主要原因在于参考项目的Rust化，还有一些其他原因，普通用户无感知 </p>
-        <p>- core移除js引擎依赖更好的适配TV </p>
-        <p>- 新增snapshot功能 </p>
-        <p>- 调整webdav功能</p>
+        <p>- feat: 允许按tag排序 </p>
+        <p>- feat: 自由画面尺寸功能 #156 </p>
+        <p>- feat: windows NVIDIA RTX VSR </p>
+        <p>- feat: 房间专属屏蔽词和屏蔽用户 </p>
+        <p>- feat: PC端小窗记忆/开屏最大化 </p>
+        <p>- feat: 弹幕随屏幕尺寸放缩 </p>
+        <p>- feat: 允许禁用滑动调节亮度/音量 </p>
+        <p>- feat: pc端参数启动应用 </p>
+        <p>- fix: huya弹幕完整性   </p>
         <p>- 一些数据错误和潜在问题的修复 </p>
         <p>- 一些细节调整  </p>
         <p>- 关于linux的一系列修复 @pugaizai </p>

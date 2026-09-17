@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:simple_live_app/app/app_style.dart';
 
 class SettingsSwitch extends StatelessWidget {
@@ -30,10 +30,7 @@ class SettingsSwitch extends StatelessWidget {
       subtitle: subtitle != null
           ? Text(
               subtitle!,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall!
-                  .copyWith(color: Colors.grey),
+              style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.grey),
             )
           : null,
       value: value,

@@ -1,11 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:simple_live_app/app/app_style.dart';
 
 class DesktopRefreshButton extends StatelessWidget {
   final bool refreshing;
   final Function()? onPressed;
-  const DesktopRefreshButton(
-      {required this.refreshing, this.onPressed, super.key});
+  const DesktopRefreshButton({required this.refreshing, this.onPressed, super.key});
 
   @override
   Widget build(BuildContext context) {

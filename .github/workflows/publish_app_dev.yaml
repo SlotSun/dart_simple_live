@@ -83,8 +83,7 @@ jobs:
 
   # 打包iOS、Mac
   build-mac-ios:
-    # https://github.com/actions/runner-images/issues/12541
-    runs-on: macos-15
+    runs-on: macos-latest
 
     permissions:
       contents: write

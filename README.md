@@ -1,6 +1,6 @@
 
 
-<p align="center">
+<p  align="center">
     <img width="128" src="/assets/logo.png" alt="Simple Live logo">
 </p>
 <h2 align="center">Slive</h2>
@@ -38,6 +38,16 @@
   yay -S slive-bin
 ```
 
+#### 便携版, 启动参数的用法
+```bash
+    
+    # Windows_PowerShell
+    .\slive.exe -p  #数据启动目录为 ./data_hive_ce
+    .\slive.exe --portable #数据启动目录为 ./data_hive_ce
+    .\slive.exe -h 
+    # linux 同上
+    # 后续根据需求添加其他参数
+```
 只保证Android, Linux和Windows可用性
 
 请到[Releases](https://github.com/slotsun/dart_simple_live/releases)下载最新版本，iOS请到上游或者action下载体验
@@ -56,7 +66,7 @@ Windows建议下载UWP版[聚合直播](https://www.microsoft.com/store/apps/9N1
 
 ## 环境
 
-flutter 3.38.6
+flutter latest
 
 ## 参考及引用
 

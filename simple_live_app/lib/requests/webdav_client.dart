@@ -10,8 +10,7 @@ class DAVClient {
   // 强制统一
   String root = "/simple_live_app";
 
-  DAVClient(String webDAVUri, String webDAVUser, String webDAVPassword,
-      {String webDAVDirectory = "/simple_live_app"}) {
+  DAVClient(String webDAVUri, String webDAVUser, String webDAVPassword, {String webDAVDirectory = "/simple_live_app"}) {
     client = newClient(
       webDAVUri,
       user: webDAVUser,
