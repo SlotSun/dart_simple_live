@@ -369,7 +369,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
       // 读取窗口大小
       _lastWindowSize = await windowManager.getSize();
       _lastWindowPosition = await windowManager.getPosition();
-      Log.d('last_window_size:${_lastWindowSize!.width}__${_lastWindowSize!.height}');
+      Log.d('last_window_size:${_lastWindowSize?.width}__${_lastWindowSize?.height}');
       Log.d('last_window_position:${_lastWindowPosition?.dx}__${_lastWindowPosition?.dy}');
       windowManager.setTitleBarStyle(TitleBarStyle.hidden);
       // 获取视频窗口大小
