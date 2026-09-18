@@ -1,4 +1,4 @@
-﻿import 'package:archive/archive.dart';
+import 'package:archive/archive.dart';
 
 abstract class SyncResource<T> {
   String get fileName;

@@ -1,4 +1,4 @@
-﻿import 'package:hive_ce/hive_ce.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 part 'follow_user_block.g.dart';
 

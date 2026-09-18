@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 
 import 'package:archive/archive.dart';
 import 'package:fractional_indexing_dart/fractional_indexing_dart.dart';

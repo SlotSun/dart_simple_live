@@ -1,7 +1,7 @@
 {
-    "version": "1.8.11",
-    "version_num": 10811,
-    "version_desc": "- feat: 允许按tag排序 \n- feat: 自由画面尺寸功能 #156 \n- feat: windows NVIDIA RTX VSR \n- feat: 房间专属屏蔽词和屏蔽用户 \n- feat: PC端小窗记忆/开屏最大化 \n- feat: 弹幕随屏幕尺寸放缩 \n- feat: 允许禁用滑动调节亮度/音量 \n- feat: pc端参数启动应用 \n- fix: huya弹幕完整性   \n- 一些数据错误和潜在问题的修复 \n- 一些细节调整  \n- 关于linux的一系列修复 @pugaizai \n- tips: ios和macos用户请到action更新测试或者下载上游仓库版本",
+    "version": "1.8.12",
+    "version_num": 10812,
+    "version_desc": "- 基于v10811的热修版本：aur 以及 部分ui修复 #173 \n- feat: 允许按tag排序 \n- feat: 自由画面尺寸功能 #156 \n- feat: windows NVIDIA RTX VSR @ZhaiXB \n- feat: 房间专属屏蔽词和屏蔽用户 \n- feat: PC端小窗记忆/开屏最大化 \n- feat: 弹幕随屏幕尺寸放缩 \n- feat: 允许禁用滑动调节亮度/音量 \n- feat: pc端参数启动应用 \n- fix: huya弹幕完整性   \n- 一些数据错误和潜在问题的修复 \n- 一些细节调整  \n- 关于linux的一系列修复 @pugaizai \n- tips: ios和macos用户请到action更新测试或者下载上游仓库版本",
     "prerelease": false,
     "download_url": "https://github.com/SlotSun/dart_simple_live/releases"
 }

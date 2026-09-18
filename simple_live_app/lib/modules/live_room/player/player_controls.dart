@@ -307,6 +307,21 @@ Widget buildFullControls(
                       style: const TextStyle(color: Colors.white, fontSize: 15),
                     ),
                   ),
+                  Obx(
+                    // only pip
+                    () => Visibility(
+                      visible: controller.smallWindowState.value,
+                      child: IconButton(
+                        onPressed: () {
+                          controller.enterFullScreen();
+                        },
+                        icon: const Icon(
+                          Remix.fullscreen_line,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
                   IconButton(
                     onPressed: () {
                       controller.enterFullScreen();

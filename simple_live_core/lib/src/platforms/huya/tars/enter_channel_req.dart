@@ -1,4 +1,4 @@
-﻿import 'package:simple_live_core/src/platforms/huya/tars/types.dart';
+import 'package:simple_live_core/src/platforms/huya/tars/types.dart';
 import 'package:tars_dart/tars/codec/tars_displayer.dart';
 import 'package:tars_dart/tars/codec/tars_input_stream.dart';
 import 'package:tars_dart/tars/codec/tars_output_stream.dart';

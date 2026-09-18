@@ -1,4 +1,4 @@
-﻿import 'dart:typed_data';
+import 'dart:typed_data';
 
 import '/tars/tup/request_packet.dart';
 import '/tars/codec/tars_input_stream.dart';

@@ -1,4 +1,4 @@
-﻿import 'package:simple_live_app/app/utils/dynamic_filter.dart';
+import 'package:simple_live_app/app/utils/dynamic_filter.dart';
 
 /// 排序条件
 class SortCondition<T> {

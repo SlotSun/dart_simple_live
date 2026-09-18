@@ -1,4 +1,4 @@
-﻿import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive.dart';
 part 'follow_snapshot.g.dart';
 
 @HiveType(typeId: 5)

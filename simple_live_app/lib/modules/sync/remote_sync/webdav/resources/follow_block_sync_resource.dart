@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 
 import 'package:archive/archive.dart';
 import 'package:simple_live_app/models/db/follow_user_block.dart';

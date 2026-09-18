@@ -1,4 +1,4 @@
-﻿enum DanmakuFontScale {
+enum DanmakuFontScale {
   small('1080P', 0.5, 0.3),  // 1080p
   medium('2k', 0.9, 0.5), // 2k
   large('4k', 1.1, 0.8); // 4k

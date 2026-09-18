@@ -1,4 +1,4 @@
-﻿enum EWebSocketCommandType {
+enum EWebSocketCommandType {
   EWSCmd_NULL(0),
   EWSCmd_RegisterReq(1),
   EWSCmd_RegisterRsp(2),

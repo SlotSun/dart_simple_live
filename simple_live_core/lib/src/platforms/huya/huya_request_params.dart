@@ -1,4 +1,4 @@
-﻿mixin HuyaRequestParams {
+mixin HuyaRequestParams {
   static const String baseUrl = "https://www.huya.com";
   static const String wupUrl = "http://wup.huya.com";
   static const String kUserAgent =

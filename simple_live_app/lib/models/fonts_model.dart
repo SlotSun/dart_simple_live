@@ -1,4 +1,4 @@
-﻿class FontsModel {
+class FontsModel {
   String version;
   int versionNum;
   String versionDesc;

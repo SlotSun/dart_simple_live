@@ -1,4 +1,4 @@
-﻿// only for Android
+// only for Android
 import 'dart:ui';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
