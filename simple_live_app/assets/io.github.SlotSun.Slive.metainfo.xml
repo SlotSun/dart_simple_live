@@ -39,11 +39,12 @@
     </screenshot>
   </screenshots>
   <releases>
-    <release version="1.8.11" date="2026-09-18">
+    <release version="1.8.12" date="2026-09-18">
       <description>
+        <p>- 基于v10811的热修版本：aur 以及 部分ui修复 #173 </p>
         <p>- feat: 允许按tag排序 </p>
         <p>- feat: 自由画面尺寸功能 #156 </p>
-        <p>- feat: windows NVIDIA RTX VSR </p>
+        <p>- feat: windows NVIDIA RTX VSR @ZhaiXB </p>
         <p>- feat: 房间专属屏蔽词和屏蔽用户 </p>
         <p>- feat: PC端小窗记忆/开屏最大化 </p>
         <p>- feat: 弹幕随屏幕尺寸放缩 </p>
