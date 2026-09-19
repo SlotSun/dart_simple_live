@@ -324,15 +324,6 @@ Widget buildFullControls(
                   ),
                   IconButton(
                     onPressed: () {
-                      controller.enterFullScreen();
-                    },
-                    icon: const Icon(
-                      Remix.fullscreen_line,
-                      color: Colors.white,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
                       if (controller.smallWindowState.value) {
                         controller.exitSmallWindow();
                       } else {
