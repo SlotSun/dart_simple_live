@@ -193,7 +193,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version-file: simple_live_app/pubspec.yaml
-          channel: stable
+          channel: master
       # 安装依赖
       - name: Update apt-get
         run: sudo apt-get update
