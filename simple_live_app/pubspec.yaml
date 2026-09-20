@@ -4,7 +4,7 @@ publish_to: none
 description: "Slive APP"
 environment: 
   sdk: '>=3.0.5 <4.0.0'
-  flutter: 3.47.4
+  flutter: 3.47.5
 
 dependencies: 
   flutter: 
@@ -19,12 +19,12 @@ dependencies:
   remixicon: ^4.9.3 # Remix 图标
 
   # 框架、工具
-  archive: ^4.0.9 # 文件压缩
+  archive: ^4.3.0 # 文件压缩
   get: ^4.7.3 # 状态管理、路由管理、国际化
   dio: ^5.11.0 # 网络请求
   hive_ce: ^2.19.3 # 持久化存储
   hive_ce_flutter: ^2.3.4 # 持久化存储
-  logger: ^2.7.0 # 日志
+  logger: ^2.8.0 # 日志
   firebase_analytics: ^12.4.6
   firebase_crashlytics: ^5.2.7 # firebase
   firebase_core: ^4.13.0
@@ -34,10 +34,10 @@ dependencies:
   dynamic_color: ^2.1.0 # 动态颜色
   path: any
   udp: ^5.0.3 # UDP
-  fractional_indexing_dart: ^1.0.7
+  fractional_indexing_dart: ^1.0.7 #分数索引
   synchronized: ^3.4.0 # 线程安全
   collection: ^1.19.1
-  pool: ^1.5.2 #并发控制器
+  pool: ^1.5.3 #并发控制器
   material_ui: any
   cupertino_ui: any
   uuid: any
