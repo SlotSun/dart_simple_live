@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -9,8 +8,9 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:simple_live_app/app/constant.dart';
+import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/models/font_model.dart';
 import 'package:simple_live_app/requests/http_client.dart';
@@ -37,8 +37,8 @@ class AppStyleSettingController extends GetxController {
   }
 
   Future<void> fontDelete() async {
-    var dir = await getApplicationSupportDirectory();
-    final fontDir = Directory("${dir.path}/fonts/${curFontModel.value!.id}");
+    final dbPath = AppSettingsController.instance.dbPath;
+    final fontDir = Directory("$dbPath/fonts/${curFontModel.value!.id}");
     try {
       // 删除整个目录（包括目录本身和所有内容）
       await fontDir.delete(recursive: true);
@@ -62,6 +62,7 @@ class AppStyleSettingController extends GetxController {
       curFontName.value = null;
       LocalStorageService.instance.removeValue(LocalStorageService.kCustomFont);
     }
+    SmartDialog.showToast("已重置为默认字体！");
   }
 
   void changeFontFamily() {
@@ -83,9 +84,9 @@ class AppStyleSettingController extends GetxController {
   }
 
   Future<void> downloadFont() async {
-    var dir = await getApplicationSupportDirectory();
+    final dbPath = AppSettingsController.instance.dbPath;
     var fontName = curFontModel.value!.id;
-    final fontDir = Directory("${dir.path}/fonts/$fontName");
+    final fontDir = Directory("$dbPath/fonts/$fontName");
     if (!await fontDir.exists()) {
       await fontDir.create(recursive: true);
     }
@@ -113,7 +114,6 @@ class AppStyleSettingController extends GetxController {
               Log.e("Failed to download font file after $maxRetries attempts: $filePath\n$e", s);
               fontState.value = DownloadState.notDownloaded;
               SmartDialog.showToast("下载失败，请检查网络后重试");
-              throw Exception("Failed to download $fileName: $e");
             }
             Log.w("Download failed, retrying ($retryCount/$maxRetries): $fileName");
             await Future.delayed(const Duration(seconds: 1));
@@ -153,8 +153,8 @@ class AppStyleSettingController extends GetxController {
   }
 
   Future<void> loadFont(String fontName) async {
-    var dir = await getApplicationSupportDirectory();
-    final fontDir = Directory("${dir.path}/fonts/$fontName");
+    final dbPath = AppSettingsController.instance.dbPath;
+    final fontDir = Directory("$dbPath/fonts/$fontName");
     final loader = FontLoader(fontName);
 
     await for (final entity in fontDir.list()) {
@@ -167,8 +167,8 @@ class AppStyleSettingController extends GetxController {
   }
 
   Future<bool> fontDownloadCheck(String fontName) async {
-    final dir = await getApplicationSupportDirectory();
-    final fontDir = Directory("${dir.path}/fonts/$fontName");
+    final dbPath = AppSettingsController.instance.dbPath;
+    final fontDir = Directory("$dbPath/fonts/$fontName");
     bool fontDownload = await fontDir.exists() && await fontDir.list().length >= 1;
     return fontDownload;
   }
