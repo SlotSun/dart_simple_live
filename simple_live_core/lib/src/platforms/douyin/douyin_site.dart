@@ -34,12 +34,11 @@ class DouyinSite implements LiveSite {
 
   Future<Map<String, dynamic>> getRequestHeaders() async {
     try {
-      if(_cookie.isNotEmpty && _cookie.contains('ttwid')){
+      if (_cookie.isNotEmpty && _cookie.contains('ttwid')) {
         headers['cookie'] = _cookie;
         return headers;
       }
-      var head = await HttpClient.instance
-          .head("https://live.douyin.com", header: headers);
+      var head = await HttpClient.instance.head("https://live.douyin.com", header: headers);
       head.headers["set-cookie"]?.forEach((element) {
         var cookie = element.split(";")[0];
         if (cookie.contains("ttwid")) {
@@ -93,16 +92,9 @@ class DouyinSite implements LiveSite {
       header: await getRequestHeaders(),
     );
 
-    var renderData =
-        RegExp(r'\{\\"pathname\\":\\"\/\\",\\"categoryData.*?\],')
-                .firstMatch(result)
-                ?.group(0) ??
-            "";
-    var renderDataJson = json.decode(renderData
-        .trim()
-        .replaceAll('\\"', '"')
-        .replaceAll(r"\\", r"\")
-        .replaceAll('],', ""));
+    var renderData = RegExp(r'\{\\"pathname\\":\\"\/\\",\\"categoryData.*?\],').firstMatch(result)?.group(0) ?? "";
+    var renderDataJson =
+        json.decode(renderData.trim().replaceAll('\\"', '"').replaceAll(r"\\", r"\").replaceAll('],', ""));
 
     for (var item in renderDataJson["categoryData"]) {
       List<LiveSubCategory> subs = [];
@@ -136,8 +128,7 @@ class DouyinSite implements LiveSite {
   }
 
   @override
-  Future<LiveCategoryResult> getCategoryRooms(LiveSubCategory category,
-      {int page = 1}) async {
+  Future<LiveCategoryResult> getCategoryRooms(LiveSubCategory category, {int page = 1}) async {
     var ids = category.id.split(',');
     var partitionId = ids[0];
     var partitionType = ids[1];
@@ -162,10 +153,8 @@ class DouyinSite implements LiveSite {
       "partition_type": partitionType,
       "req_from": '2'
     };
-    var categoryRoomUrl =
-        "https://live.douyin.com/webcast/web/partition/detail/room/v2/";
-    var targetUrl =
-        DouyinUtils.buildRequestUrl(categoryRoomUrl, queryParameters);
+    var categoryRoomUrl = "https://live.douyin.com/webcast/web/partition/detail/room/v2/";
+    var targetUrl = DouyinUtils.buildRequestUrl(categoryRoomUrl, queryParameters);
     var result = await HttpClient.instance.getJson(
       targetUrl,
       header: await getRequestHeaders(),
@@ -179,9 +168,7 @@ class DouyinSite implements LiveSite {
         title: item["room"]["title"].toString(),
         cover: item["room"]["cover"]["url_list"][0].toString(),
         userName: item["room"]["owner"]["nickname"].toString(),
-        online: int.tryParse(
-                item["room"]["room_view_stats"]["display_value"].toString()) ??
-            0,
+        online: int.tryParse(item["room"]["room_view_stats"]["display_value"].toString()) ?? 0,
       );
       items.add(roomItem);
     }
@@ -213,9 +200,7 @@ class DouyinSite implements LiveSite {
         title: item["title"].toString(),
         cover: item["cover"]["url_list"][0].toString(),
         userName: item["owner"]["nickname"].toString(),
-        online:
-            int.tryParse(item["room_view_stats"]["display_value"].toString()) ??
-                0,
+        online: int.tryParse(item["room_view_stats"]["display_value"].toString()) ?? 0,
       );
       items.add(roomItem);
     }
@@ -243,9 +228,7 @@ class DouyinSite implements LiveSite {
     var response = await HttpClient.instance.getText(
       "$baseUrl$roomId",
     );
-    final reg = RegExp(
-        r'mysteryMan\\":1,\\\"webRid\\\":\\\"([^\\"]+)\\\",\\\"desensitizedNickname'
-    );
+    final reg = RegExp(r'mysteryMan\\":1,\\\"webRid\\\":\\\"([^\\"]+)\\\",\\\"desensitizedNickname');
     var webRid = reg.firstMatch(response)?.group(1) ?? "";
     return webRid.isEmpty ? roomId : webRid;
   }
@@ -287,9 +270,7 @@ class DouyinSite implements LiveSite {
       cover: roomStatus ? room["cover"]["url_list"][0].toString() : "",
       userName: owner["nickname"].toString(),
       userAvatar: owner["avatar_thumb"]["url_list"][0].toString(),
-      online: roomStatus
-          ? asT<int?>(room["room_view_stats"]["display_value"]) ?? 0
-          : 0,
+      online: roomStatus ? asT<int?>(room["room_view_stats"]["display_value"]) ?? 0 : 0,
       status: roomStatus,
       url: "https://live.douyin.com/$webRid",
       introduction: owner["signature"].toString(),
@@ -342,15 +323,11 @@ class DouyinSite implements LiveSite {
       roomId: webRid,
       title: roomData["title"].toString(),
       cover: roomStatus ? roomData["cover"]["url_list"][0].toString() : "",
-      userName: roomStatus
-          ? owner["nickname"].toString()
-          : userData["nickname"].toString(),
+      userName: roomStatus ? owner["nickname"].toString() : userData["nickname"].toString(),
       userAvatar: roomStatus
           ? owner["avatar_thumb"]["url_list"][0].toString()
           : userData["avatar_thumb"]["url_list"][0].toString(),
-      online: roomStatus
-          ? asT<int?>(roomData["room_view_stats"]["display_value"]) ?? 0
-          : 0,
+      online: roomStatus ? asT<int?>(roomData["room_view_stats"]["display_value"]) ?? 0 : 0,
       status: roomStatus,
       url: "https://live.douyin.com/$webRid",
       introduction: owner?["signature"]?.toString() ?? "",
@@ -371,8 +348,7 @@ class DouyinSite implements LiveSite {
   Future<LiveRoomDetail> _getRoomDetailByWebRidHtml(String webRid) async {
     var roomData = await _getRoomDataByHtml(webRid);
     var roomId = roomData["roomStore"]["roomInfo"]["room"]["id_str"].toString();
-    var userUniqueId =
-        roomData["userStore"]["odin"]["user_unique_id"].toString();
+    var userUniqueId = roomData["userStore"]["odin"]["user_unique_id"].toString();
 
     var room = roomData["roomStore"]["roomInfo"]["room"];
     var owner = room["owner"];
@@ -386,15 +362,11 @@ class DouyinSite implements LiveSite {
       roomId: webRid,
       title: room["title"].toString(),
       cover: roomStatus ? room["cover"]["url_list"][0].toString() : "",
-      userName: roomStatus
-          ? owner["nickname"].toString()
-          : anchor["nickname"].toString(),
+      userName: roomStatus ? owner["nickname"].toString() : anchor["nickname"].toString(),
       userAvatar: roomStatus
           ? owner["avatar_thumb"]["url_list"][0].toString()
           : anchor["avatar_thumb"]["url_list"][0].toString(),
-      online: roomStatus
-          ? asT<int?>(room["room_view_stats"]["display_value"]) ?? 0
-          : 0,
+      online: roomStatus ? asT<int?>(room["room_view_stats"]["display_value"]) ?? 0 : 0,
       status: roomStatus,
       url: "https://live.douyin.com/$webRid",
       introduction: owner?["signature"]?.toString() ?? "",
@@ -459,15 +431,8 @@ class DouyinSite implements LiveSite {
       },
     );
 
-    var renderData = RegExp(r'\{\\"state\\":\{\\"appStore.*?\]\\n')
-            .firstMatch(result)
-            ?.group(0) ??
-        "";
-    var str = renderData
-        .trim()
-        .replaceAll('\\"', '"')
-        .replaceAll(r"\\", r"\")
-        .replaceAll(']\\n', "");
+    var renderData = RegExp(r'\{\\"state\\":\{\\"appStore.*?\]\\n').firstMatch(result)?.group(0) ?? "";
+    var str = renderData.trim().replaceAll('\\"', '"').replaceAll(r"\\", r"\").replaceAll(']\\n', "");
     var renderDataJson = json.decode(str);
     return renderDataJson["state"];
   }
@@ -483,8 +448,7 @@ class DouyinSite implements LiveSite {
       'web_rid': webRid,
       'is_need_double_stream': "false"
     };
-    var targetUrl = DouyinUtils.buildRequestUrl(
-        "https://live.douyin.com/webcast/room/web/enter/", queryParams);
+    var targetUrl = DouyinUtils.buildRequestUrl("https://live.douyin.com/webcast/room/web/enter/", queryParams);
     CoreLog.d("targetUrl: $targetUrl");
     var result = await HttpClient.instance.getJson(
       targetUrl,
@@ -512,23 +476,15 @@ class DouyinSite implements LiveSite {
   }
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualites(
-      {required LiveRoomDetail detail}) async {
+  Future<List<LivePlayQuality>> getPlayQualites({required LiveRoomDetail detail}) async {
     List<LivePlayQuality> qualities = [];
 
-    var qulityList =
-        detail.data["live_core_sdk_data"]["pull_data"]["options"]["qualities"];
-    var streamData = detail.data["live_core_sdk_data"]["pull_data"]
-            ["stream_data"]
-        .toString();
+    var qulityList = detail.data["live_core_sdk_data"]["pull_data"]["options"]["qualities"];
+    var streamData = detail.data["live_core_sdk_data"]["pull_data"]["stream_data"].toString();
 
     if (!streamData.startsWith('{')) {
-      var flvList =
-          (detail.data["flv_pull_url"] as Map).values.cast<String>().toList();
-      var hlsList = (detail.data["hls_pull_url_map"] as Map)
-          .values
-          .cast<String>()
-          .toList();
+      var flvList = (detail.data["flv_pull_url"] as Map).values.cast<String>().toList();
+      var hlsList = (detail.data["hls_pull_url_map"] as Map).values.cast<String>().toList();
       for (var quality in qulityList) {
         int level = quality["level"];
         List<String> urls = [];
@@ -553,18 +509,16 @@ class DouyinSite implements LiveSite {
       var qualityData = json.decode(streamData)["data"] as Map;
       for (var quality in qulityList) {
         List<String> urls = [];
-        var flvUrl =
-            qualityData[quality["sdk_key"]]?["main"]?["flv"]?.toString();
+        var flvUrl = qualityData[quality["sdk_key"]]?["main"]?["flv"]?.toString();
 
         if (flvUrl != null && flvUrl.isNotEmpty) {
           urls.add(flvUrl);
         }
-        var hlsUrl =
-            qualityData[quality["sdk_key"]]?["main"]?["hls"]?.toString();
+        var hlsUrl = qualityData[quality["sdk_key"]]?["main"]?["hls"]?.toString();
         if (hlsUrl != null && hlsUrl.isNotEmpty) {
-          if(hlsFirst){
+          if (hlsFirst) {
             urls.insert(0, hlsUrl);
-          }else{
+          } else {
             urls.add(hlsUrl);
           }
         }
@@ -597,18 +551,14 @@ class DouyinSite implements LiveSite {
   }
 
   @override
-  Future<LivePlayUrl> getPlayUrls(
-      {required LiveRoomDetail detail,
-      required LivePlayQuality quality}) async {
+  Future<LivePlayUrl> getPlayUrls({required LiveRoomDetail detail, required LivePlayQuality quality}) async {
     return LivePlayUrl(urls: quality.data);
   }
 
   @override
-  Future<LiveSearchRoomResult> searchRooms(String keyword,
-      {int page = 1}) async {
+  Future<LiveSearchRoomResult> searchRooms(String keyword, {int page = 1}) async {
     String serverUrl = "https://www.douyin.com/aweme/v1/web/live/search/";
-    var uri = Uri.parse(serverUrl)
-        .replace(scheme: "https", port: 443, queryParameters: {
+    var uri = Uri.parse(serverUrl).replace(scheme: "https", port: 443, queryParameters: {
       "device_platform": "webapp",
       "aid": "6383",
       "channel": "channel_pc_web",
@@ -655,10 +605,8 @@ class DouyinSite implements LiveSite {
         'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
         'cookie': dyCookie,
         'priority': 'u=1, i',
-        'referer':
-            'https://www.douyin.com/search/${Uri.encodeComponent(keyword)}?type=live',
-        'sec-ch-ua':
-            '"Microsoft Edge";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
+        'referer': 'https://www.douyin.com/search/${Uri.encodeComponent(keyword)}?type=live',
+        'sec-ch-ua': '"Microsoft Edge";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
         'sec-ch-ua-mobile': '?0',
         'sec-ch-ua-platform': '"Windows"',
         'sec-fetch-dest': 'empty',
@@ -686,8 +634,7 @@ class DouyinSite implements LiveSite {
   }
 
   @override
-  Future<LiveSearchAnchorResult> searchAnchors(String keyword,
-      {int page = 1}) async {
+  Future<LiveSearchAnchorResult> searchAnchors(String keyword, {int page = 1}) async {
     throw Exception("抖音暂不支持搜索主播，请直接搜索直播间");
   }
 
@@ -698,8 +645,7 @@ class DouyinSite implements LiveSite {
   }
 
   @override
-  Future<List<LiveSuperChatMessage>> getSuperChatMessage(
-      {required String roomId}) {
+  Future<List<LiveSuperChatMessage>> getSuperChatMessage({required String roomId}) {
     return Future.value(<LiveSuperChatMessage>[]);
   }
 
@@ -722,8 +668,7 @@ class DouyinSite implements LiveSite {
     for (var item in values) {
       stringBuffer.write(item);
     }
-    return int.tryParse(stringBuffer.toString()) ??
-        Random().nextInt(1000000000);
+    return int.tryParse(stringBuffer.toString()) ?? Random().nextInt(1000000000);
   }
 
   /// 读取A-Bogus签名后的URL
@@ -747,11 +692,11 @@ class DouyinSite implements LiveSite {
   }
 
   // 更新 douyin._cookie 参数
-  void _updateDouyinCookie(String cookie){
-    if(cookie.isEmpty){
+  void _updateDouyinCookie(String cookie) {
+    if (cookie.isEmpty) {
       _cookie = '';
       headers.remove('cookie');
-    }else{
+    } else {
       _cookie = cookie;
       headers['cookie'] = cookie;
     }

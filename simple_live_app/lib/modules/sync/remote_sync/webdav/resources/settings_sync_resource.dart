@@ -52,6 +52,8 @@ class SettingsSyncResource implements SyncResource<Map<String, dynamic>> {
         LocalStorageService.kHiveDbVer,
         (data as Map).containsKey(LocalStorageService.kHiveDbVer) ? data[LocalStorageService.kHiveDbVer] : "10805",
       );
+      // 同步后直接更新数值
+      await AppSettingsController.instance.onInit();
     } catch (e) {
       Log.e("同步用户设置失败：$e", StackTrace.current);
     }

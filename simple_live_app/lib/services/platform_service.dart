@@ -137,7 +137,7 @@ class PlatformService extends GetxService {
 
   void douyuLogout() async {
     douyuCookie.value = "";
-    // 可能存在网络问题，不清空本地存储
+    LocalStorageService.instance.setValue(LocalStorageService.kDouyuCookie, "");
     _updateDouyuAttr();
     if (Platform.isAndroid || Platform.isIOS) {
       CookieManager cookieManager = CookieManager.instance();
