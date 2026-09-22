@@ -81,7 +81,7 @@ class MinePage extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Remix.account_circle_line),
-              title: const Text("账号管理"),
+              title: const Text("平台配置"),
               trailing: const Icon(
                 Icons.chevron_right,
                 color: Colors.grey,

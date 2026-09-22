@@ -19,6 +19,9 @@ class DouyinSite implements LiveSite {
 
   bool hlsFirst = false;
 
+  //only search
+  String _cookie = '';
+
   static const String kDefaultReferer = "https://live.douyin.com";
 
   static const String kDefaultAuthority = "live.douyin.com";
@@ -31,8 +34,8 @@ class DouyinSite implements LiveSite {
 
   Future<Map<String, dynamic>> getRequestHeaders() async {
     try {
-      final existCookies = headers['cookie'] ?? '';
-      if (existCookies.contains('ttwid')) {
+      if(_cookie.isNotEmpty && _cookie.contains('ttwid')){
+        headers['cookie'] = _cookie;
         return headers;
       }
       var head = await HttpClient.instance
@@ -40,7 +43,7 @@ class DouyinSite implements LiveSite {
       head.headers["set-cookie"]?.forEach((element) {
         var cookie = element.split(";")[0];
         if (cookie.contains("ttwid")) {
-          final newCookie = '$cookie; $existCookies';
+          final newCookie = '$cookie; $_cookie';
           headers['cookie'] = newCookie;
         }
       });
@@ -740,6 +743,27 @@ class DouyinSite implements LiveSite {
     } catch (e) {
       CoreLog.error(e);
       return url;
+    }
+  }
+
+  // 更新 douyin._cookie 参数
+  void _updateDouyinCookie(String cookie){
+    if(cookie.isEmpty){
+      _cookie = '';
+      headers.remove('cookie');
+    }else{
+      _cookie = cookie;
+      headers['cookie'] = cookie;
+    }
+  }
+
+  @override
+  void setSiteAttrs(Map<String, dynamic> data) {
+    if (data.containsKey('cookie')) {
+      _updateDouyinCookie(data['cookie'] as String);
+    }
+    if (data.containsKey('hlsFirst')) {
+      hlsFirst = data['hlsFirst'] as bool;
     }
   }
 }

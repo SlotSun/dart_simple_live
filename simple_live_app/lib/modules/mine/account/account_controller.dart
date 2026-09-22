@@ -88,12 +88,29 @@ class AccountController extends GetxController {
       final cookie = await Utils.showEditTextDialog(
         "",
         title: "请输入抖音Cookie",
-        hintText: "__ac_nonce=...;__ac_signature=...;sessionid=...;",
+        hintText: "__ac_signature=...;sessionid=...;",
       );
       if (cookie == null || cookie.isEmpty) return;
       PlatformService.instance.setDouyinCookie(cookie);
       // 检查输入的cookie是否有效
       await PlatformService.instance.loadDouyinUserInfo();
+    }
+  }
+
+  void douyuTap() async {
+    if (PlatformService.instance.douyuCookie.value.isNotEmpty) {
+      var result = await Utils.showAlertDialog("确定要清除斗鱼Cookie吗？", title: "清除Cookie");
+      if (result) {
+        PlatformService.instance.douyuLogout();
+      }
+    } else {
+      final cookie = await Utils.showEditTextDialog(
+        "",
+        title: "请输入斗鱼Cookie",
+        hintText: "dy_did=...; acf_did=...;etc",
+      );
+      if (cookie == null || cookie.isEmpty) return;
+      PlatformService.instance.setDouyuCookie(cookie);
     }
   }
 }

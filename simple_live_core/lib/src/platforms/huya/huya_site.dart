@@ -585,6 +585,13 @@ class HuyaSite implements LiveSite {
     }
     return ls;
   }
+
+  @override
+  void setSiteAttrs(Map<String, dynamic> data) {
+    if (data.containsKey('ua')) {
+      HYSDK_UA = data['ua'] as String;
+    }
+  }
 }
 
 class HuyaUrlDataModel {
