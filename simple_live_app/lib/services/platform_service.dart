@@ -64,7 +64,7 @@ class PlatformService extends GetxService {
 
   void douyinLogout() async {
     douyinCookie = "";
-    // 可能存在网络问题，不清空本地存储
+    LocalStorageService.instance.setValue(LocalStorageService.kDouyinCookie, "");
     douyinLogined.value = false;
     douyinName.value = "未登录";
     _updateDouyinAttr();
