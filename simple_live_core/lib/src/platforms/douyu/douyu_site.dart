@@ -122,6 +122,12 @@ class DouyuSite implements LiveSite {
     for (var item in data.cdns) {
       var url = await getPlayUrl(detail.roomId, data.rate, item);
       if (url.isNotEmpty) {
+        // if expire=300 and cdn is ws then add &expire=0
+        // user must be live in oversea
+        // cookie is better, cookie needs refreshed every 7 days
+        if(url.contains('expire=300') && url.contains('fcdn=ws')){
+          url = '$url&expire=0';
+        }
         urls.add(url);
       }
     }

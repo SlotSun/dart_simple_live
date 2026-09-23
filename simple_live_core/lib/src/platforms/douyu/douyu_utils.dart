@@ -54,7 +54,7 @@ class DouyuUtils {
   }
 
   // 用于流/登录/弹幕，暂时只需要流获取
-  static Future<String> sign(String rid, {int rate = -1, String cdn = "", String cookie = ''}) async {
+  static Future<String> sign(String rid, {int rate = -1, String cdn = "hw-h5", String cookie = ''}) async {
     var ts = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     await _encKeyUpdate(cookie: cookie);
     String randStr = _encKey["rand_str"] ?? "";
