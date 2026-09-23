@@ -14,6 +14,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:screen_brightness/screen_brightness.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/event_bus.dart';
@@ -73,6 +74,37 @@ void main(List<String> arguments) async {
   //初始化服务
   await initServices();
   await initWindow();
+
+  // Windows 上中和 screen_brightness_windows 插件的亮度回写。
+  // 该插件(2.1.2)会在窗口消息时用 DDC/CI 把内部缓存的亮度强写回显示器：
+  //   1) 失焦(WM_ACTIVATEAPP)/最小化(WM_SIZE)：有 is_auto_reset_ 守卫，
+  //      setAutoReset(false) 即可关闭；
+  //   2) 关闭(WM_CLOSE/WM_DESTROY)：无守卫，公开 API 关不掉，
+  //      导致关闭软件时亮度仍会跳回启动时读到的旧值。
+  // 不修改插件源码的前提下，利用原生 SetScreenBrightness() 对负值直接
+  // return 的守卫：直连插件方法通道发一个负百分比（platform_interface
+  // 的 0~1 范围校验只在 Dart 层，原生只校验 NaN），把插件的系统亮度
+  // 缓存置为负值，使所有回写路径全部变成空操作，显示器不再被插件写入。
+  // 注意：
+  //   - 必须与 setAutoReset(false) 配对：否则窗口恢复触发的
+  //     OnApplicationResume 会重读亮度、冲掉负值缓存，关闭场景复发；
+  //   - 负值要足够深：小量程显示器(如 0~64)上 -0.01 会被
+  //     static_cast<long> 截断成 0，关闭时会写入亮度 0 导致黑屏；
+  //   - 桌面端 App 从不读写亮度(亮度手势仅 Android/iOS/macOS 生效)，
+  //     负值缓存对现有功能无副作用；
+  //   - 通道名与各守卫已对照 screen_brightness_windows 2.1.2 源码验证，
+  //     上游修复 WM_CLOSE 守卫后可整段移除。
+  if (Platform.isWindows) {
+    try {
+      await ScreenBrightness().setAutoReset(false);
+      await const MethodChannel('github.com/aaassseee/screen_brightness')
+          .invokeMethod<void>(
+              'setSystemScreenBrightness', <String, Object?>{'brightness': -2.0});
+    } catch (e) {
+      // 中和失败不阻塞启动
+      debugPrint('screen brightness neutralize failed: $e');
+    }
+  }
 
   await MigrationService.migrateDataByVersion();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
