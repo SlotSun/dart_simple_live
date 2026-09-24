@@ -13,14 +13,14 @@ class AccountPage extends GetView<AccountController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("账号管理"),
+        title: const Text("平台配置"),
       ),
       body: ListView(
         children: [
           const Padding(
             padding: AppStyle.edgeInsetsA12,
             child: Text(
-              "哔哩哔哩账号需要登录才能看高清晰度的直播，其他平台暂无此限制。",
+              "哔哩哔哩账号/斗鱼需要登录才能看高清晰度的直播，其他平台暂无此限制。",
               textAlign: TextAlign.center,
             ),
           ),
@@ -39,16 +39,22 @@ class AccountPage extends GetView<AccountController> {
               onTap: controller.bilibiliTap,
             ),
           ),
-          ListTile(
-            leading: Image.asset(
-              'assets/images/douyu.png',
-              width: 36,
-              height: 36,
+          Obx(
+            () => ListTile(
+              leading: Image.asset(
+                'assets/images/douyu.png',
+                width: 36,
+                height: 36,
+              ),
+              title: const Text("斗鱼直播"),
+              subtitle: Text(
+                PlatformService.instance.douyuCookie.value.isEmpty ? "点击配置Cookie" : "已自定义Cookie",
+              ),
+              onTap: controller.douyuTap,
+              trailing: PlatformService.instance.douyuCookie.value.isNotEmpty
+                  ? const Icon(Icons.logout)
+                  : const Icon(Icons.chevron_right),
             ),
-            title: const Text("斗鱼直播"),
-            subtitle: const Text("无需登录"),
-            enabled: false,
-            trailing: const Icon(Icons.chevron_right),
           ),
           Obx(
             () => ListTile(

@@ -109,4 +109,38 @@ class SyncClientRequest {
       throw data["message"];
     }
   }
+
+  Future<bool> syncDouyuAccount(SyncClinet client, String cookie, String did, String ltp0) async {
+    var url = "http://${client.address}:${client.port}/sync/account/douyu";
+    var data = await HttpClient.instance.postJson(
+      url,
+      data: {
+        "cookie": cookie,
+        'dy_did': did,
+        'ltp0': ltp0,
+      },
+    );
+
+    if (data["status"]) {
+      return true;
+    } else {
+      throw data["message"];
+    }
+  }
+
+  Future<bool> syncDouyinAccount(SyncClinet client, String cookie) async {
+    var url = "http://${client.address}:${client.port}/sync/account/douyin";
+    var data = await HttpClient.instance.postJson(
+      url,
+      data: {
+        "cookie": cookie,
+      },
+    );
+
+    if (data["status"]) {
+      return true;
+    } else {
+      throw data["message"];
+    }
+  }
 }

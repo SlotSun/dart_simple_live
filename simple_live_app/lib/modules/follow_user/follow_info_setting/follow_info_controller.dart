@@ -171,24 +171,9 @@ class FollowInfoController extends BasePageController<FollowUser> {
       watchDuration: current.watchDuration,
       watchDurationSec: current.watchDurationSec,
       tag: current.tag,
-    );
-    newFollow.liveStatus.value = current.liveStatus.value;
-    // 更新标签归属
-    if (current.tag != '全部') {
-      FollowUserTag? tagObj;
-      for (final t in FollowService.instance.followTagList) {
-        if (t.tag == current.tag) {
-          tagObj = t;
-          break;
-        }
-      }
-      if (tagObj != null) {
-        // 自刷新和迁移逻辑一致：删旧增新
-        tagObj.userId.remove(current.id);
-        tagObj.userId.add(newFollow.id);
-        await FollowService.instance.updateFollowUserTag(tagObj);
-      }
-    }
+      remark: current.remark,
+      romanName: current.romanName
+    )..liveStatus.value = current.liveStatus.value;
 
     // 替换关注
     await FollowService.instance.removeFollowUser(current.id);

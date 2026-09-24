@@ -4,12 +4,12 @@ import 'dart:io';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:hive_ce_flutter/adapters.dart';
 import 'package:logger/logger.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
@@ -29,13 +29,13 @@ import 'package:simple_live_app/routes/app_pages.dart';
 import 'package:simple_live_app/routes/route_path.dart';
 import 'package:simple_live_app/services/bilibili_account_service.dart';
 import 'package:simple_live_app/services/db_service.dart';
-import 'package:simple_live_app/services/follow_block_service.dart';
-import 'package:simple_live_app/services/platform_service.dart';
 import 'package:simple_live_app/services/firebase_service.dart' as app;
+import 'package:simple_live_app/services/follow_block_service.dart';
 import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/services/history_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
 import 'package:simple_live_app/services/migration_service.dart';
+import 'package:simple_live_app/services/platform_service.dart';
 import 'package:simple_live_app/services/sync_service.dart';
 import 'package:simple_live_app/services/window_service.dart';
 import 'package:simple_live_app/src/rust/frb_generated.dart';
@@ -46,18 +46,19 @@ import 'package:window_manager/window_manager.dart';
 void main(List<String> arguments) async {
   final action = arguments.isEmpty ? null : arguments.first.toLowerCase();
   var path = (await getApplicationSupportDirectory()).path;
-  if (action == "-p" || action == "--portable") {
-    path = p.join(
-      p.dirname(Platform.resolvedExecutable),
-      'data_hive_ce',
-    );
-  } else if (action == "-h" || action == "--help") {
-    printHelp();
-    return;
-  } else if (action != null) {
-    print("未知指令: $action");
-    printHelp();
-    return;
+  if (!Platform.isAndroid && !Platform.isIOS) {
+    var pathPortable = p.join(p.dirname(Platform.resolvedExecutable), 'data_hive_ce');
+    bool dirPortableExist = await Directory(pathPortable).exists();
+    if (action == "-p" || action == "--portable" || dirPortableExist) {
+      path = pathPortable;
+    } else if (action == "-h" || action == "--help") {
+      printHelp();
+      return;
+    } else if (action != null) {
+      print("未知指令: $action");
+      printHelp();
+      return;
+    }
   }
   WidgetsFlutterBinding.ensureInitialized();
   // init-queue:
@@ -109,7 +110,9 @@ Future initServices() async {
   await Get.put(LocalStorageService()).init();
   await Get.put(DBService()).init();
   //初始化设置控制器
-  Get.put(AppSettingsController());
+  await Get.put(AppSettingsController()).onInit();
+
+  await Get.put(AppStyleSettingController()).init();
 
   await Get.put(AppStyleSettingController()).init();
 

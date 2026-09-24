@@ -42,6 +42,7 @@ class DouyinUtils {
     return newUrl.toString();
   }
 
+  // no useful
   Future<Map<String, String>> getTtwidWebid({required String reqUrl}) async {
     // 先请求以获取 ttwid 等 Cookie，再解析页面的 RENDER_DATA 获取 user_unique_id
     final headers = <String, String>{

@@ -9,6 +9,7 @@ import 'package:simple_live_app/models/sync_client_info_model.dart';
 import 'package:simple_live_app/requests/sync_client_request.dart';
 import 'package:simple_live_app/services/bilibili_account_service.dart';
 import 'package:simple_live_app/services/db_service.dart';
+import 'package:simple_live_app/services/platform_service.dart';
 import 'package:simple_live_app/services/sync_service.dart';
 
 class SyncDeviceController extends BaseController {
@@ -89,6 +90,44 @@ class SyncDeviceController extends BaseController {
 
       await request.syncBiliAccount(client, BiliBiliAccountService.instance.cookie);
       SmartDialog.showToast("已同步哔哩哔哩账号");
+    } catch (e) {
+      SmartDialog.showToast("同步失败:$e");
+      Log.logPrint(e);
+    } finally {
+      SmartDialog.dismiss();
+    }
+  }
+
+  void syncDouyuAccount() async {
+    try {
+      if (PlatformService.instance.douyuCookie.value.isNotEmpty) {
+        SmartDialog.showToast("未登录斗鱼");
+        return;
+      }
+      SmartDialog.showLoading(msg: "同步中...");
+      var cookie = PlatformService.instance.douyuCookie.value;
+      var did = PlatformService.instance.dy_did;
+      var ltp0 = PlatformService.instance.ltp0;
+      await request.syncDouyuAccount(client, cookie, did, ltp0);
+      SmartDialog.showToast("已同步斗鱼账号");
+    } catch (e) {
+      SmartDialog.showToast("同步失败:$e");
+      Log.logPrint(e);
+    } finally {
+      SmartDialog.dismiss();
+    }
+  }
+
+  void syncDouyinAccount() async {
+    try {
+      if (PlatformService.instance.douyinCookie.isEmpty) {
+        SmartDialog.showToast("未登录抖音");
+        return;
+      }
+      SmartDialog.showLoading(msg: "同步中...");
+      var cookie = PlatformService.instance.douyinCookie;
+      await request.syncDouyinAccount(client, cookie);
+      SmartDialog.showToast("已同步抖音账号");
     } catch (e) {
       SmartDialog.showToast("同步失败:$e");
       Log.logPrint(e);

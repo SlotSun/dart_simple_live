@@ -235,6 +235,18 @@ class FollowService extends GetxService {
     // 重新关注时清除墓碑标记
     follow.deleted = false;
     follow.updateTime = 0;
+
+    // 更新标签归属
+    if (follow.tag != '全部') {
+      FollowUserTag? tagObj = followTagList.firstWhereOrNull((t) => t.tag == follow.tag);
+      if (tagObj != null) {
+        // 自刷新和迁移逻辑一致：删旧增新
+        tagObj.userId.remove(follow.id);
+        tagObj.userId.add(follow.id);
+        await updateFollowUserTag(tagObj);
+      }
+    }
+
     // live_room_controller.add 已同步history
     // db.add 其实是update会直接更新数据，所以外表也应该实现此功能：有则更，无则添加
     int index = followList.indexWhere((f) => f.id == follow.id);

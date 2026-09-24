@@ -88,12 +88,49 @@ class AccountController extends GetxController {
       final cookie = await Utils.showEditTextDialog(
         "",
         title: "请输入抖音Cookie",
-        hintText: "__ac_nonce=...;__ac_signature=...;sessionid=...;",
+        hintText: "__ac_signature=...;sessionid=...;",
       );
       if (cookie == null || cookie.isEmpty) return;
       PlatformService.instance.setDouyinCookie(cookie);
       // 检查输入的cookie是否有效
       await PlatformService.instance.loadDouyinUserInfo();
+    }
+  }
+
+  void douyuTap() async {
+    if (PlatformService.instance.douyuCookie.value.isNotEmpty) {
+      var result = await Utils.showAlertDialog("确定要清除斗鱼Cookie吗？", title: "清除Cookie");
+      if (result) {
+        PlatformService.instance.douyuLogout();
+      }
+    } else {
+      final douyuParams = await Utils.showEditTextsDialog([
+        TextEditItem(
+          value: PlatformService.instance.douyuCookie.value,
+          label: 'cookie',
+          hintText: 'dy_did=...; acf_did=...;etc',
+          key: 'cookie',
+        ),
+        TextEditItem(
+          value: PlatformService.instance.dy_did,
+          label: 'dy_did',
+          hintText: '10000000000000000000000000001501',
+          key: 'dy_did',
+        ),
+        TextEditItem(
+          value: PlatformService.instance.ltp0,
+          label: 'ltp0',
+          hintText: '自动更新cookie',
+          obscureText: true,
+          key: 'ltp0',
+        ),
+      ], title: '请输入斗鱼各项参数');
+      if (douyuParams == null || douyuParams.isEmpty) return;
+      var dyCookie = douyuParams['cookie']??'';
+      var dyDid = douyuParams['dy_did']??'';
+      var dyLtp0 = douyuParams['ltp0']??'';
+      PlatformService.instance.setDouyuCookie(dyCookie);
+      await PlatformService.instance.setDouyuDidAndLtp0(dyDid, dyLtp0);
     }
   }
 }

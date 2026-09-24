@@ -6,8 +6,7 @@ mixin HuyaRequestParams {
 
 // regex
   /// 匹配房间数据
-  static const String ROOM_DATA_REGEX =
-      r'var\s+TT_ROOM_DATA\s*=\s*(\{[\s\S]*?\})';
+  static const String ROOM_DATA_REGEX = r'var\s+TT_ROOM_DATA\s*=\s*(\{[\s\S]*?\})';
 
   /// 匹配流数据
   static const String STREAM_REGEX = r"stream:\s*(\{[\s\S]*?\n\s*\})";
@@ -15,8 +14,7 @@ mixin HuyaRequestParams {
   /// 匹配 YY ID
   static const String AYYUID_REGEX = r'"yyid":"?(\d+)"?';
 
-  static String HYSDK_UA =
-      "HYSDK(Windows,30000002)_APP(pc_exe&7100004&official)_SDK(trans&2.40.0.6448)";
+  static String HYSDK_UA = "HYSDK(Windows,30000002)_APP(pc_exe&7100004&official)_SDK(trans&2.40.0.6448)";
 
   static Map<String, String> get requestHeaders {
     return {

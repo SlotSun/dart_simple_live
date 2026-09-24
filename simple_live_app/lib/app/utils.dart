@@ -281,6 +281,77 @@ class Utils {
     return result;
   }
 
+  /// 多行文本编辑的弹窗
+  /// - `items` 文本项配置
+  /// - `title` 弹窗标题
+  /// - `confirm` 确认按钮内容
+  /// - `cancel` 取消按钮内容
+  static Future<Map<String, String>?> showEditTextsDialog(
+    List<TextEditItem> items, {
+    String title = '',
+    String confirm = '',
+    String cancel = '',
+  }) async {
+    final controllers = items.map((item) => TextEditingController(text: item.value)).toList();
+    final result = await Get.dialog<Map<String, String>>(
+      AlertDialog(
+        title: Text(title),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (int i = 0; i < items.length; i++) ...[
+                if (i > 0) const SizedBox(height: 12),
+                TextField(
+                  controller: controllers[i],
+                  autofocus: i == 0,
+                  obscureText: items[i].obscureText,
+                  keyboardType: items[i].keyboardType,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    contentPadding: AppStyle.edgeInsetsA12,
+                    labelText: items[i].label,
+                    hintText: items[i].hintText,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: Get.back,
+            child: Text(
+              cancel.isEmpty ? '取消' : cancel,
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              for (int i = 0; i < items.length; i++) {
+                final validate = items[i].validate;
+                if (validate != null && !validate(controllers[i].text)) {
+                  return;
+                }
+              }
+              Get.back(
+                result: {
+                  for (int i = 0; i < items.length; i++) items[i].key: controllers[i].text,
+                },
+              );
+            },
+            child: Text(
+              confirm.isEmpty ? '确定' : confirm,
+            ),
+          ),
+        ],
+      ),
+    );
+    for (final controller in controllers) {
+      controller.dispose();
+    }
+    return result;
+  }
+
   static Future<T?> showOptionDialog<T>(
     List<T> contents,
     T value, {
@@ -612,4 +683,24 @@ class Utils {
     var clamped = result.clamp(minSize, maxSize);
     return clamped.roundToDouble();
   }
+}
+
+class TextEditItem {
+  final String key;
+  final String value;
+  final String? label;
+  final String? hintText;
+  final TextValidate? validate;
+  final bool obscureText;
+  final TextInputType? keyboardType;
+
+  const TextEditItem({
+    required this.key,
+    this.value = '',
+    this.label,
+    this.hintText,
+    this.validate,
+    this.obscureText = false,
+    this.keyboardType,
+  });
 }

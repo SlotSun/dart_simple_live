@@ -13,7 +13,7 @@ jobs:
 
     steps:
       # 签出代码
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       # APK 签名设置
       - name: Download Android keystore
@@ -43,7 +43,7 @@ jobs:
 
       # 设置 Flutter
       - name: Flutter action
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@v2.16.0
         with:
           channel: stable
           flutter-version-file: simple_live_app/pubspec.yaml
@@ -63,7 +63,7 @@ jobs:
 
       # 上传 APK 至 Artifacts
       - name: Upload APK to Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: android
           path: |
@@ -111,7 +111,7 @@ jobs:
       contents: write
     steps:
       # 签出代码
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # 设置 Flutter 环境
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -162,7 +162,7 @@ jobs:
           mv simple_live_app-*-linux.zip Slive-${{ matrix.arch }}-linux.zip
       # 上传 Linux 包至 Artifacts
       - name: Upload Linux APP to Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: linux-${{ matrix.arch }}
           path: |
@@ -201,14 +201,14 @@ jobs:
       contents: write
     steps:
       # 签出代码
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # 设置 Flutter 环境
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version-file: simple_live_app/pubspec.yaml
           cache: true
-          channel: "stable"
+          channel: stable
       - name: Enable Flutter Desktop
         run: flutter config --enable-windows-desktop
       - name: Restore Packages
@@ -242,7 +242,7 @@ jobs:
         shell: pwsh
       # 上传 Windows 至 Artifacts
       - name: Upload Windows APP to Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: windows
           path: |
@@ -291,7 +291,7 @@ jobs:
       contents: write
     steps:
       # 签出代码
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # 安装依赖
       - name: Install dependencies
         run: |
@@ -315,7 +315,7 @@ jobs:
 
       # 上传 Flatpak 包至 Artifacts
       - name: Upload linux flatpak to artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: linux-flatpak-${{ matrix.arch }}
           path: Slive-*.flatpak
