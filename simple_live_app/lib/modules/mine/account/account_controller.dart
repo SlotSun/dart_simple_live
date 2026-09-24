@@ -104,13 +104,33 @@ class AccountController extends GetxController {
         PlatformService.instance.douyuLogout();
       }
     } else {
-      final cookie = await Utils.showEditTextDialog(
-        "",
-        title: "请输入斗鱼Cookie",
-        hintText: "dy_did=...; acf_did=...;etc",
-      );
-      if (cookie == null || cookie.isEmpty) return;
-      PlatformService.instance.setDouyuCookie(cookie);
+      final douyuParams = await Utils.showEditTextsDialog([
+        TextEditItem(
+          value: PlatformService.instance.douyuCookie.value,
+          label: 'cookie',
+          hintText: 'dy_did=...; acf_did=...;etc',
+          key: 'cookie',
+        ),
+        TextEditItem(
+          value: PlatformService.instance.dy_did,
+          label: 'dy_did',
+          hintText: '10000000000000000000000000001501',
+          key: 'dy_did',
+        ),
+        TextEditItem(
+          value: PlatformService.instance.ltp0,
+          label: 'ltp0',
+          hintText: '自动更新cookie',
+          obscureText: true,
+          key: 'ltp0',
+        ),
+      ], title: '请输入斗鱼各项参数');
+      if (douyuParams == null || douyuParams.isEmpty) return;
+      var dyCookie = douyuParams['cookie']??'';
+      var dyDid = douyuParams['dy_did']??'';
+      var dyLtp0 = douyuParams['ltp0']??'';
+      PlatformService.instance.setDouyuCookie(dyCookie);
+      await PlatformService.instance.setDouyuDidAndLtp0(dyDid, dyLtp0);
     }
   }
 }

@@ -161,4 +161,37 @@ class HttpClient {
       }
     }
   }
+  /// get请求，返回Response
+  /// * [url] 请求链接
+  /// * [queryParameters] 请求参数
+  /// * [cancel] 任务取消Token
+  /// * [followRedirects] 是否允许跳转
+  Future<Response<T>> getResponse<T>(
+      String url, {
+        Map<String, dynamic>? queryParameters,
+        Map<String, dynamic>? header,
+        bool? followRedirects,
+        CancelToken? cancel,
+        ResponseType responseType = ResponseType.plain,
+      }) async {
+    try {
+      return await dio.get<T>(
+        url,
+        queryParameters: queryParameters,
+        options: Options(
+          followRedirects: followRedirects,
+          responseType: responseType,
+          headers: header,
+          validateStatus: (s) => s != null && s >= 200 && s < 400,
+        ),
+        cancelToken: cancel,
+      );
+    } catch (e) {
+      if (e is DioException && e.type == DioExceptionType.badResponse) {
+        throw CoreError(e.message ?? "", statusCode: e.response?.statusCode ?? 0);
+      } else {
+        throw CoreError("发送GET请求失败");
+      }
+    }
+  }
 }

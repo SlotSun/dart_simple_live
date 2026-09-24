@@ -37,7 +37,7 @@ class UserAccountCookieSyncResource implements SyncResource<Map<String, String?>
       BiliBiliAccountService.instance.loadUserInfo();
     }
     if (data['douyin_cookie'] != null) {
-      PlatformService.instance.setDouyuCookie(data['douyin_cookie']!);
+      PlatformService.instance.setDouyinCookie(data['douyin_cookie']!);
     }
     if (data['douyu_cookie'] != null) {
       PlatformService.instance.setDouyuCookie(data['douyu_cookie']!);

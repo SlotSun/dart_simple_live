@@ -16,6 +16,10 @@ class DouyuSite implements LiveSite {
 
   String _cookie = '';
 
+  String _dy_did = '';
+
+  String _ltp0 = '';
+
   @override
   LiveDanmaku getDanmaku() => DouyuDanmaku();
 
@@ -322,6 +326,12 @@ class DouyuSite implements LiveSite {
       {required String roomId}) {
     //尚不支持
     return Future.value([]);
+  }
+
+  Future<String> refreshCookie(String dy_did, String ltp0) async {
+    var newCookie = await DouyuUtils.refreshCookie(did: dy_did, ltp0: ltp0, cookie: _cookie);
+    _cookie = newCookie;
+    return newCookie;
   }
 
   @override
