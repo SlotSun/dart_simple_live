@@ -68,7 +68,9 @@ dependencies:
   permission_handler_android: ^14.0.0
   permission_handler_platform_interface: ^4.4.0
   flutter_image_gallery_saver: ^2.0.0 # 图片保存到相册
-  screen_brightness: ^2.1.7 # 亮度控制
+  screen_brightness_android: ^2.1.3
+  screen_brightness_ios: ^2.1.2
+  screen_brightness_platform_interface: ^2.1.0 #亮度控制
   auto_orientation_v2: 2.3.8 # 屏幕方向
   wakelock_plus: ^1.3.3 # 屏幕常亮
   file_picker: ^11.0.3 # 文件选择

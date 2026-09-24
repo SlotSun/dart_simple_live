@@ -16,7 +16,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/services/window_service.dart';
 import 'package:volume_controller/volume_controller.dart';
-import 'package:screen_brightness/screen_brightness.dart';
+import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/app/custom_throttle.dart';
@@ -263,7 +263,6 @@ mixin PlayerDanmakuMixin on PlayerStateMixin {
 }
 mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
   final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  final screenBrightness = ScreenBrightness();
   final VolumeController volumeController = VolumeController.instance;
   final pip = Floating();
   StreamSubscription<PiPStatus>? _pipSubscription;
@@ -294,7 +293,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
     if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
       // 亮度重置,桌面平台可能会报错,暂时不处理桌面平台的亮度
       try {
-        await screenBrightness.resetApplicationScreenBrightness();
+        await ScreenBrightnessPlatform.instance.resetApplicationScreenBrightness();
       } catch (e) {
         Log.logPrint(e);
       }
@@ -612,7 +611,7 @@ mixin PlayerGestureControlMixin on PlayerStateMixin, PlayerMixin, PlayerSystemMi
       _currentVolume = await volumeController.getVolume();
     }
     if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
-      _currentBrightness = await screenBrightness.application;
+      _currentBrightness = await ScreenBrightnessPlatform.instance.application;
     }
   }
 
@@ -689,7 +688,7 @@ mixin PlayerGestureControlMixin on PlayerStateMixin, PlayerMixin, PlayerSystemMi
       if (seek < 0) {
         seek = 0;
       }
-      screenBrightness.setApplicationScreenBrightness(seek);
+      ScreenBrightnessPlatform.instance.setApplicationScreenBrightness(seek);
 
       gestureTipText.value = "亮度 ${(seek * 100).toInt()}%";
       Log.logPrint(value);
@@ -700,7 +699,7 @@ mixin PlayerGestureControlMixin on PlayerStateMixin, PlayerMixin, PlayerSystemMi
         seek = 1;
       }
 
-      screenBrightness.setApplicationScreenBrightness(seek);
+      ScreenBrightnessPlatform.instance.setApplicationScreenBrightness(seek);
       gestureTipText.value = "亮度 ${(seek * 100).toInt()}%";
       Log.logPrint(value);
     }
