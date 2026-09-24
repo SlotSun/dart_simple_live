@@ -63,6 +63,24 @@ class SyncDevicePage extends GetView<SyncDeviceController> {
                     controller.syncBiliAccount();
                   },
                 ),
+                AppStyle.divider,
+                ListTile(
+                  leading: const Icon(Remix.account_circle_line),
+                  title: const Text("同步斗鱼账号"),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    controller.syncDouyuAccount();
+                  },
+                ),
+                AppStyle.divider,
+                ListTile(
+                  leading: const Icon(Remix.tiktok_line),
+                  title: const Text("同步抖音账号"),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    controller.syncDouyinAccount();
+                  },
+                ),
               ],
             ),
           ),
