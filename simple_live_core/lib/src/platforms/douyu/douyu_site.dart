@@ -14,6 +14,12 @@ class DouyuSite implements LiveSite {
   @override
   String name = "斗鱼直播";
 
+  String _cookie = '';
+
+  String _dy_did = '';
+
+  String _ltp0 = '';
+
   @override
   LiveDanmaku getDanmaku() => DouyuDanmaku();
 
@@ -76,22 +82,14 @@ class DouyuSite implements LiveSite {
   }
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualites(
-      {required LiveRoomDetail detail}) async {
-    var data = await DouyuUtils.sign(detail.roomId);
+  Future<List<LivePlayQuality>> getPlayQualites({required LiveRoomDetail detail}) async {
+    var data = await DouyuUtils.sign(detail.roomId, cookie: _cookie);
     List<LivePlayQuality> qualities = [];
     var result = await HttpClient.instance.postJson(
       "https://www.douyu.com/lapi/live/getH5PlayV1/${detail.roomId}",
       data: data,
       formUrlEncoded: true,
-        header: {
-          'accept':
-          'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'accept-encoding': "gzip, deflate",
-          'accept-language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3',
-          'user-agent':
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43"
-        }
+      header: DouyuUtils.requestHeader(roomId: detail.roomId, cookie: _cookie),
     );
 
     var cdns = <String>[];
@@ -128,6 +126,12 @@ class DouyuSite implements LiveSite {
     for (var item in data.cdns) {
       var url = await getPlayUrl(detail.roomId, data.rate, item);
       if (url.isNotEmpty) {
+        // if expire=300 and cdn is ws then add &expire=0
+        // user must be live in oversea
+        // cookie is better, cookie needs refreshed every 7 days
+        if(url.contains('expire=300') && url.contains('fcdn=ws')){
+          url = '$url&expire=0';
+        }
         urls.add(url);
       }
     }
@@ -135,19 +139,13 @@ class DouyuSite implements LiveSite {
   }
 
   Future<String> getPlayUrl(String roomId, int rate, String cdn) async {
-    var sign = await DouyuUtils.sign(roomId, rate: rate, cdn: cdn);
+    var sign = await DouyuUtils.sign(roomId, rate: rate, cdn: cdn, cookie: _cookie);
     var result = await HttpClient.instance.postJson(
-        "https://www.douyu.com/lapi/live/getH5PlayV1/$roomId",
-        data: sign,
-        formUrlEncoded: true,
-        header: {
-          'accept':
-              'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'accept-encoding': "gzip, deflate",
-          'accept-language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3',
-          'user-agent':
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43"
-        });
+      "https://www.douyu.com/lapi/live/getH5PlayV1/$roomId",
+      data: sign,
+      formUrlEncoded: true,
+      header: DouyuUtils.requestHeader(roomId: roomId, cookie: _cookie),
+    );
 
     return "${result["data"]["rtmp_url"]}/${HtmlUnescape().convert(result["data"]["rtmp_live"].toString())}";
   }
@@ -328,6 +326,19 @@ class DouyuSite implements LiveSite {
       {required String roomId}) {
     //尚不支持
     return Future.value([]);
+  }
+
+  Future<String> refreshCookie(String dy_did, String ltp0) async {
+    var newCookie = await DouyuUtils.refreshCookie(did: dy_did, ltp0: ltp0, cookie: _cookie);
+    _cookie = newCookie;
+    return newCookie;
+  }
+
+  @override
+  Future<void> setSiteAttrs(Map<String, dynamic> data) async {
+    if(data.containsKey('cookie')){
+      _cookie = data['cookie'] as String;
+    }
   }
 }
 

@@ -87,4 +87,9 @@ class LiveSite {
       {required String roomId}) {
     return Future.value([]);
   }
+
+  /// 配置站点参数，包括不限于 cookie/ua
+  void setSiteAttrs(Map<String, dynamic> data){
+  }
+
 }

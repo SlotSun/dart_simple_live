@@ -306,4 +306,10 @@ class TwitchSite implements LiveSite {
   Future<LiveSearchRoomResult> searchRooms(String keyword, {int page = 1}) {
     throw Exception("twitch暂不支持搜索房间");
   }
+
+  @override
+  Future<void> setSiteAttrs(Map<String, dynamic> data) {
+    // TODO: implement setSiteAttrs
+    throw UnimplementedError();
+  }
 }
