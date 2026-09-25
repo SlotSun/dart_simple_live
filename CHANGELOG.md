@@ -6,6 +6,11 @@ Format: Each version section starts with `## x.x.x`, followed by change lines st
 
 ---
 
+## 1.8.14
+
+- fix: 进一步修正douyu断流问题
+- tips: ios和macos用户请到action更新测试或者下载上游仓库版本
+
 ## 1.8.13
 
 - feat: 支持自定义数据目录 (data_hive_ce) #174

@@ -1,7 +1,7 @@
 {
-    "version": "1.8.13",
-    "version_num": 10813,
-    "version_desc": "- feat: 支持自定义数据目录 (data_hive_ce) #174 \n- fix: douyu, 需要在配置douyu参数 说明 #182 \n- fix: 统一关注业务逻辑，修复tag数据混乱 #178 \n- fix: Windows屏幕亮度重置问题 #180 \n- 一些数据错误和潜在问题的修复 \n- 一些细节调整 \n- 关于linux的一系列修复 @pugaizai \n- tips: ios和macos用户请到action更新测试或者下载上游仓库版本",
+    "version": "1.8.14",
+    "version_num": 10814,
+    "version_desc": "- fix: 进一步修正douyu断流问题 \n- tips: ios和macos用户请到action更新测试或者下载上游仓库版本",
     "prerelease": false,
     "download_url": "https://github.com/SlotSun/dart_simple_live/releases"
 }

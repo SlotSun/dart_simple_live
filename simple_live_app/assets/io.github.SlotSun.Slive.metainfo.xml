@@ -39,34 +39,9 @@
     </screenshot>
   </screenshots>
   <releases>
-    <release version="1.8.13" date="2026-09-24">
+    <release version="1.8.14" date="2026-09-25">
       <description>
-        <p>feat: 支持自定义数据目录 (data_hive_ce) #174</p>
-        <p>fix: douyu, 需要在配置douyu参数 说明 #182</p>
-        <p>fix: 统一关注业务逻辑，修复tag数据混乱 #178</p>
-        <p>fix: Windows屏幕亮度重置问题 #180</p>
-        <p>一些数据错误和潜在问题的修复</p>
-        <p>一些细节调整</p>
-        <p>关于linux的一系列修复 @pugaizai</p>
-        <p>tips: ios和macos用户请到action更新测试或者下载上游仓库版本</p>
-      </description>
-    </release>
-
-    <release version="1.8.12" date="2026-09-24">
-      <description>
-        <p>基于v10811的热修版本：aur 以及 部分ui修复 #173</p>
-        <p>feat: 允许按tag排序</p>
-        <p>feat: 自由画面尺寸功能 #156</p>
-        <p>feat: windows NVIDIA RTX VSR @ZhaiXB</p>
-        <p>feat: 房间专属屏蔽词和屏蔽用户</p>
-        <p>feat: PC端小窗记忆/开屏最大化</p>
-        <p>feat: 弹幕随屏幕尺寸放缩</p>
-        <p>feat: 允许禁用滑动调节亮度/音量</p>
-        <p>feat: pc端参数启动应用</p>
-        <p>fix: huya弹幕完整性</p>
-        <p>一些数据错误和潜在问题的修复</p>
-        <p>一些细节调整</p>
-        <p>关于linux的一系列修复 @pugaizai</p>
+        <p>fix: 进一步修正douyu断流问题</p>
         <p>tips: ios和macos用户请到action更新测试或者下载上游仓库版本</p>
       </description>
     </release>
