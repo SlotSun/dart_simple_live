@@ -118,7 +118,7 @@ class AccountController extends GetxController {
           key: 'dy_did',
         ),
         TextEditItem(
-          value: PlatformService.instance.ltp0,
+          value: PlatformService.instance.dyLtp0,
           label: 'ltp0',
           hintText: '自动更新cookie',
           obscureText: true,

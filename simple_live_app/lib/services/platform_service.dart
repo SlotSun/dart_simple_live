@@ -124,14 +124,14 @@ class PlatformService extends GetxService {
   // ==================== 斗鱼 ====================
 
   var douyuCookie = ''.obs;
-  var ltp0 = '';
+  var dyLtp0 = '';
   var dy_did = '';
   final _douyuSite = (Sites.allSites[Constant.kDouyu]!.liveSite as DouyuSite);
 
   void _initDouyu() {
     douyuCookie.value = LocalStorageService.instance.getValue(LocalStorageService.kDouyuCookie, "");
     dy_did = LocalStorageService.instance.getValue(LocalStorageService.kDouyuDyDid, "");
-    ltp0 = LocalStorageService.instance.getValue(LocalStorageService.kDouyuLTP0, "");
+    dyLtp0 = LocalStorageService.instance.getValue(LocalStorageService.kDouyuLTP0, "");
     // set and refresh
     _updateDouyuAttr();
     _refreshDouyuCookie();
@@ -152,7 +152,7 @@ class PlatformService extends GetxService {
       LocalStorageService.instance.setValue(LocalStorageService.kDouyuDyDid, dy_did);
     }
     if(ltp0.isNotEmpty){
-      ltp0 = ltp0;
+      dyLtp0 = ltp0;
       LocalStorageService.instance.setValue(LocalStorageService.kDouyuLTP0, ltp0);
     }
     // set and refresh
@@ -162,13 +162,17 @@ class PlatformService extends GetxService {
   // 无论如何 都应检查cookie有效性后再保存
   // logic: 有效则不变，无效且配置did&ltp0并保存
   Future<void> _refreshDouyuCookie() async {
-    var cookie = await _douyuSite.refreshCookie(dy_did, ltp0);
+    var cookie = await _douyuSite.refreshCookie(dy_did, dyLtp0);
     setDouyuCookie(cookie);
   }
 
   void douyuLogout() async {
     douyuCookie.value = "";
     LocalStorageService.instance.setValue(LocalStorageService.kDouyuCookie, "");
+    dy_did = "";
+    LocalStorageService.instance.setValue(LocalStorageService.kDouyuDyDid, "");
+    dyLtp0 = "";
+    LocalStorageService.instance.setValue(LocalStorageService.kDouyuLTP0, "");
     _updateDouyuAttr();
     if (Platform.isAndroid || Platform.isIOS) {
       CookieManager cookieManager = CookieManager.instance();

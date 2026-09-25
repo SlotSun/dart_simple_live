@@ -114,8 +114,6 @@ Future initServices() async {
 
   await Get.put(AppStyleSettingController()).init();
 
-  await Get.put(AppStyleSettingController()).init();
-
   Get.put(BiliBiliAccountService());
 
   Get.put(PlatformService());

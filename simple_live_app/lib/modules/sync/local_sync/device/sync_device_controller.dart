@@ -107,7 +107,7 @@ class SyncDeviceController extends BaseController {
       SmartDialog.showLoading(msg: "同步中...");
       var cookie = PlatformService.instance.douyuCookie.value;
       var did = PlatformService.instance.dy_did;
-      var ltp0 = PlatformService.instance.ltp0;
+      var ltp0 = PlatformService.instance.dyLtp0;
       await request.syncDouyuAccount(client, cookie, did, ltp0);
       SmartDialog.showToast("已同步斗鱼账号");
     } catch (e) {
