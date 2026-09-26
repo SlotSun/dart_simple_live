@@ -65,6 +65,14 @@ class UserAccountCookieSyncResource implements SyncResource<Map<String, String?>
 
   @override
   Map<String, String?> merge(Map<String, String?> local, Map<String, String?> remote) {
-    return {...local, ...remote};
+    final result = <String, String?>{};
+    final keys = {...local.keys, ...remote.keys};
+    for (final key in keys) {
+      final localValue = local[key];
+      final remoteValue = remote[key];
+      // 本地有值就用本地，否则用远程
+      result[key] = (localValue != null && localValue.isNotEmpty) ? localValue : remoteValue;
+    }
+    return result;
   }
 }
