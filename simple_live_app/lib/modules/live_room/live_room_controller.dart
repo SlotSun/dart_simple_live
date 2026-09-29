@@ -20,6 +20,7 @@ import 'package:simple_live_app/app/utils/sandbox.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_block.dart';
 import 'package:simple_live_app/models/db/history.dart';
+import 'package:simple_live_app/modules/live_room/player/danmaku_emoticon.dart';
 import 'package:simple_live_app/modules/live_room/player/player_controller.dart';
 import 'package:simple_live_app/modules/settings/danmu_settings_page.dart';
 import 'package:simple_live_app/services/db_service.dart';
@@ -210,6 +211,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
                   msg.color.g,
                   msg.color.b,
                 ),
+                // 表情包（目前仅 B 站下发）：交给渲染层把 [占位符] 换成图片
+                extra: msg.emoticons,
               ))
           .toList());
     } finally {
@@ -364,6 +367,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
               msg.color.g,
               msg.color.b,
             ),
+            // 表情包（目前仅 B 站下发）：交给渲染层把 [占位符] 换成图片
+            extra: msg.emoticons,
           ),
         ]);
       }
@@ -1204,6 +1209,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     messages.clear();
     superChats.clear();
     danmakuController?.clear();
+    // 表情包是分房间下发的，换房间后上一个房间的合成位图没有复用价值
+    DanmakuEmoticonRenderer.clearCache();
 
     // 重新设置LiveDanmaku
     liveDanmaku = site.liveSite.getDanmaku();
@@ -1260,6 +1267,9 @@ ${error?.stackTrace}''');
 
     liveDanmaku.stop();
     danmakuController = null;
+    // 直接退出直播间不经过 resetRoom，这里补一次：表情是分房间下发的，
+    // 留在静态缓存里的源图句柄与合成位图出房间后就没有复用价值了。
+    DanmakuEmoticonRenderer.clearCache();
     rustDanmakuMask.dispose();
     super.onClose();
   }

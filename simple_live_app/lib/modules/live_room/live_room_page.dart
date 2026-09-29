@@ -10,6 +10,7 @@ import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
+import 'package:simple_live_app/modules/live_room/chat_emoticon_span.dart';
 import 'package:simple_live_app/modules/live_room/live_room_controller.dart';
 import 'package:simple_live_app/modules/live_room/player/player_controls.dart';
 import 'package:simple_live_app/services/follow_service.dart';
@@ -478,9 +479,9 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                           ),
                           padding: AppStyle.edgeInsetsA12,
                           itemCount: controller.messages.length,
-                          itemBuilder: (_, i) {
+                          itemBuilder: (context, i) {
                             var item = controller.messages[i];
-                            return buildMessageItem(item);
+                            return buildMessageItem(item, context);
                           },
                         ),
                         Visibility(
@@ -513,7 +514,7 @@ class LiveRoomPage extends GetView<LiveRoomController> {
     );
   }
 
-  Widget buildMessageItem(LiveMessage message) {
+  Widget buildMessageItem(LiveMessage message, BuildContext context) {
     if (message.userName == "LiveSysMessage") {
       return Obx(
         () => SelectableText(
@@ -551,14 +552,13 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                           color: Colors.grey,
                           fontSize: AppSettingsController.instance.chatTextSize.value,
                         ),
-                        children: [
-                          TextSpan(
-                            text: message.message,
-                            style: TextStyle(
-                              color: Get.isDarkMode ? Colors.white : AppColors.black333,
-                            ),
-                          )
-                        ],
+                        children: buildChatMessageSpans(
+                          context,
+                          message,
+                          TextStyle(
+                            color: Get.isDarkMode ? Colors.white : AppColors.black333,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -572,14 +572,13 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                   color: Colors.grey,
                   fontSize: AppSettingsController.instance.chatTextSize.value,
                 ),
-                children: [
-                  TextSpan(
-                    text: message.message,
-                    style: TextStyle(
-                      color: Get.isDarkMode ? Colors.white : AppColors.black333,
-                    ),
-                  )
-                ],
+                children: buildChatMessageSpans(
+                  context,
+                  message,
+                  TextStyle(
+                    color: Get.isDarkMode ? Colors.white : AppColors.black333,
+                  ),
+                ),
               ),
               contextMenuBuilder: _contextMenuBuilder,
             ),
