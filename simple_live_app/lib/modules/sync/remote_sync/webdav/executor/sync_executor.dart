@@ -20,13 +20,7 @@ class SyncExecutor {
 
   SyncExecutor._();
 
-  final List<SyncResource> _resources = [
-    FollowSyncResource(),
-    HistorySyncResource(),
-    BlockwordsSyncResource(),
-    UserAccountCookieSyncResource(),
-    SettingsSyncResource(),
-    FollowBlockSyncResource(),
+  List<SyncResource> _resources = [
   ];
 
   void buildExecutorAttr(
@@ -38,14 +32,14 @@ class SyncExecutor {
     bool isSyncSetting = true,
   }) {
     _davClient = davClient;
-    _resources.addAll([
+    _resources = [
       if (isSyncFollows) FollowSyncResource(),
       if (isSyncHistories) HistorySyncResource(),
       if (isSyncBlockWord) BlockwordsSyncResource(),
       if (isSyncAccount) UserAccountCookieSyncResource(),
       if (isSyncSetting) SettingsSyncResource(),
       FollowBlockSyncResource(),
-    ]);
+    ]; // 整体替换 防止单例无限add, fuck ai
   }
 
   // fetch -> local-> remote -> select sync-mode
