@@ -92,6 +92,50 @@ flutter latest
 
 [biliup](https://github.com/biliup/biliup)
 
+## CONTRIBUTORS
+<!-- CONTRIBUTORS:START -->
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/xiaoyaocz">
+        <img src="https://github.com/xiaoyaocz.png" width="60px;" alt="xiaoyaocz"/>
+        <br />
+        <sub><b>xiaoyaocz</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/pugaizai">
+        <img src="https://github.com/pugaizai.png" width="60px;" alt="pugaizai"/>
+        <br />
+        <sub><b>pugaizai</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/GH4NG">
+        <img src="https://github.com/GH4NG.png" width="60px;" alt="GH4NG"/>
+        <br />
+        <sub><b>GH4NG</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/ZhaiXB">
+        <img src="https://github.com/ZhaiXB.png" width="60px;" alt="ZhaiXB"/>
+        <br />
+        <sub><b>ZhaiXB</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/gaoxing64">
+        <img src="https://github.com/gaoxing64.png" width="60px;" alt="gaoxing64"/>
+        <br />
+        <sub><b>gaoxing64</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
+
+<!-- CONTRIBUTORS:END -->
+
 ## 声明
 
 本项目的所有功能都是基于互联网上公开的资料开发，无任何破解、逆向工程等行为。
