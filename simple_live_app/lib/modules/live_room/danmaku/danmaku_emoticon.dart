@@ -115,10 +115,6 @@ class DanmakuEmoticonBitmap {
 /// 在途结果又落回静态缓存」，要等到下一次进/出房间才被清掉。
 int _cacheGeneration = 0;
 
-/// 大表情显示高度的逻辑像素上限，挡异常载荷（如 height=10000）一次申请
-/// 数百 MB 级的合成位图；正常大表情（÷dpr 后约几十到一百多）远够不到。
-const double kMaxEmoteLogicalHeight = 240.0;
-
 /// 表情宽高比的安全区间，挡极端比例的载荷把消息行 / 弹幕位图撑爆
 const double kMinEmoteAspectRatio = 0.25;
 const double kMaxEmoteAspectRatio = 4.0;
@@ -127,17 +123,32 @@ const double kMaxEmoteAspectRatio = 4.0;
 /// 口径与 PiliNara 一致。
 const double kUpowerEmotePhysicalPx = 162.0;
 
+/// 表情显示高度的绝对兜底上限（逻辑像素）。
+///
+/// 正常情况下限由调用方按「最多占两个轨道 / 两行」给（见 [emoteDisplayHeight] 的
+/// `maxHeight`），这里只防异常载荷把位图撑到几百像素。
+const double kMaxEmoteLogicalHeight = 240.0;
+
+/// 表情最多占多少个轨道 / 多少行。
+///
+/// 上游的要求：大表情再大也不许超过两行，否则弹幕密集时会把画面挡得太多。
+const double kMaxEmoteLines = 2.0;
+
 /// 表情的显示高度，聊天区与弹幕渲染器共用这一份**大表情**口径。
 ///
 /// 行内小表情不经过这里：聊天区是 `fontSize * 1.2`、弹幕区是
 /// `min(fontSize * 1.25, 行高)`，两处历来就不同，各自保留。
-/// 大表情服务端下发的是**物理像素**，换回逻辑像素后明显大于单行行高，
-/// 即「占两行」的效果：official 系再放大 1.25，upower 系用固定边长，
-/// 服务端没给尺寸时兜底两行；最后统一夹在 [kMaxEmoteLogicalHeight] 内。
+/// 大表情服务端下发的是**物理像素**，换回逻辑像素后大于单行行高：official 系再放大
+/// 1.25，upower 系用固定边长，服务端没给尺寸时兜底两行。
+///
+/// [maxHeight] 是这一处允许占多少行/轨道（弹幕区传两个轨道高、聊天区传两行高），
+/// 上游明确要求大表情最多占 [kMaxEmoteLines] 行，不许霸屏；没传时只用
+/// [kMaxEmoteLogicalHeight] 这个绝对兜底。
 double emoteDisplayHeight(
   LiveMessageEmoticon emoticon, {
   required double fontSize,
   required double dpr,
+  double? maxHeight,
 }) {
   if (!emoticon.large) {
     return fontSize * 1.2;
@@ -148,16 +159,18 @@ double emoteDisplayHeight(
   } else {
     final serverHeight = emoticon.height?.toDouble();
     if (serverHeight == null || serverHeight <= 0) {
-      raw = fontSize * 2.4;
+      raw = fontSize * 1.2 * kMaxEmoteLines;
     } else {
       raw = serverHeight / dpr * (emoticon.isOfficial ? 1.25 : 1.0);
     }
   }
-  // 下界也要夹进上界内：fontSize 来自持久化设置，脏数据把它撑到 200+ 时下界会
+  // 下界也要夹进上界内：fontSize 来自持久化设置，脏数据把它撑到极大时下界会
   // 反超上界，`num.clamp` 直接抛 ArgumentError；聊天区是在 build 里同步调它，
   // 异常会打断整帧渲染。
-  final minHeight = math.min(fontSize * 1.2, kMaxEmoteLogicalHeight);
-  return raw.clamp(minHeight, kMaxEmoteLogicalHeight);
+  final ceiling = maxHeight == null
+      ? kMaxEmoteLogicalHeight
+      : math.min(maxHeight, kMaxEmoteLogicalHeight);
+  return raw.clamp(math.min(fontSize * 1.2, ceiling), ceiling);
 }
 
 /// 表情的宽高比，夹在安全区间内（服务端比例极端时不撑爆行宽）
@@ -184,9 +197,11 @@ double emoteAspectRatio(LiveMessageEmoticon emoticon, double fallbackRatio) {
 ///
 /// **尺寸与透明度**：行内小表情的高度跟随弹幕字号（`fontSize * 1.25`，不超过
 /// 行高），调大弹幕字号时表情同步变大；大表情（[LiveMessageEmoticon.large]）按
-/// 服务端物理像素换回逻辑像素（见 [emoteDisplayHeight]），整条位图随之变高，
-/// 弹幕库按 `item.height` 给它让出对应轨道。透明度不用单独处理 —— 弹幕库把整层
-/// 包在 `Opacity(option.opacity)` 里，表情天然跟着一起变透明。
+/// 服务端物理像素换回逻辑像素，最多占 [kMaxEmoteLines] 个轨道高（见
+/// [emoteDisplayHeight]）。弹幕库的滚动轨道是等高网格、排轨不认单条 `item.height`，
+/// 所以超过一行的大表情会与相邻轨道重叠，这是上游确认接受的取舍。
+/// 透明度不用单独处理 —— 弹幕库把整层包在 `Opacity(option.opacity)` 里，
+/// 表情天然跟着一起变透明。
 class DanmakuEmoticonRenderer {
   DanmakuEmoticonRenderer._();
 
@@ -415,13 +430,15 @@ class DanmakuEmoticonRenderer {
           if (placedAny) {
             width += emoteGap;
           }
-          // 大表情按物理像素换回逻辑像素，会比单行行高高出一截，
-          // 整条位图随之变高，弹幕库按 item.height 给它让出对应的轨道
+          // 大表情按物理像素换回逻辑像素，会比单行高出一截，最多允许占两个轨道。
+          // 弹幕库的轨道是等高网格、不认单条高度，所以哪怕只占两轨也会与相邻轨道
+          // 重叠，这是上游确认过的取舍。
           final h = emoticon.large
               ? emoteDisplayHeight(
                   emoticon,
                   fontSize: fontSize,
                   dpr: devicePixelRatio,
+                  maxHeight: (lineBox + strokeWidth) * kMaxEmoteLines,
                 )
               : math.min(fontSize * _emoteScale, lineBox);
           if (h > maxEmoteHeight) {

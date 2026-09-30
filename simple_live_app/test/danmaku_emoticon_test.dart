@@ -345,9 +345,16 @@ void main() {
       );
     }
 
-    test('大表情位图按服务端物理像素 ÷ dpr，整条高于单行', () async {
+    const small = LiveMessageEmoticon(
+      name: '[doge]',
+      url: 'https://i0.hdslb.com/bfs/live/doge.png',
+      width: 20,
+      height: 20,
+    );
+
+    test('大表情位图高于单行，但最多只占两个轨道', () async {
       DanmakuEmoticonRenderer.debugImageProviderFactory = (_) => MemoryImage(png);
-      final dpr = ui.PlatformDispatcher.instance.views.first.devicePixelRatio;
+      const option = DanmakuOption();
 
       const big = LiveMessageEmoticon(
         name: '冲鸭',
@@ -356,25 +363,21 @@ void main() {
         height: 300,
         large: true,
       );
-      const small = LiveMessageEmoticon(
-        name: '[doge]',
-        url: 'https://i0.hdslb.com/bfs/live/doge.png',
-        width: 20,
-        height: 20,
-      );
 
       final bigBitmap = await renderOf(big);
-      final smallBitmap = await renderOf(small);
+      // 行内小表情不超过行高，所以它那条的总高就是「一个轨道」的高度
+      final oneTrack = (await renderOf(small))!.height;
 
-      expect(bigBitmap, isNotNull);
-      expect(smallBitmap, isNotNull);
-      // 位图总高 = max(行高, 表情高) + 描边。300 物理像素换回逻辑像素后必然
-      // 盖过单行行高，弹幕库按 item.height 给整条让出对应的轨道
-      expect(bigBitmap!.height, greaterThanOrEqualTo(300 / dpr));
-      expect(bigBitmap.height, greaterThan(smallBitmap!.height));
+      // 上游要求：大表情最多占两个轨道，不许霸屏。
+      // 总高 = 两轨内容高 + 描边
+      expect(
+        bigBitmap!.height,
+        closeTo(oneTrack * kMaxEmoteLines + option.strokeWidth, 0.01),
+      );
+      expect(bigBitmap.height, greaterThan(oneTrack));
     });
 
-    test('异常大的服务端尺寸被封顶，不会一次申请超大位图', () async {
+    test('异常大的服务端尺寸与极端宽高比都被夹住', () async {
       DanmakuEmoticonRenderer.debugImageProviderFactory = (_) => MemoryImage(png);
       const option = DanmakuOption();
 
@@ -386,17 +389,19 @@ void main() {
         large: true,
       );
       final bitmap = await renderOf(absurd);
+      final oneTrack = (await renderOf(small))!.height;
 
-      // 总高 = max(行高, 封顶后的表情高) + 描边
+      // 服务端给 10 万物理像素也只占两轨，不会一次申请超大位图
       expect(
         bitmap!.height,
-        closeTo(kMaxEmoteLogicalHeight + option.strokeWidth, 0.01),
+        closeTo(oneTrack * kMaxEmoteLines + option.strokeWidth, 0.01),
       );
-      // 宽高比 10 被夹到 4:1，总宽 = 表情宽 + 左右各半个描边
+      // 宽高比 10 被夹到 4:1；总宽 = 表情宽 + 左右各半个描边
       expect(
         bitmap.width,
         closeTo(
-          kMaxEmoteLogicalHeight * kMaxEmoteAspectRatio + option.strokeWidth,
+          (bitmap.height - option.strokeWidth) * kMaxEmoteAspectRatio +
+              option.strokeWidth,
           0.01,
         ),
       );

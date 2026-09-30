@@ -142,70 +142,113 @@ void main() {
       );
     });
 
-    testWidgets('大表情按服务端物理像素 ÷ dpr 显示，而不是挤在单行里', (tester) async {
+    testWidgets('大表情按物理像素 ÷ dpr 显示，最多占两行', (tester) async {
       tester.view.devicePixelRatio = 2;
       addTearDown(tester.view.reset);
 
       const big = LiveMessageEmoticon(
         name: '冲鸭',
         url: 'https://example.com/big.png',
-        width: 300,
-        height: 300,
+        width: 50,
+        height: 50,
         large: true,
       );
       await tester.pumpWidget(_host(_message('冲鸭', const [big])));
 
-      final image = tester.widget<Image>(find.byType(Image));
-      expect(image.height, closeTo(300 / 2, 0.001));
-      expect(image.width, closeTo(300 / 2, 0.001));
+      var image = tester.widget<Image>(find.byType(Image));
+      expect(image.height, closeTo(50 / 2, 0.001));
+      expect(image.width, closeTo(50 / 2, 0.001));
+
+      // 服务端给 10 万物理像素也只占两行；宽高比 10 夹到 4:1
+      const absurd = LiveMessageEmoticon(
+        name: '冲鸭',
+        url: 'https://example.com/absurd.png',
+        width: 1000000,
+        height: 100000,
+        large: true,
+      );
+      await tester.pumpWidget(_host(_message('冲鸭', const [absurd])));
+      image = tester.widget<Image>(find.byType(Image));
+      final twoLines = _fontSize * 1.2 * kMaxEmoteLines;
+      expect(image.height, closeTo(twoLines, 0.001));
+      expect(image.width, closeTo(twoLines * kMaxEmoteAspectRatio, 0.001));
     });
 
-    testWidgets('official 系大表情再放大 1.25，upower 系用固定边长', (tester) async {
-      tester.view.devicePixelRatio = 2;
-      addTearDown(tester.view.reset);
+    // 尺寸口径本身用纯函数锁：不依赖 widget 里的 devicePixelRatio，
+    // 三种 emoticon_unique 的分类也在这里一次看全
+    double heightOf(
+      LiveMessageEmoticon e, {
+      double dpr = 2,
+      double? maxHeight,
+    }) =>
+        emoteDisplayHeight(
+          e,
+          fontSize: _fontSize,
+          dpr: dpr,
+          maxHeight: maxHeight,
+        );
+
+    test('room 系按物理像素 ÷ dpr，official 系再乘 1.25', () {
+      const room = LiveMessageEmoticon(
+        name: '冲鸭',
+        url: 'https://example.com/r.png',
+        width: 50,
+        height: 50,
+        large: true,
+        emoticonUnique: 'room_13001_1',
+      );
+      expect(heightOf(room), closeTo(25, 0.001));
 
       const official = LiveMessageEmoticon(
         name: '害怕',
-        url: 'https://example.com/official.png',
-        width: 200,
-        height: 100,
+        url: 'https://example.com/o.png',
+        width: 40,
+        height: 40,
         large: true,
         emoticonUnique: 'official_12',
       );
+      expect(heightOf(official), closeTo(40 / 2 * 1.25, 0.001));
+    });
+
+    test('upower 系用固定 162 物理像素，服务端没给尺寸时按两行兜底', () {
       const upower = LiveMessageEmoticon(
         name: '充电',
-        url: 'https://example.com/upower.png',
+        url: 'https://example.com/u.png',
         large: true,
         emoticonUnique: 'upower_[充电]',
       );
+      expect(heightOf(upower), closeTo(162 / 2, 0.001));
 
-      late List<InlineSpan> officialSpans;
-      late List<InlineSpan> upowerSpans;
-      await tester.pumpWidget(MaterialApp(
-        home: Builder(builder: (context) {
-          officialSpans = buildChatMessageSpans(
-            context,
-            _message('害怕', const [official]),
-            const TextStyle(fontSize: _fontSize),
-          );
-          upowerSpans = buildChatMessageSpans(
-            context,
-            _message('充电', const [upower]),
-            const TextStyle(fontSize: _fontSize),
-          );
-          return const SizedBox();
-        }),
-      ));
+      const noDims = LiveMessageEmoticon(
+        name: '冲鸭',
+        url: 'https://example.com/n.png',
+        large: true,
+        emoticonUnique: 'room_13001_1',
+      );
+      expect(
+        heightOf(noDims),
+        closeTo(_fontSize * 1.2 * kMaxEmoteLines, 0.001),
+      );
+    });
 
-      Image imageOf(List<InlineSpan> spans) =>
-          ((spans.single as WidgetSpan).child as Padding).child as Image;
+    test('maxHeight 一到就停，行内小表情不跟大表情口径', () {
+      const big = LiveMessageEmoticon(
+        name: '冲鸭',
+        url: 'https://example.com/b.png',
+        width: 100000,
+        height: 100000,
+        large: true,
+      );
+      final twoLines = _fontSize * 1.2 * kMaxEmoteLines;
+      expect(heightOf(big, maxHeight: twoLines), closeTo(twoLines, 0.001));
 
-      // 200x100 物理像素 ÷ dpr2 = 100x50，official 再 ×1.25 → 高 62.5、宽按 2:1 = 125
-      expect(imageOf(officialSpans).height, closeTo(62.5, 0.001));
-      expect(imageOf(officialSpans).width, closeTo(125, 0.001));
-      // upower 不给尺寸：162 物理像素 ÷ dpr2 = 81，1:1
-      expect(imageOf(upowerSpans).height, closeTo(81, 0.001));
-      expect(imageOf(upowerSpans).width, closeTo(81, 0.001));
+      const small = LiveMessageEmoticon(
+        name: '[doge]',
+        url: 'https://example.com/s.png',
+        width: 20,
+        height: 20,
+      );
+      expect(heightOf(small), closeTo(_fontSize * 1.2, 0.001));
     });
 
     testWidgets('行内表情高度跟随传入 style 的字号', (tester) async {
@@ -229,28 +272,6 @@ void main() {
 
       final image = ((spans[1] as WidgetSpan).child as Padding).child as Image;
       expect(image.height, closeTo(28 * 1.2, 0.001));
-    });
-
-    testWidgets('大表情的高度与宽高比都有上限，异常载荷不撑爆消息行', (tester) async {
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-
-      const absurd = LiveMessageEmoticon(
-        name: '冲鸭',
-        url: 'https://example.com/absurd.png',
-        width: 1000000,
-        height: 100000,
-        large: true,
-      );
-      await tester.pumpWidget(_host(_message('冲鸭', const [absurd])));
-
-      final image = tester.widget<Image>(find.byType(Image));
-      expect(image.height, closeTo(kMaxEmoteLogicalHeight, 0.001));
-      // 1000000 / 100000 = 10 → 夹到 4:1
-      expect(
-        image.width,
-        closeTo(kMaxEmoteLogicalHeight * kMaxEmoteAspectRatio, 0.001),
-      );
     });
 
     testWidgets('name 为 null 的大表情取图失败时显示可见兜底文案', (tester) async {

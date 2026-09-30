@@ -35,6 +35,12 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+/// 聊天区最多保留多少条消息。
+///
+/// 带表情的消息每条都挂着图片，列表越长，切页（聊天 → 关注 → 聊天）时一次性
+/// 重建的开销越大。上游实测从 200 降到 150 后切回来的那一下卡顿明显减轻。
+const int kMaxChatMessageCount = 150;
+
 class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   StreamSubscription<dynamic>? subscription;
   final Site pSite;
@@ -191,8 +197,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       if (filteredBatch.isEmpty) return;
 
       messages.addAll(filteredBatch);
-      if (messages.length > 200 && !disableAutoScroll.value) {
-        messages.removeRange(0, messages.length - 200);
+      if (messages.length > kMaxChatMessageCount && !disableAutoScroll.value) {
+        messages.removeRange(0, messages.length - kMaxChatMessageCount);
       }
 
       WidgetsBinding.instance.addPostFrameCallback(
@@ -347,7 +353,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       if (AppSettingsController.instance.danmakuMaskEnable.value && messages.length > 50) {
         danmakuBuffer.add(msg);
       } else {
-        if (messages.length > 200 && !disableAutoScroll.value) {
+        if (messages.length > kMaxChatMessageCount && !disableAutoScroll.value) {
           messages.removeAt(0);
         }
         messages.add(msg);

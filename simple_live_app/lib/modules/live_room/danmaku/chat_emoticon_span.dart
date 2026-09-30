@@ -55,7 +55,13 @@ List<InlineSpan> buildChatMessageSpans(
         style: style,
       );
     }
-    final emoteHeight = emoteDisplayHeight(emoticon, fontSize: fontSize, dpr: dpr);
+    // 与弹幕区同一要求：大表情最多占两行，不许把聊天区整屏挡住
+    final emoteHeight = emoteDisplayHeight(
+      emoticon,
+      fontSize: fontSize,
+      dpr: dpr,
+      maxHeight: fontSize * 1.2 * kMaxEmoteLines,
+    );
     return WidgetSpan(
       alignment: PlaceholderAlignment.middle,
       child: Padding(
