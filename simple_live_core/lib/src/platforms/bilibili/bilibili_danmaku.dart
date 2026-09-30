@@ -9,6 +9,7 @@ import 'package:simple_live_core/src/common/convert_helper.dart';
 import 'package:simple_live_core/src/common/web_socket_util.dart';
 
 import '../../common/binary_writer.dart';
+import 'bilibili_emoticon.dart';
 
 class BiliBiliDanmakuArgs {
   final int roomId;
@@ -189,11 +190,14 @@ class BiliBiliDanmaku implements LiveDanmaku {
       var obj = json.decode(jsonMessage);
       var cmd = obj["cmd"].toString();
       if (cmd.contains("DANMU_MSG")) {
-        if (obj["info"] != null && obj["info"].length != 0) {
-          var message = obj["info"][1].toString();
-          var color = asT<int?>(obj["info"][0][3]) ?? 0;
-          if (obj["info"][2] != null && obj["info"][2].length != 0) {
-            var username = obj["info"][2][1].toString();
+        // 安全转换：守卫只保证非空，String / Map 也有 length，直接强转
+        // 会在异常载荷上抛 TypeError，绕过 parseBilibiliEmoticons 自己的防御
+        var info = asT<List<dynamic>>(obj["info"]);
+        if (info != null && info.isNotEmpty) {
+          var message = info[1].toString();
+          var color = asT<int?>(info[0][3]) ?? 0;
+          if (info[2] != null && info[2].length != 0) {
+            var username = info[2][1].toString();
             var liveMsg = LiveMessage(
               type: LiveMessageType.chat,
               userName: username,
@@ -201,6 +205,7 @@ class BiliBiliDanmaku implements LiveDanmaku {
               color: color == 0
                   ? LiveMessageColor.white
                   : LiveMessageColor.numberToColor(color),
+              emoticons: parseBilibiliEmoticons(info, message),
             );
             onMessage?.call(liveMsg);
           }

@@ -20,6 +20,7 @@ import 'package:simple_live_app/app/utils/sandbox.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_block.dart';
 import 'package:simple_live_app/models/db/history.dart';
+import 'package:simple_live_app/modules/live_room/danmaku/danmaku_emoticon.dart';
 import 'package:simple_live_app/modules/live_room/player/player_controller.dart';
 import 'package:simple_live_app/modules/settings/danmu_settings_page.dart';
 import 'package:simple_live_app/services/db_service.dart';
@@ -33,6 +34,12 @@ import 'package:simple_live_core/simple_live_core.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+
+/// 聊天区最多保留多少条消息。
+///
+/// 带表情的消息每条都挂着图片，列表越长，切页（聊天 → 关注 → 聊天）时一次性
+/// 重建的开销越大。上游实测从 200 降到 150 后切回来的那一下卡顿明显减轻。
+const int kMaxChatMessageCount = 150;
 
 class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   StreamSubscription<dynamic>? subscription;
@@ -190,8 +197,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       if (filteredBatch.isEmpty) return;
 
       messages.addAll(filteredBatch);
-      if (messages.length > 200 && !disableAutoScroll.value) {
-        messages.removeRange(0, messages.length - 200);
+      if (messages.length > kMaxChatMessageCount && !disableAutoScroll.value) {
+        messages.removeRange(0, messages.length - kMaxChatMessageCount);
       }
 
       WidgetsBinding.instance.addPostFrameCallback(
@@ -210,6 +217,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
                   msg.color.g,
                   msg.color.b,
                 ),
+                // 表情包（目前仅 B 站下发）：交给渲染层把 [占位符] 换成图片
+                extra: msg.emoticons,
               ))
           .toList());
     } finally {
@@ -344,7 +353,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       if (AppSettingsController.instance.danmakuMaskEnable.value && messages.length > 50) {
         danmakuBuffer.add(msg);
       } else {
-        if (messages.length > 200 && !disableAutoScroll.value) {
+        if (messages.length > kMaxChatMessageCount && !disableAutoScroll.value) {
           messages.removeAt(0);
         }
         messages.add(msg);
@@ -364,6 +373,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
               msg.color.g,
               msg.color.b,
             ),
+            // 表情包（目前仅 B 站下发）：交给渲染层把 [占位符] 换成图片
+            extra: msg.emoticons,
           ),
         ]);
       }
@@ -1204,6 +1215,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     messages.clear();
     superChats.clear();
     danmakuController?.clear();
+    // 表情包是分房间下发的，换房间后上一个房间的合成位图没有复用价值
+    DanmakuEmoticonRenderer.clearCache();
 
     // 重新设置LiveDanmaku
     liveDanmaku = site.liveSite.getDanmaku();
@@ -1260,6 +1273,9 @@ ${error?.stackTrace}''');
 
     liveDanmaku.stop();
     danmakuController = null;
+    // 直接退出直播间不经过 resetRoom，这里补一次：表情是分房间下发的，
+    // 留在静态缓存里的源图句柄与合成位图出房间后就没有复用价值了。
+    DanmakuEmoticonRenderer.clearCache();
     rustDanmakuMask.dispose();
     super.onClose();
   }

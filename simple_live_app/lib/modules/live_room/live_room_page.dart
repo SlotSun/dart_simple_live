@@ -10,6 +10,7 @@ import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
+import 'package:simple_live_app/modules/live_room/danmaku/chat_emoticon_span.dart';
 import 'package:simple_live_app/modules/live_room/live_room_controller.dart';
 import 'package:simple_live_app/modules/live_room/player/player_controls.dart';
 import 'package:simple_live_app/services/follow_service.dart';
@@ -478,9 +479,9 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                           ),
                           padding: AppStyle.edgeInsetsA12,
                           itemCount: controller.messages.length,
-                          itemBuilder: (_, i) {
+                          itemBuilder: (context, i) {
                             var item = controller.messages[i];
-                            return buildMessageItem(item);
+                            return buildMessageItem(item, context);
                           },
                         ),
                         Visibility(
@@ -513,7 +514,7 @@ class LiveRoomPage extends GetView<LiveRoomController> {
     );
   }
 
-  Widget buildMessageItem(LiveMessage message) {
+  Widget buildMessageItem(LiveMessage message, BuildContext context) {
     if (message.userName == "LiveSysMessage") {
       return Obx(
         () => SelectableText(
@@ -551,14 +552,22 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                           color: Colors.grey,
                           fontSize: AppSettingsController.instance.chatTextSize.value,
                         ),
-                        children: [
-                          TextSpan(
-                            text: message.message,
-                            style: TextStyle(
-                              color: Get.isDarkMode ? Colors.white : AppColors.black333,
-                            ),
-                          )
-                        ],
+                        children: buildChatMessageSpans(
+                          context,
+                          message,
+                          TextStyle(
+                            color: Get.isDarkMode ? Colors.white : AppColors.black333,
+                            // 行内表情的高度按这份 style 的字号推算，必须与正文同源，
+                            // 否则用户调「聊天字号」后文字与表情尺寸脱节
+                            fontSize: AppSettingsController.instance.chatTextSize.value,
+                          ),
+                          emoticonsEnabled: AppSettingsController
+                              .instance.danmuEmoticonEnable.value,
+                        ),
+                      ),
+                      contextMenuBuilder: _contextMenuBuilderFor(
+                        message,
+                        fallback: _defaultContextMenu,
                       ),
                     ),
                   ),
@@ -572,27 +581,74 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                   color: Colors.grey,
                   fontSize: AppSettingsController.instance.chatTextSize.value,
                 ),
-                children: [
-                  TextSpan(
-                    text: message.message,
-                    style: TextStyle(
-                      color: Get.isDarkMode ? Colors.white : AppColors.black333,
-                    ),
-                  )
-                ],
+                children: buildChatMessageSpans(
+                  context,
+                  message,
+                  TextStyle(
+                    color: Get.isDarkMode ? Colors.white : AppColors.black333,
+                    fontSize: AppSettingsController.instance.chatTextSize.value,
+                  ),
+                  emoticonsEnabled:
+                      AppSettingsController.instance.danmuEmoticonEnable.value,
+                ),
               ),
-              contextMenuBuilder: _contextMenuBuilder,
+              contextMenuBuilder: _contextMenuBuilderFor(
+                message,
+                fallback: _contextMenuBuilder,
+              ),
             ),
     );
   }
 
+  /// 会渲染出表情的消息，只在**选区里没有真实文字**时不建上下文菜单。
+  ///
+  /// `SelectableText.rich` 里的 `WidgetSpan` 在文本里是一个占位字符（`\uFFFC`）。
+  /// 右键落在图片上时会把这个占位符当成一个"词"选中：selection 是**有效的**，
+  /// 但 `customContextMenuBuilder` 拿它去 `textInside` 时又可能越界抛
+  /// `RangeError (start)`；系统默认菜单则干脆给出「复制」，复制出来的是一个
+  /// 看不见的占位符——两者都不是可用状态。
+  /// 判据因此不能只看 `selection.isValid`，要看剥掉占位符与空白之后还剩不剩
+  /// 真实文字：混排消息（`白花300块[热]`）右键点在正文上仍应保留屏蔽/复制能力。
+  Widget Function(BuildContext, EditableTextState) _contextMenuBuilderFor(
+    LiveMessage message, {
+    required Widget Function(BuildContext, EditableTextState) fallback,
+  }) {
+    final rendersEmoticon = AppSettingsController
+            .instance.danmuEmoticonEnable.value &&
+        (message.emoticons?.isNotEmpty ?? false);
+    if (!rendersEmoticon) {
+      return fallback;
+    }
+    return (context, state) {
+      final value = state.textEditingValue;
+      if (!shouldShowContextMenu(value.text, value.selection)) {
+        return _noContextMenu(context, state);
+      }
+      return fallback(context, state);
+    };
+  }
+
+  Widget _noContextMenu(BuildContext context, EditableTextState state) {
+    return const SizedBox.shrink();
+  }
+
+  /// 与 `SelectableText` 的默认菜单等价（框架里那份 `_defaultContextMenuBuilder`
+  /// 是私有的，这里照抄它唯一的一行），保证气泡样式下普通消息的菜单不变。
+  Widget _defaultContextMenu(BuildContext context, EditableTextState state) {
+    return AdaptiveTextSelectionToolbar.editableText(editableTextState: state);
+  }
+
   Widget _contextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    // 入参要先剥掉表情占位符：拖选跨过 `白花300块[热]` 时选中文本里带着 \uFFFC，
+    // 原样写进屏蔽表就与弹幕原文 `[热]` 永远匹配不上，屏蔽词静默失效
     return customContextMenuBuilder(
       context,
       editableTextState,
       {
-        '屏蔽用户': (s) => controller.addCurBlockAccount(s),
-        '屏蔽关键词': (s) => controller.addCurBlockWord(s),
+        '屏蔽用户': (s) =>
+            controller.addCurBlockAccount(stripEmoticonPlaceholder(s)),
+        '屏蔽关键词': (s) =>
+            controller.addCurBlockWord(stripEmoticonPlaceholder(s)),
       },
     );
   }

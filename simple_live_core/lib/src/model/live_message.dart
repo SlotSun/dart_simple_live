@@ -33,6 +33,10 @@ class LiveMessage {
 
   /// 弹幕颜色
   final LiveMessageColor color;
+
+  /// 弹幕表情包（可选，目前仅 B 站直播间提供）
+  final List<LiveMessageEmoticon>? emoticons;
+
   LiveMessage({
     required this.type,
     required this.userName,
@@ -40,6 +44,7 @@ class LiveMessage {
     this.data,
     this.userId,
     required this.color,
+    this.emoticons,
   });
 
   @override
@@ -50,7 +55,72 @@ class LiveMessage {
       "message": message,
       "data": data.toString(),
       "color": color.toString(),
+      if (emoticons != null)
+        "emoticons": emoticons!.map((e) => e.toJson()).toList(),
     });
+  }
+}
+
+/// 弹幕里的表情包（B 站直播间的「表情包」弹幕）
+///
+/// 注意：表情是以图片形式下发的，[message] 里对应位置只有占位符文本（如 `[doge]`），
+/// 需要渲染层用 [url] 取图后替换 [name] 才能显示成图片。
+class LiveMessageEmoticon {
+  /// 占位符文本，如 `[doge]`
+  ///
+  /// 为 null 表示无法定位到文本中的具体占位符，渲染层应把它追加到消息末尾。
+  final String? name;
+
+  /// 图片地址（已规范化为 https）
+  final String url;
+
+  /// 服务端下发的原始宽，用于还原宽高比（可能为 null，此时以图片自带尺寸为准）
+  final int? width;
+
+  /// 服务端下发的原始高
+  final int? height;
+
+  /// 是否是从 `info[0][13]` 单独下发的「大表情」（冲鸭 / 害怕这类）。
+  ///
+  /// 行内小表情（`extra.emots`）为 false。两者尺寸口径不同：大表情服务端
+  /// 下发的是物理像素，渲染层要换回逻辑像素并放大显示，见渲染层实现。
+  final bool large;
+
+  /// B 站的 `emoticon_unique`，形如 `room_<roomId>_<n>` / `official_<n>` /
+  /// `upower_[<name>]`，大表情的尺寸分类用它（见 [isOfficial] / [isUpower]）
+  final String? emoticonUnique;
+
+  const LiveMessageEmoticon({
+    required this.name,
+    required this.url,
+    this.width,
+    this.height,
+    this.large = false,
+    this.emoticonUnique,
+  });
+
+  bool get isOfficial => emoticonUnique?.startsWith('official_') ?? false;
+
+  bool get isUpower => emoticonUnique?.startsWith('upower_') ?? false;
+
+  /// 供 [LiveMessage.toString] 组装 JSON 用的对象形态。
+  ///
+  /// 不要用 [toString] 代替它：那会得到一个 JSON 字符串，外层再
+  /// `json.encode` 一次就变成「字符串数组」，消费方按对象取值会拿到字符串。
+  Map<String, dynamic> toJson() {
+    return {
+      "name": name,
+      "url": url,
+      "width": width,
+      "height": height,
+      "large": large,
+      "emoticonUnique": emoticonUnique,
+    };
+  }
+
+  @override
+  String toString() {
+    return json.encode(toJson());
   }
 }
 
