@@ -84,8 +84,11 @@ Future<List<LiveSuperChatMessage>> getHuyaSuperChatMessageList(
   messages.sort((a, b) => b.startTime.compareTo(a.startTime));
   if (first) {
     return messages.length > 10 ? messages.sublist(0,10) : messages;
-  } else {
+  } else if(messages.isNotEmpty) {
+    // 当响应时必不可能为empty，测试安全
     return [messages.first];
+  } else {
+    return messages;
   }
 }
 class RequestIdGenerator {

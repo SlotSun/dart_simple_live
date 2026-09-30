@@ -218,6 +218,12 @@ class HuyaDanmaku implements LiveDanmaku {
           var uname = messageNotice.userInfo.sNickName;
           var content = messageNotice.content;
 
+          // websocket maybe need cookie check, reg temp instead
+          // xxx(来自一元上头条)
+          RegExp scReg = RegExp(r'\(来自.+?上头条\)');
+          if(scReg.hasMatch(content)){
+            callSc();
+          }
           var color = messageNotice.bulletFormat.fontColor;
 
           onMessage?.call(
@@ -258,19 +264,7 @@ class HuyaDanmaku implements LiveDanmaku {
           // '6220': RankInfoNotice
           // '1091000': pk
           if (item.iUri == 2001314) {
-            var sc =
-                await getHuyaSuperChatMessageList(lPid: danmakuArgs.topSid);
-            if (sc.isNotEmpty) {
-              onMessage?.call(
-                LiveMessage(
-                  type: LiveMessageType.superChat,
-                  userName: "SUPER_CHAT_MESSAGE",
-                  message: "SUPER_CHAT_MESSAGE",
-                  color: LiveMessageColor.white,
-                  data: sc.first,
-                ),
-              );
-            }
+            callSc();
           }
         }
       } else {
@@ -278,6 +272,21 @@ class HuyaDanmaku implements LiveDanmaku {
       }
     } catch (e) {
       CoreLog.error(e);
+    }
+  }
+
+  Future<void> callSc() async {
+    var sc = await getHuyaSuperChatMessageList(lPid: danmakuArgs.topSid);
+    if (sc.isNotEmpty) {
+      onMessage?.call(
+        LiveMessage(
+          type: LiveMessageType.superChat,
+          userName: "SUPER_CHAT_MESSAGE",
+          message: "SUPER_CHAT_MESSAGE",
+          color: LiveMessageColor.white,
+          data: sc.first,
+        ),
+      );
     }
   }
 }
