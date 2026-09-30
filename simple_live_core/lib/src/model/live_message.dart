@@ -80,12 +80,28 @@ class LiveMessageEmoticon {
   /// 服务端下发的原始高
   final int? height;
 
+  /// 是否是从 `info[0][13]` 单独下发的「大表情」（冲鸭 / 害怕这类）。
+  ///
+  /// 行内小表情（`extra.emots`）为 false。两者尺寸口径不同：大表情服务端
+  /// 下发的是物理像素，渲染层要换回逻辑像素并放大显示，见渲染层实现。
+  final bool large;
+
+  /// B 站的 `emoticon_unique`，形如 `room_<roomId>_<n>` / `official_<n>` /
+  /// `upower_[<name>]`，大表情的尺寸分类用它（见 [isOfficial] / [isUpower]）
+  final String? emoticonUnique;
+
   const LiveMessageEmoticon({
     required this.name,
     required this.url,
     this.width,
     this.height,
+    this.large = false,
+    this.emoticonUnique,
   });
+
+  bool get isOfficial => emoticonUnique?.startsWith('official_') ?? false;
+
+  bool get isUpower => emoticonUnique?.startsWith('upower_') ?? false;
 
   /// 供 [LiveMessage.toString] 组装 JSON 用的对象形态。
   ///
@@ -97,6 +113,8 @@ class LiveMessageEmoticon {
       "url": url,
       "width": width,
       "height": height,
+      "large": large,
+      "emoticonUnique": emoticonUnique,
     };
   }
 

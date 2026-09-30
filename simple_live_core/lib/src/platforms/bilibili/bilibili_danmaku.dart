@@ -190,8 +190,10 @@ class BiliBiliDanmaku implements LiveDanmaku {
       var obj = json.decode(jsonMessage);
       var cmd = obj["cmd"].toString();
       if (cmd.contains("DANMU_MSG")) {
-        if (obj["info"] != null && obj["info"].length != 0) {
-          var info = obj["info"] as List<dynamic>;
+        // 安全转换：守卫只保证非空，String / Map 也有 length，直接强转
+        // 会在异常载荷上抛 TypeError，绕过 parseBilibiliEmoticons 自己的防御
+        var info = asT<List<dynamic>>(obj["info"]);
+        if (info != null && info.isNotEmpty) {
           var message = info[1].toString();
           var color = asT<int?>(info[0][3]) ?? 0;
           if (info[2] != null && info[2].length != 0) {
