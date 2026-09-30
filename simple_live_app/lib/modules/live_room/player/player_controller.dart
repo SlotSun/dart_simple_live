@@ -22,7 +22,7 @@ import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/app/custom_throttle.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
-import 'package:simple_live_app/modules/live_room/player/danmaku_emoticon.dart';
+import 'package:simple_live_app/modules/live_room/danmaku/danmaku_emoticon.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:window_manager/window_manager.dart';
@@ -267,12 +267,20 @@ mixin PlayerDanmakuMixin on PlayerStateMixin {
   /// 表情包弹幕的渲染接管。
   ///
   /// 弹幕库只认纯文本，这里用它公开的 [DanmakuController] 接口做后置替换：
-  /// 先让库按占位符文本正常入轨（占位符文本比表情图片更宽，轨道判定偏保守、
-  /// 不会重叠），等图片取回后再把该条的位图换成「文本 + 表情」的行内混排版本。
+  /// 先让库按占位符文本入轨，等图片取回后再把该条的位图换成「文本 + 表情」的
+  /// 行内混排版本，并把该 [DanmakuItem] 的宽高改写成位图尺寸。
+  ///
+  /// 已知限制：库的滚动轨道是等高网格、排轨只看入轨时的文本宽高，改写尺寸后
+  /// 不会重排。行内小表情与占位符文本尺寸接近、看不出来；大表情
+  /// （[LiveMessageEmoticon.large]）比占位符文本宽高都大，会与同轨 / 相邻轨的
+  /// 弹幕重叠——这是接受了的取舍，真要让位得改 canvas_danmaku 的排轨。
   ///
   /// 取图失败 / 弹幕已过期时直接放弃替换 —— 库渲染的占位符文本就是兜底表现，
   /// 不会出现空白弹幕。
   void _applyDanmakuEmoticon(DanmakuContentItem item) {
+    if (!AppSettingsController.instance.danmuEmoticonEnable.value) {
+      return;
+    }
     final extra = item.extra;
     if (!DanmakuEmoticonRenderer.canRender(extra)) {
       return;

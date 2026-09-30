@@ -20,7 +20,7 @@ import 'package:simple_live_app/app/utils/sandbox.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_block.dart';
 import 'package:simple_live_app/models/db/history.dart';
-import 'package:simple_live_app/modules/live_room/player/danmaku_emoticon.dart';
+import 'package:simple_live_app/modules/live_room/danmaku/danmaku_emoticon.dart';
 import 'package:simple_live_app/modules/live_room/player/player_controller.dart';
 import 'package:simple_live_app/modules/settings/danmu_settings_page.dart';
 import 'package:simple_live_app/services/db_service.dart';

@@ -14,7 +14,7 @@ import 'dart:ui' as ui;
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:simple_live_app/modules/live_room/player/danmaku_emoticon.dart';
+import 'package:simple_live_app/modules/live_room/danmaku/danmaku_emoticon.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 
 LiveMessageEmoticon _emot(String? name, String url) =>
@@ -320,6 +320,115 @@ void main() {
         _ThrowingImageStream.addListenerCalls,
         greaterThan(0),
         reason: '必须真的走到取图链路里抛异常的那一步，否则这条用例是假通过',
+      );
+    });
+  });
+
+  group('大表情的位图高度', () {
+    late Uint8List png;
+
+    setUpAll(() async {
+      png = await _makePng();
+    });
+
+    tearDown(() {
+      DanmakuEmoticonRenderer.debugImageProviderFactory = null;
+      DanmakuEmoticonRenderer.clearCache();
+    });
+
+    Future<DanmakuEmoticonBitmap?> renderOf(LiveMessageEmoticon emoticon) {
+      return DanmakuEmoticonRenderer.render(
+        text: emoticon.name!,
+        emoticons: [emoticon],
+        option: const DanmakuOption(),
+        color: const Color(0xFFFFFFFF),
+      );
+    }
+
+    test('大表情位图按服务端物理像素 ÷ dpr，整条高于单行', () async {
+      DanmakuEmoticonRenderer.debugImageProviderFactory = (_) => MemoryImage(png);
+      final dpr = ui.PlatformDispatcher.instance.views.first.devicePixelRatio;
+
+      const big = LiveMessageEmoticon(
+        name: '冲鸭',
+        url: 'https://i0.hdslb.com/bfs/live/chongya.png',
+        width: 300,
+        height: 300,
+        large: true,
+      );
+      const small = LiveMessageEmoticon(
+        name: '[doge]',
+        url: 'https://i0.hdslb.com/bfs/live/doge.png',
+        width: 20,
+        height: 20,
+      );
+
+      final bigBitmap = await renderOf(big);
+      final smallBitmap = await renderOf(small);
+
+      expect(bigBitmap, isNotNull);
+      expect(smallBitmap, isNotNull);
+      // 位图总高 = max(行高, 表情高) + 描边。300 物理像素换回逻辑像素后必然
+      // 盖过单行行高，弹幕库按 item.height 给整条让出对应的轨道
+      expect(bigBitmap!.height, greaterThanOrEqualTo(300 / dpr));
+      expect(bigBitmap.height, greaterThan(smallBitmap!.height));
+    });
+
+    test('异常大的服务端尺寸被封顶，不会一次申请超大位图', () async {
+      DanmakuEmoticonRenderer.debugImageProviderFactory = (_) => MemoryImage(png);
+      const option = DanmakuOption();
+
+      const absurd = LiveMessageEmoticon(
+        name: '冲鸭',
+        url: 'https://i0.hdslb.com/bfs/live/absurd.png',
+        width: 1000000,
+        height: 100000,
+        large: true,
+      );
+      final bitmap = await renderOf(absurd);
+
+      // 总高 = max(行高, 封顶后的表情高) + 描边
+      expect(
+        bitmap!.height,
+        closeTo(kMaxEmoteLogicalHeight + option.strokeWidth, 0.01),
+      );
+      // 宽高比 10 被夹到 4:1，总宽 = 表情宽 + 左右各半个描边
+      expect(
+        bitmap.width,
+        closeTo(
+          kMaxEmoteLogicalHeight * kMaxEmoteAspectRatio + option.strokeWidth,
+          0.01,
+        ),
+      );
+    });
+
+    test('在途渲染遇到 clearCache 时放弃，不把脏数据写回静态缓存', () async {
+      DanmakuEmoticonRenderer.debugImageProviderFactory = (_) => MemoryImage(png);
+
+      // 不 await：让 render 先走到「等图」，中途清缓存（换房间 / 退出直播间），
+      // 再把结果交付。没有 generation 兜底的话，这份迟到的句柄会重新落回
+      // 静态缓存，要等到下一次进/出房间才清得掉
+      final pending = DanmakuEmoticonRenderer.render(
+        text: '[doge]',
+        emoticons: const [
+          LiveMessageEmoticon(
+            name: '[doge]',
+            url: 'https://i0.hdslb.com/bfs/live/doge.png',
+            width: 20,
+            height: 20,
+          ),
+        ],
+        option: const DanmakuOption(),
+        color: const Color(0xFFFFFFFF),
+      );
+      DanmakuEmoticonRenderer.clearCache();
+      final bitmap = await pending;
+
+      expect(bitmap, isNull);
+      expect(
+        DanmakuEmoticonRenderer.debugCachedSourceImages,
+        isEmpty,
+        reason: '过期的一代不该往缓存里留源图句柄',
       );
     });
   });

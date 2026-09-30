@@ -41,6 +41,8 @@ class AppSettingsController extends GetxController {
     danmuSpeed.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmuSpeed, 10.0);
     danmuEnable.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmuEnable, true);
     danmakuMaskEnable.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmakuMaskEnable, false);
+    danmuEmoticonEnable.value =
+        LocalStorageService.instance.getValue(LocalStorageService.kDanmuEmoticonEnable, true);
     danmuStrokeWidth.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmuStrokeWidth, 2.0);
     danmuTopMargin.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmuTopMargin, 0.0);
     danmuBottomMargin.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmuBottomMargin, 0.0);
@@ -339,6 +341,15 @@ class AppSettingsController extends GetxController {
   void setDanmakuMaskEnable(bool e) {
     danmakuMaskEnable.value = e;
     LocalStorageService.instance.setValue(LocalStorageService.kDanmakuMaskEnable, e);
+  }
+
+  /// 弹幕表情包：把 B 站下发的表情渲染成图片。
+  /// 关闭后仍然是原来的占位符文本，只是不再下载与合成图片。
+  var danmuEmoticonEnable = true.obs;
+
+  void setDanmuEmoticonEnable(bool e) {
+    danmuEmoticonEnable.value = e;
+    LocalStorageService.instance.setValue(LocalStorageService.kDanmuEmoticonEnable, e);
   }
 
   var danmuStrokeWidth = 2.0.obs;
