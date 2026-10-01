@@ -703,9 +703,9 @@ void showQualitesInfo(LiveRoomController controller) {
     useSystem: true,
     child: ListView.builder(
       padding: EdgeInsets.zero,
-      itemCount: controller.qualites.length,
+      itemCount: controller.qualities.length,
       itemBuilder: (_, i) {
-        var item = controller.qualites[i];
+        var item = controller.qualities[i];
         return ListTile(
           selected: controller.currentQuality == i,
           title: Text(

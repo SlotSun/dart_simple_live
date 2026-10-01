@@ -35,12 +35,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-/// 聊天区最多保留多少条消息。
-///
-/// 带表情的消息每条都挂着图片，列表越长，切页（聊天 → 关注 → 聊天）时一次性
-/// 重建的开销越大。上游实测从 200 降到 150 后切回来的那一下卡顿明显减轻。
-const int kMaxChatMessageCount = 150;
-
 class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   StreamSubscription<dynamic>? subscription;
   final Site pSite;
@@ -86,7 +80,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   Rx<FollowUserBlock?> followUserBlock = Rx<FollowUserBlock?>(null);
 
   /// 清晰度数据
-  RxList<LivePlayQuality> qualites = RxList<LivePlayQuality>();
+  RxList<LivePlayQuality> qualities = RxList<LivePlayQuality>();
 
   /// 当前清晰度
   var currentQuality = -1;
@@ -127,6 +121,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   Error? error;
 
   int _count = 0;
+
+  final int _kMaxChatMessageCount = 150;
 
   @override
   void onInit() {
@@ -197,8 +193,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       if (filteredBatch.isEmpty) return;
 
       messages.addAll(filteredBatch);
-      if (messages.length > kMaxChatMessageCount && !disableAutoScroll.value) {
-        messages.removeRange(0, messages.length - kMaxChatMessageCount);
+      if (messages.length > _kMaxChatMessageCount && !disableAutoScroll.value) {
+        messages.removeRange(0, messages.length - _kMaxChatMessageCount);
       }
 
       WidgetsBinding.instance.addPostFrameCallback(
@@ -353,7 +349,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       if (AppSettingsController.instance.danmakuMaskEnable.value && messages.length > 50) {
         danmakuBuffer.add(msg);
       } else {
-        if (messages.length > kMaxChatMessageCount && !disableAutoScroll.value) {
+        if (messages.length > _kMaxChatMessageCount && !disableAutoScroll.value) {
           messages.removeAt(0);
         }
         messages.add(msg);
@@ -382,7 +378,17 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       online.value = msg.data;
     } else if (msg.type == LiveMessageType.superChat) {
       // set newest sc at the top， limit 20 better I think
-      superChats.insert(0, msg.data);
+      // unique ensures from front
+      LiveSuperChatMessage scData = msg.data;
+      bool contain = superChats.any(
+        (s) => s.startTime == scData.startTime && s.userName == scData.userName && s.message == scData.message,
+      );
+      if(!contain){
+        superChats.insert(0, msg.data);
+        if (superChats.length > 20) {
+          superChats.removeRange(20, superChats.length);
+        }
+      }
     }
   }
 
@@ -524,7 +530,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
         SmartDialog.showToast("无法读取播放清晰度");
         return;
       }
-      qualites.assignAll(playQualites);
+      qualities.assignAll(playQualites);
       var qualityLevel = await getQualityLevel();
       if (qualityLevel == 2) {
         //最高
@@ -558,10 +564,10 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   }
 
   Future<void> getPlayUrl() async {
-    currentQualityInfo.value = qualites[currentQuality].quality;
+    currentQualityInfo.value = qualities[currentQuality].quality;
     currentLineInfo.value = "";
     currentLineIndex = -1;
-    var playUrl = await site.liveSite.getPlayUrls(detail: detail.value!, quality: qualites[currentQuality]);
+    var playUrl = await site.liveSite.getPlayUrls(detail: detail.value!, quality: qualities[currentQuality]);
     if (playUrl.urls.isEmpty) {
       SmartDialog.showToast("无法读取播放地址");
       return;
@@ -819,9 +825,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
           await getPlayUrl();
         },
         child: ListView.builder(
-          itemCount: qualites.length,
+          itemCount: qualities.length,
           itemBuilder: (_, i) {
-            var item = qualites[i];
+            var item = qualities[i];
             return RadioListTile(
               value: i,
               title: Text(item.quality),
