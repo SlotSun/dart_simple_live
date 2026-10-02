@@ -379,9 +379,10 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     } else if (msg.type == LiveMessageType.superChat) {
       // set newest sc at the top， limit 20 better I think
       // unique ensures from front
+      // 没想到 huya-data居然会有时间戳不准的问题
       LiveSuperChatMessage scData = msg.data;
       bool contain = superChats.any(
-        (s) => s.startTime == scData.startTime && s.userName == scData.userName && s.message == scData.message,
+        (s) => s.price == scData.price && s.userName == scData.userName && s.message == scData.message,
       );
       if(!contain){
         superChats.insert(0, msg.data);

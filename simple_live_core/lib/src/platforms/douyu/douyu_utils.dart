@@ -6,7 +6,7 @@ import 'package:simple_live_core/src/common/parse_cookie.dart';
 
 class DouyuUtils {
   // params
-  static final String _did = '10000000000000000000000000001501';
+  static String _did = '10000000000000000000000000001501';
 
   static final int _encCacheTTL = 5 * 60;
 
@@ -41,6 +41,11 @@ class DouyuUtils {
     return res;
   }
 
+  static void setDyDid(String cookie) {
+    final match = RegExp(r'dy_did=([^;]+)').firstMatch(cookie);
+    _did = match?.group(1) ?? _did;
+  }
+
   static Future<String> refreshCookie({String did = '', String ltp0 = '', String cookie = ''}) async {
     // expired-> refresh
     if (_isCookieExpired(cookie) && ltp0.isNotEmpty && did.isNotEmpty) {
@@ -62,6 +67,7 @@ class DouyuUtils {
           .map((raw) => raw.split(';').first.trim())
           .where((s) => s.contains('='))
           .join('; ');
+      _did = did;
     }
     return cookie;
   }

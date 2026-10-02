@@ -5,7 +5,9 @@ on:
   push:
     branches:
       - 'dev'
-
+    paths:
+      - 'simple_live_app/**'
+      - 'simple_live_core/**'
 # If previous workflow is still running, we push again, we will cancel the previous workflow
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}

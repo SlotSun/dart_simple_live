@@ -338,6 +338,7 @@ class DouyuSite implements LiveSite {
   Future<void> setSiteAttrs(Map<String, dynamic> data) async {
     if(data.containsKey('cookie')){
       _cookie = data['cookie'] as String;
+      DouyuUtils.setDyDid(_cookie);
     }
   }
 }
