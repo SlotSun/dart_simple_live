@@ -24,7 +24,7 @@ class DouyuSite implements LiveSite {
   LiveDanmaku getDanmaku() => DouyuDanmaku();
 
   @override
-  Future<List<LiveCategory>> getCategores() async {
+  Future<List<LiveCategory>> getCategories() async {
     List<LiveCategory> categories = [];
     var result =
         await HttpClient.instance.getJson("https://m.douyu.com/api/cate/list");
@@ -82,7 +82,7 @@ class DouyuSite implements LiveSite {
   }
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualites({required LiveRoomDetail detail}) async {
+  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoomDetail detail}) async {
     var data = await DouyuUtils.sign(detail.roomId, cookie: _cookie);
     List<LivePlayQuality> qualities = [];
     var result = await HttpClient.instance.postJson(

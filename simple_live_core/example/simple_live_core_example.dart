@@ -20,10 +20,10 @@ void main() async {
 
   // //var search = await site.searchRooms("东方");
 
-  // //var categores = await site.getCategores();
+  // //var categores = await site.getCategories();
   // //print(categores.length);
   // var detail = await site.getRoomDetail(roomId: '7734200');
-  // // var playQualites = await site.getPlayQualites(detail: detail);
+  // // var playQualites = await site.getPlayQualities(detail: detail);
   // // print(playQualites);
   // // var playUrls =
   // //     await site.getPlayUrls(detail: detail, quality: playQualites.first);

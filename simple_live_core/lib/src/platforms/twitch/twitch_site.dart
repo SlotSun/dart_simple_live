@@ -66,7 +66,7 @@ class TwitchSite implements LiveSite {
   }
 
   @override
-  Future<List<LiveCategory>> getCategores() {
+  Future<List<LiveCategory>> getCategories() {
     //尚不支持
     return Future.value([]);
   }
@@ -89,7 +89,7 @@ class TwitchSite implements LiveSite {
   }
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualites(
+  Future<List<LivePlayQuality>> getPlayQualities(
       {required LiveRoomDetail detail}) async {
     List<LivePlayQuality> qualities = <LivePlayQuality>[];
     var liveGpl = buildPersistedRequest(

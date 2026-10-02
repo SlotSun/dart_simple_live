@@ -58,7 +58,7 @@ class BiliBiliSite implements LiveSite {
   }
 
   @override
-  Future<List<LiveCategory>> getCategores() async {
+  Future<List<LiveCategory>> getCategories() async {
     List<LiveCategory> categories = [];
     var result = await HttpClient.instance.getJson(
       "https://api.live.bilibili.com/room/v1/Area/getList",
@@ -122,7 +122,7 @@ class BiliBiliSite implements LiveSite {
   }
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualites(
+  Future<List<LivePlayQuality>> getPlayQualities(
       {required LiveRoomDetail detail}) async {
     List<LivePlayQuality> qualities = [];
     var result = await HttpClient.instance.getJson(

@@ -84,7 +84,7 @@ class DouyinSite implements LiveSite {
   }
 
   @override
-  Future<List<LiveCategory>> getCategores() async {
+  Future<List<LiveCategory>> getCategories() async {
     List<LiveCategory> categories = [];
     var result = await HttpClient.instance.getText(
       "https://live.douyin.com/",
@@ -476,7 +476,7 @@ class DouyinSite implements LiveSite {
   }
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualites({required LiveRoomDetail detail}) async {
+  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoomDetail detail}) async {
     List<LivePlayQuality> qualities = [];
 
     var qulityList = detail.data["live_core_sdk_data"]["pull_data"]["options"]["qualities"];

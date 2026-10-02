@@ -499,7 +499,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       followUserBlock.value = FollowBlockService.instance.getBlock(siteId: site.id, roomId: roomId);
       if (liveStatus.value) {
         getSuperChatMessage();
-        getPlayQualites();
+        getPlayQualities();
         addSysMsg("开始连接弹幕服务器");
         initDanmau();
         liveDanmaku.start(detail.value?.danmakuData);
@@ -520,27 +520,27 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   }
 
   /// 初始化播放器
-  void getPlayQualites() async {
+  void getPlayQualities() async {
     currentQuality = -1;
 
     try {
-      var playQualites = await site.liveSite.getPlayQualites(detail: detail.value!);
+      var playQualities = await site.liveSite.getPlayQualities(detail: detail.value!);
 
-      if (playQualites.isEmpty) {
+      if (playQualities.isEmpty) {
         SmartDialog.showToast("无法读取播放清晰度");
         return;
       }
-      qualities.assignAll(playQualites);
+      qualities.assignAll(playQualities);
       var qualityLevel = await getQualityLevel();
       if (qualityLevel == 2) {
         //最高
         currentQuality = 0;
       } else if (qualityLevel == 0) {
         //最低
-        currentQuality = playQualites.length - 1;
+        currentQuality = playQualities.length - 1;
       } else {
         //中间值
-        int middle = (playQualites.length / 2).floor();
+        int middle = (playQualities.length / 2).floor();
         currentQuality = middle;
       }
       await getPlayUrl();

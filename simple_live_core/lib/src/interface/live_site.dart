@@ -22,7 +22,7 @@ class LiveSite {
   LiveDanmaku getDanmaku() => LiveDanmaku();
 
   /// 读取网站的分类
-  Future<List<LiveCategory>> getCategores() {
+  Future<List<LiveCategory>> getCategories() {
     return Future.value(<LiveCategory>[]);
   }
 
@@ -66,7 +66,7 @@ class LiveSite {
   }
 
   /// 读取房间清晰度
-  Future<List<LivePlayQuality>> getPlayQualites(
+  Future<List<LivePlayQuality>> getPlayQualities(
       {required LiveRoomDetail detail}) {
     return Future.value(<LivePlayQuality>[]);
   }
