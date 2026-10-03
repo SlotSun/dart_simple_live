@@ -58,7 +58,7 @@ class PlatformService extends GetxService {
   }
 
   void setDouyinCookie(String cookie) {
-    if(cookie.isEmpty) return;
+    if (cookie.isEmpty) return;
     douyinCookie = cookie;
     LocalStorageService.instance.setValue(LocalStorageService.kDouyinCookie, cookie);
     _updateDouyinAttr();
@@ -133,63 +133,89 @@ class PlatformService extends GetxService {
     dy_did = LocalStorageService.instance.getValue(LocalStorageService.kDouyuDyDid, "");
     dyLtp0 = LocalStorageService.instance.getValue(LocalStorageService.kDouyuLTP0, "");
     // set and refresh
+    _douyuSite.onCookieRefreshed = (cookie) async {
+      douyuCookie.value = cookie;
+      await LocalStorageService.instance.setValue(LocalStorageService.kDouyuCookie, cookie);
+    };
     _updateDouyuAttr();
-    _refreshDouyuCookie();
+    _refreshDouyuCookie().catchError((_) {});
   }
 
   // 本地存储-> update Core-Site attrs
   void setDouyuCookie(String cookie) {
-    if(cookie.isNotEmpty){
+    if (cookie.isNotEmpty) {
       douyuCookie.value = cookie;
       LocalStorageService.instance.setValue(LocalStorageService.kDouyuCookie, douyuCookie.value);
+      _updateDouyuAttr();
     }
   }
 
   // for douyu cookie
-  Future<void> setDouyuDidAndLtp0(String did, String ltp0) async {
-    if(did.isNotEmpty){
+  Future<void> setDouyuDidAndLtp0(String did, String newLtp0) async {
+    if (did.isNotEmpty) {
       dy_did = did;
-      LocalStorageService.instance.setValue(LocalStorageService.kDouyuDyDid, dy_did);
+      await LocalStorageService.instance.setValue(LocalStorageService.kDouyuDyDid, dy_did);
     }
-    if(ltp0.isNotEmpty){
-      dyLtp0 = ltp0;
-      LocalStorageService.instance.setValue(LocalStorageService.kDouyuLTP0, ltp0);
+    if (newLtp0.isNotEmpty) {
+      dyLtp0 = newLtp0;
+      await LocalStorageService.instance.setValue(LocalStorageService.kDouyuLTP0, dyLtp0);
     }
     // set and refresh
     _updateDouyuAttr();
-    _refreshDouyuCookie();
+    await _refreshDouyuCookie();
   }
+
   // 无论如何 都应检查cookie有效性后再保存
   // logic: 有效则不变，无效且配置did&ltp0并保存
   Future<void> _refreshDouyuCookie() async {
-    var cookie = await _douyuSite.refreshCookie(dy_did, dyLtp0);
-    if(cookie.isEmpty){
-      SmartDialog.showToast("斗鱼登录已失效，请重新登录");
+    final did = dy_did;
+    final ltp = dyLtp0;
+    var cookie = await _douyuSite.refreshCookie(did, ltp);
+    if (did != dy_did || ltp != dyLtp0) return;
+    if (did.isNotEmpty && ltp.isNotEmpty && cookie.isEmpty) {
+      Log.w('斗鱼登录已失效，请重新登录');
     }
     setDouyuCookie(cookie);
   }
 
-  void douyuLogout() async {
-    douyuCookie.value = "";
-    LocalStorageService.instance.setValue(LocalStorageService.kDouyuCookie, "");
-    dy_did = "";
-    LocalStorageService.instance.setValue(LocalStorageService.kDouyuDyDid, "");
-    dyLtp0 = "";
-    LocalStorageService.instance.setValue(LocalStorageService.kDouyuLTP0, "");
+  /// Complete a passport login only after it produces a usable playback cookie.
+  Future<bool> loginDouyuWithPassport(String did, String passportLtp0) async {
+    final cookie = await _douyuSite.refreshCookie(did, passportLtp0, force: true);
+    if (!cookie.split(';').any((part) => part.trim().startsWith('acf_jwt_token='))) {
+      return false;
+    }
+    dy_did = did;
+    dyLtp0 = passportLtp0;
+    douyuCookie.value = cookie;
+    await LocalStorageService.instance.setValue(LocalStorageService.kDouyuDyDid, did);
+    await LocalStorageService.instance.setValue(LocalStorageService.kDouyuLTP0, passportLtp0);
+    await LocalStorageService.instance.setValue(LocalStorageService.kDouyuCookie, cookie);
     _updateDouyuAttr();
+    return true;
+  }
+
+  Future<void> douyuLogout() async {
+    douyuCookie.value = "";
+    dy_did = "";
+    dyLtp0 = "";
+    _updateDouyuAttr();
+    await LocalStorageService.instance.setValue(LocalStorageService.kDouyuCookie, "");
+    await LocalStorageService.instance.setValue(LocalStorageService.kDouyuDyDid, "");
+    await LocalStorageService.instance.setValue(LocalStorageService.kDouyuLTP0, "");
     if (Platform.isAndroid || Platform.isIOS) {
       CookieManager cookieManager = CookieManager.instance();
       await cookieManager.deleteAllCookies();
     }
   }
 
-  void _updateDouyuAttr(){
-    Map<String,String> params = {
+  void _updateDouyuAttr() {
+    Map<String, String> params = {
       'cookie': douyuCookie.value,
+      'dy_did': dy_did,
+      'ltp0': dyLtp0,
     };
     _douyuSite.setSiteAttrs(params);
   }
-
 
   // ==================== 生命周期 ====================
 

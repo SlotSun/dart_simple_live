@@ -48,12 +48,10 @@ class AccountPage extends GetView<AccountController> {
               ),
               title: const Text("斗鱼直播"),
               subtitle: Text(
-                PlatformService.instance.douyuCookie.value.isEmpty ? "点击配置Cookie" : "已自定义Cookie",
+                PlatformService.instance.douyuCookie.value.isEmpty ? "扫码登录 / 手动配置" : "已配置登录，可重新扫码",
               ),
               onTap: controller.douyuTap,
-              trailing: PlatformService.instance.douyuCookie.value.isNotEmpty
-                  ? const Icon(Icons.logout)
-                  : const Icon(Icons.chevron_right),
+              trailing: const Icon(Icons.chevron_right),
             ),
           ),
           Obx(

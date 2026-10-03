@@ -16,9 +16,41 @@ class DouyuSite implements LiveSite {
 
   String _cookie = '';
 
-  String _dy_did = '';
+  String _dyDid = '';
 
   String _ltp0 = '';
+
+  Future<void> Function(String cookie)? onCookieRefreshed;
+  Future<String>? _refreshingCookie;
+  DateTime? _lastRefreshFailure;
+  int _cookieGeneration = 0;
+
+  Future<void> _ensurePlaybackCookie() async {
+    if (_dyDid.isEmpty ||
+        _ltp0.isEmpty ||
+        !DouyuUtils.isCookieExpired(_cookie)) {
+      return;
+    }
+    if (_lastRefreshFailure != null &&
+        DateTime.now().difference(_lastRefreshFailure!) <
+            const Duration(seconds: 30)) {
+      return;
+    }
+    try {
+      _refreshingCookie ??= refreshCookie(_dyDid, _ltp0);
+      final refreshed = await _refreshingCookie!;
+      if (DouyuUtils.isCookieExpired(refreshed)) {
+        _lastRefreshFailure = DateTime.now();
+      } else {
+        _lastRefreshFailure = null;
+        await onCookieRefreshed?.call(refreshed);
+      }
+    } catch (_) {
+      _lastRefreshFailure = DateTime.now();
+    } finally {
+      _refreshingCookie = null;
+    }
+  }
 
   @override
   LiveDanmaku getDanmaku() => DouyuDanmaku();
@@ -82,7 +114,9 @@ class DouyuSite implements LiveSite {
   }
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoomDetail detail}) async {
+  Future<List<LivePlayQuality>> getPlayQualities(
+      {required LiveRoomDetail detail}) async {
+    await _ensurePlaybackCookie();
     var data = await DouyuUtils.sign(detail.roomId, cookie: _cookie);
     List<LivePlayQuality> qualities = [];
     var result = await HttpClient.instance.postJson(
@@ -120,6 +154,7 @@ class DouyuSite implements LiveSite {
   Future<LivePlayUrl> getPlayUrls(
       {required LiveRoomDetail detail,
       required LivePlayQuality quality}) async {
+    await _ensurePlaybackCookie();
     var data = quality.data as DouyuPlayData;
 
     List<String> urls = [];
@@ -129,7 +164,7 @@ class DouyuSite implements LiveSite {
         // if expire=300 and cdn is ws then add &expire=0
         // user must be live in oversea
         // cookie is better, cookie needs refreshed every 7 days
-        if(url.contains('expire=300') && url.contains('fcdn=ws')){
+        if (url.contains('expire=300') && url.contains('fcdn=ws')) {
           url = '$url&expire=0';
         }
         urls.add(url);
@@ -139,7 +174,8 @@ class DouyuSite implements LiveSite {
   }
 
   Future<String> getPlayUrl(String roomId, int rate, String cdn) async {
-    var sign = await DouyuUtils.sign(roomId, rate: rate, cdn: cdn, cookie: _cookie);
+    var sign =
+        await DouyuUtils.sign(roomId, rate: rate, cdn: cdn, cookie: _cookie);
     var result = await HttpClient.instance.postJson(
       "https://www.douyu.com/lapi/live/getH5PlayV1/$roomId",
       data: sign,
@@ -328,18 +364,31 @@ class DouyuSite implements LiveSite {
     return Future.value([]);
   }
 
-  Future<String> refreshCookie(String dy_did, String ltp0) async {
-    var newCookie = await DouyuUtils.refreshCookie(did: dy_did, ltp0: ltp0, cookie: _cookie);
-    _cookie = newCookie;
+  Future<String> refreshCookie(String dy_did, String ltp0,
+      {bool force = false}) async {
+    final generation = _cookieGeneration;
+    var newCookie = await DouyuUtils.refreshCookie(
+      did: dy_did,
+      ltp0: ltp0,
+      cookie: force ? '' : _cookie,
+    );
+    if (generation != _cookieGeneration) return '';
+    if (newCookie.isNotEmpty) {
+      _cookie = newCookie;
+    }
     return newCookie;
   }
 
   @override
   Future<void> setSiteAttrs(Map<String, dynamic> data) async {
-    if(data.containsKey('cookie')){
+    _cookieGeneration++;
+    _lastRefreshFailure = null;
+    if (data.containsKey('cookie')) {
       _cookie = data['cookie'] as String;
       DouyuUtils.setDyDid(_cookie);
     }
+    if (data.containsKey('dy_did')) _dyDid = data['dy_did'] as String;
+    if (data.containsKey('ltp0')) _ltp0 = data['ltp0'] as String;
   }
 }
 

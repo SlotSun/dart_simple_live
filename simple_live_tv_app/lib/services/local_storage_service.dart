@@ -105,6 +105,10 @@ class LocalStorageService extends GetxService {
   /// 哔哩哔哩cookie
   static const String kBilibiliCookie = "BilibiliCookie";
 
+  static const String kDouyuCookie = 'DouyuCookie';
+  static const String kDouyuDid = 'DouyuDid';
+  static const String kDouyuLtp0 = 'DouyuLtp0';
+
   ///主题色
   static const String kStyleColor = "kStyleColor";
 
@@ -138,7 +142,9 @@ class LocalStorageService extends GetxService {
   T getValue<T>(dynamic key, T defaultValue) {
     try {
       var value = settingsBox.get(key, defaultValue: defaultValue) as T;
-      Log.d("Get LocalStorage：$key\r\n$value");
+      if (!key.toString().startsWith("Douyu")) {
+        Log.d("Get LocalStorage：$key\r\n$value");
+      }
       return value;
     } catch (e) {
       Log.logPrint(e);
@@ -147,7 +153,9 @@ class LocalStorageService extends GetxService {
   }
 
   Future setValue<T>(dynamic key, T value) async {
-    Log.d("Set LocalStorage：$key\r\n$value");
+    if (!key.toString().startsWith("Douyu")) {
+      Log.d("Set LocalStorage：$key\r\n$value");
+    }
     return await settingsBox.put(key, value);
   }
 

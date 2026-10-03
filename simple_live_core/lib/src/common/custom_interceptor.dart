@@ -6,6 +6,10 @@ class CustomInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     options.extra["ts"] = DateTime.now().millisecondsSinceEpoch;
+    if (options.extra['sensitive'] == true) {
+      super.onRequest(options, handler);
+      return;
+    }
     if (CoreLog.requestLogType == RequestLogType.all) {
       CoreLog.i(
         '''[HTTP Request] [${options.method}]
@@ -23,6 +27,10 @@ Request Headers：${options.headers}''',
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
+    if (err.requestOptions.extra['sensitive'] == true) {
+      super.onError(err, handler);
+      return;
+    }
     var time =
         DateTime.now().millisecondsSinceEpoch - err.requestOptions.extra["ts"];
     if (CoreLog.requestLogType == RequestLogType.all) {
@@ -49,6 +57,10 @@ Response Data：${err.response?.data}''', err.stackTrace);
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
+    if (response.requestOptions.extra['sensitive'] == true) {
+      super.onResponse(response, handler);
+      return;
+    }
     var time = DateTime.now().millisecondsSinceEpoch -
         response.requestOptions.extra["ts"];
     if (CoreLog.requestLogType == RequestLogType.all) {

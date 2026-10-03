@@ -98,39 +98,71 @@ class AccountController extends GetxController {
   }
 
   void douyuTap() async {
-    if (PlatformService.instance.douyuCookie.value.isNotEmpty) {
-      var result = await Utils.showAlertDialog("确定要清除斗鱼Cookie吗？", title: "清除Cookie");
-      if (result) {
-        PlatformService.instance.douyuLogout();
-      }
-    } else {
-      final douyuParams = await Utils.showEditTextsDialog([
-        TextEditItem(
-          value: PlatformService.instance.douyuCookie.value,
-          label: 'cookie',
-          hintText: 'dy_did=...; acf_did=...;etc',
-          key: 'cookie',
-        ),
-        TextEditItem(
-          value: PlatformService.instance.dy_did,
-          label: 'dy_did',
-          hintText: '10000000000000000000000000001501',
-          key: 'dy_did',
-        ),
-        TextEditItem(
-          value: PlatformService.instance.dyLtp0,
-          label: 'ltp0',
-          hintText: '自动更新cookie',
-          obscureText: true,
-          key: 'ltp0',
-        ),
-      ], title: '请输入斗鱼各项参数');
-      if (douyuParams == null || douyuParams.isEmpty) return;
-      var dyCookie = douyuParams['cookie']??'';
-      var dyDid = douyuParams['dy_did']??'';
-      var dyLtp0 = douyuParams['ltp0']??'';
-      PlatformService.instance.setDouyuCookie(dyCookie);
-      await PlatformService.instance.setDouyuDidAndLtp0(dyDid, dyLtp0);
-    }
+    Utils.showBottomSheet(
+      title: '斗鱼账号',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.qr_code),
+            title: const Text('扫码登录'),
+            subtitle: const Text('用另一台设备上的斗鱼 APP 扫码'),
+            onTap: () {
+              Get.back();
+              Get.toNamed(RoutePath.kDouyuQRLogin);
+            },
+          ),
+          if (PlatformService.instance.douyuCookie.value.isNotEmpty)
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('退出斗鱼登录'),
+              onTap: () async {
+                Get.back();
+                if (await Utils.showAlertDialog('确定要退出斗鱼登录吗？', title: '退出登录')) {
+                  PlatformService.instance.douyuLogout();
+                }
+              },
+            ),
+          ListTile(
+            leading: const Icon(Icons.edit_outlined),
+            title: const Text('手动配置 Cookie'),
+            onTap: () {
+              Get.back();
+              douyuCookieLogin();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void douyuCookieLogin() async {
+    final douyuParams = await Utils.showEditTextsDialog([
+      TextEditItem(
+        value: PlatformService.instance.douyuCookie.value,
+        label: 'cookie',
+        hintText: 'dy_did=...; acf_did=...;etc',
+        key: 'cookie',
+      ),
+      TextEditItem(
+        value: PlatformService.instance.dy_did,
+        label: 'dy_did',
+        hintText: '10000000000000000000000000001501',
+        key: 'dy_did',
+      ),
+      TextEditItem(
+        value: PlatformService.instance.dyLtp0,
+        label: 'ltp0',
+        hintText: '自动更新cookie',
+        obscureText: true,
+        key: 'ltp0',
+      ),
+    ], title: '请输入斗鱼各项参数');
+    if (douyuParams == null || douyuParams.isEmpty) return;
+    var dyCookie = douyuParams['cookie'] ?? '';
+    var dyDid = douyuParams['dy_did'] ?? '';
+    var dyLtp0 = douyuParams['ltp0'] ?? '';
+    PlatformService.instance.setDouyuCookie(dyCookie);
+    await PlatformService.instance.setDouyuDidAndLtp0(dyDid, dyLtp0);
   }
 }
