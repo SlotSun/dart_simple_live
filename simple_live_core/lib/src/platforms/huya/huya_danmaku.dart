@@ -256,7 +256,6 @@ class HuyaDanmaku implements LiveDanmaku {
         stream = TarsInputStream(stream.readBytes(1, false));
         wsPushMessageV2.readFrom(stream);
         for (var item in wsPushMessageV2.vMsgItem) {
-          CoreLog.i("huya-danmaku-type22-uri: ${item.iUri}");
           // match uri
           // '110003': ai(666,大气，NB etc)
           // '2001314': sc

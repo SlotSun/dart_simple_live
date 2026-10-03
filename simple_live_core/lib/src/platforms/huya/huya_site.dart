@@ -170,8 +170,13 @@ class HuyaSite implements LiveSite {
     var ls = <String>[];
     for (var element in quality.data["urls"]) {
       var line = element as HuyaLineModel;
-      var url = await getPlayUrl(line, quality.data["bitRate"]);
-      ls.add(url);
+      try {
+        var url = await getPlayUrl(line, quality.data["bitRate"]);
+        ls.add(url);
+      } catch (e, s) {
+        // if 403,skip
+        CoreLog.e('huya-getPlayUrl error: $e', s);
+      }
     }
     return LivePlayUrl(
       urls: ls,
@@ -418,7 +423,7 @@ class HuyaSite implements LiveSite {
   Future<String> getCndTokenInfoEx(String stream) async {
     var func = "getCdnTokenInfoEx";
     var tid = HuyaUserId();
-    tid.sHuYaUA = "pc_exe&7060000&official";
+    tid.sHuYaUA = HuyaRequestParams.requestHuyaUA;
     var tReq = GetCdnTokenExReq();
     tReq.tId = tid;
     tReq.sStreamName = stream;
