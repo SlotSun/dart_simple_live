@@ -227,11 +227,11 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     setPlayer();
   }
 
-  void setPlayer() async {
+  Future<void> setPlayer() async {
     currentLineInfo.value = "线路${currentLineIndex + 1}";
     errorMsg.value = "";
 
-    player.open(
+    await player.open(
       Media(
         playUrls[currentLineIndex],
         httpHeaders: playHeaders,
@@ -241,8 +241,53 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     Log.d("播放链接\r\n：${playUrls[currentLineIndex]}");
   }
 
+  bool _recoveringDouyu = false;
+  DateTime? _lastDouyuRecovery;
+
+  /// Expired stream URLs must be fetched again, rather than repeatedly reopened.
+  Future<bool> _recoverDouyuStream() async {
+    if (site.id != Constant.kDouyu ||
+        detail.value == null ||
+        currentQuality < 0 ||
+        currentQuality >= qualites.length) {
+      return false;
+    }
+    if (_recoveringDouyu) return true;
+    final now = DateTime.now();
+    if (_lastDouyuRecovery != null &&
+        now.difference(_lastDouyuRecovery!) < const Duration(seconds: 30)) {
+      return false;
+    }
+    _recoveringDouyu = true;
+    _lastDouyuRecovery = now;
+    final room = detail.value!;
+    final qualityIndex = currentQuality;
+    final quality = qualites[qualityIndex];
+    try {
+      await Future<void>.delayed(const Duration(seconds: 1));
+      if (isClosed) return true;
+      final fresh =
+          await site.liveSite.getPlayUrls(detail: room, quality: quality);
+      if (isClosed || detail.value != room || currentQuality != qualityIndex) {
+        return true;
+      }
+      if (fresh.urls.isEmpty) return false;
+      playUrls.assignAll(fresh.urls);
+      playHeaders = fresh.headers;
+      currentLineIndex = 0;
+      mediaErrorRetryCount = 0;
+      await setPlayer();
+      return true;
+    } catch (_) {
+      return false;
+    } finally {
+      _recoveringDouyu = false;
+    }
+  }
+
   @override
   void mediaEnd() async {
+    if (await _recoverDouyuStream()) return;
     if (mediaErrorRetryCount < 2) {
       Log.d("播放结束，尝试第${mediaErrorRetryCount + 1}次刷新");
       if (mediaErrorRetryCount == 1) {
@@ -269,6 +314,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   int mediaErrorRetryCount = 0;
   @override
   void mediaError(String error) async {
+    if (await _recoverDouyuStream()) return;
     if (mediaErrorRetryCount < 2) {
       Log.d("播放失败，尝试第${mediaErrorRetryCount + 1}次刷新");
       if (mediaErrorRetryCount == 1) {

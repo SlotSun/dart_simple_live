@@ -139,7 +139,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
     scrollController.addListener(scrollListener);
     subscription = EventBus.instance.listen(Constant.kUpdateDanmaku, (data) {
-      if(danmakuController?.option.fontSize != data as double ){
+      if (danmakuController?.option.fontSize != data as double) {
         updateDanmuOption(danmakuController?.option.copyWith(fontSize: data));
       }
     });
@@ -384,7 +384,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       bool contain = superChats.any(
         (s) => s.price == scData.price && s.userName == scData.userName && s.message == scData.message,
       );
-      if(!contain){
+      if (!contain) {
         superChats.insert(0, msg.data);
         if (superChats.length > 20) {
           superChats.removeRange(20, superChats.length);
@@ -579,7 +579,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     currentLineInfo.value = "线路${currentLineIndex + 1}";
     //重置错误次数
     mediaErrorRetryCount = 0;
-    initPlaylist();
+    await initPlaylist();
   }
 
   void changePlayLine(int index) {
@@ -589,7 +589,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     setPlayer();
   }
 
-  void initPlaylist() async {
+  Future<void> initPlaylist() async {
     currentLineInfo.value = "线路${currentLineIndex + 1}";
     errorMsg.value = "";
 
@@ -614,8 +614,49 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     await player.jump(currentLineIndex);
   }
 
+  bool _recoveringDouyu = false;
+  DateTime? _lastDouyuRecovery;
+
+  /// Expired stream URLs must be fetched again, rather than repeatedly reopened.
+  Future<bool> _recoverDouyuStream() async {
+    if (site.id != Constant.kDouyu ||
+        detail.value == null ||
+        currentQuality < 0 ||
+        currentQuality >= qualities.length) {
+      return false;
+    }
+    if (_recoveringDouyu) return true;
+    final now = DateTime.now();
+    if (_lastDouyuRecovery != null && now.difference(_lastDouyuRecovery!) < const Duration(seconds: 30)) {
+      return false;
+    }
+    _recoveringDouyu = true;
+    _lastDouyuRecovery = now;
+    final room = detail.value!;
+    final qualityIndex = currentQuality;
+    final quality = qualities[qualityIndex];
+    try {
+      await Future<void>.delayed(const Duration(seconds: 1));
+      if (isClosed) return true;
+      final fresh = await site.liveSite.getPlayUrls(detail: room, quality: quality);
+      if (isClosed || detail.value != room || currentQuality != qualityIndex) return true;
+      if (fresh.urls.isEmpty) return false;
+      playUrls.assignAll(fresh.urls);
+      playHeaders = fresh.headers;
+      currentLineIndex = 0;
+      mediaErrorRetryCount = 0;
+      await initPlaylist();
+      return true;
+    } catch (_) {
+      return false;
+    } finally {
+      _recoveringDouyu = false;
+    }
+  }
+
   @override
   void mediaEnd() async {
+    if (await _recoverDouyuStream()) return;
     super.mediaEnd();
     if (mediaErrorRetryCount < 2) {
       Log.d("播放结束，尝试第${mediaErrorRetryCount + 1}次刷新");
@@ -643,6 +684,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   int mediaErrorRetryCount = 0;
   @override
   void mediaError(String error) async {
+    if (await _recoverDouyuStream()) return;
     super.mediaEnd();
     if (mediaErrorRetryCount < 2) {
       Log.d("播放失败，尝试第${mediaErrorRetryCount + 1}次刷新");
