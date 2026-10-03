@@ -34,7 +34,7 @@ class AppNavigator {
         actions: [
           TextButton(
             onPressed: () {
-              AppSettingsController.instance.setBiliBiliLoginTip(false);
+              AppSettingsController.instance.setBilibiliLoginTip(false);
               Get.back(result: false);
             },
             child: const Text("不再提示"),

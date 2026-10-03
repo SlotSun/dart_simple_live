@@ -159,7 +159,7 @@ class PlaySettingsPage extends GetView<AppSettingsController> {
                       title: "进入小窗隐藏弹幕",
                       value: controller.pipHideDanmu.value,
                       onChanged: (e) {
-                        controller.setPIPHideDanmu(e);
+                        controller.setPipHideDanmu(e);
                       },
                     ),
                   ),

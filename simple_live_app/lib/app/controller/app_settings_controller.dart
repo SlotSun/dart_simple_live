@@ -8,21 +8,29 @@ import 'package:path_provider/path_provider.dart';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/sites.dart';
+import 'package:simple_live_app/app/utils/setting_gen_util.dart';
 import 'package:simple_live_app/models/db/follow_snapshot.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
+
+part 'app_settings_controller.g.dart';
 
 class AppSettingsController extends GetxController {
   static AppSettingsController get instance => Get.find<AppSettingsController>();
 
   /// 缩放模式
+  @SettingItem(defaultValue: 0, key: LocalStorageService.kPlayerScaleMode)
   var scaleMode = 0.obs;
 
+  @SettingItem(defaultValue: 16 / 9, key: LocalStorageService.kPlayerAspectByUser)
   var aspectByUser = (16 / 9).obs;
 
+  @SettingItem(defaultValue: 16, key: LocalStorageService.kPlayerAspectWidth)
   var aspectWidth = 16.obs;
 
+  @SettingItem(defaultValue: 9, key: LocalStorageService.kPlayerAspectHeight)
   var aspectHeight = 9.obs;
 
+  @SettingItem(defaultValue: 0, key: LocalStorageService.kThemeMode)
   var themeMode = 0.obs;
 
   var firstRun = false;
@@ -33,19 +41,18 @@ class AppSettingsController extends GetxController {
 
   @override
   Future<void> onInit() async {
-    themeMode.value = LocalStorageService.instance.getValue(LocalStorageService.kThemeMode, 0);
+    getThemeMode();
     firstRun = LocalStorageService.instance.getValue(LocalStorageService.kFirstRun, true);
-    danmuSize.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmuSize, 16.0);
-    danmuOpacity.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmuOpacity, 1.0);
-    danmuArea.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmuArea, 0.8);
-    danmuSpeed.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmuSpeed, 10.0);
-    danmuEnable.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmuEnable, true);
-    danmakuMaskEnable.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmakuMaskEnable, false);
-    danmuEmoticonEnable.value =
-        LocalStorageService.instance.getValue(LocalStorageService.kDanmuEmoticonEnable, true);
-    danmuStrokeWidth.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmuStrokeWidth, 2.0);
-    danmuTopMargin.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmuTopMargin, 0.0);
-    danmuBottomMargin.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmuBottomMargin, 0.0);
+    getDanmuSize();
+    getDanmuOpacity();
+    getDanmuArea();
+    getDanmuSpeed();
+    getDanmuEnable();
+    getDanmakuMaskEnable();
+    getDanmuEmoticonEnable();
+    getDanmuStrokeWidth();
+    getDanmuTopMargin();
+    getDanmuBottomMargin();
     danmuFontWeight.value = LocalStorageService.instance.getValue(
         LocalStorageService.kDanmuFontWeight,
         // ignore: deprecated_member_use
@@ -53,90 +60,72 @@ class AppSettingsController extends GetxController {
     // limit of canvas_danmaku interface, there is bug if change index to value
     // and now, value was set 0..8, the value needs ..=FontWeight[index] after
     // migration, so marked it, next migration depends on canvas_danmaku upgrade
-    danmakuFontClamped.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmakuFontClamped, false);
-    danmakuFontClampUpSens.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmakuFontClampUpSens, 9.0);
-    danmakuFontClampDownSens.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmakuFontClampDownSens, 5.0);
+    getDanmakuFontClamped();
+    getDanmakuFontClampUpSens();
+    getDanmakuFontClampDownSens();
 
-    hardwareDecode.value = LocalStorageService.instance.getValue(LocalStorageService.kHardwareDecode, true);
-    chatTextSize.value = LocalStorageService.instance.getValue(LocalStorageService.kChatTextSize, 14.0);
+    getHardwareDecode();
+    getChatTextSize();
 
-    chatTextGap.value = LocalStorageService.instance.getValue(LocalStorageService.kChatTextGap, 4.0);
+    getChatTextGap();
 
-    chatBubbleStyle.value = LocalStorageService.instance.getValue(
-      LocalStorageService.kChatBubbleStyle,
-      false,
-    );
+    getChatBubbleStyle();
 
-    qualityLevel.value = LocalStorageService.instance.getValue(LocalStorageService.kQualityLevel, 2);
-    qualityLevelCellular.value = LocalStorageService.instance.getValue(LocalStorageService.kQualityLevelCellular, 1);
+    getQualityLevel();
+    getQualityLevelCellular();
 
-    autoExitEnable.value = LocalStorageService.instance.getValue(LocalStorageService.kAutoExitEnable, false);
+    getAutoExitEnable();
 
-    autoExitDuration.value = LocalStorageService.instance.getValue(LocalStorageService.kAutoExitDuration, 60);
+    getAutoExitDuration();
 
-    roomAutoExitDuration.value = LocalStorageService.instance.getValue(LocalStorageService.kRoomAutoExitDuration, 60);
+    getRoomAutoExitDuration();
 
-    playerCompatMode.value = LocalStorageService.instance.getValue(LocalStorageService.kPlayerCompatMode, false);
+    getPlayerCompatMode();
 
-    playerAutoPause.value = LocalStorageService.instance.getValue(LocalStorageService.kPlayerAutoPause, false);
+    getPlayerAutoPause();
 
-    playerForceHttps.value = LocalStorageService.instance.getValue(LocalStorageService.kPlayerForceHttps, false);
+    getPlayerForceHttps();
 
-    douyinHlsFirst.value = LocalStorageService.instance.getValue(LocalStorageService.kDouyinHlsFirst, false);
+    getDouyinHlsFirst();
 
-    autoFullScreen.value = LocalStorageService.instance.getValue(LocalStorageService.kAutoFullScreen, false);
+    getAutoFullScreen();
 
-    verticalDragLock.value = LocalStorageService.instance.getValue(LocalStorageService.kVerticalDragLock, false);
+    getVerticalDragLock();
 
     // ignore: invalid_use_of_protected_member
     shieldList.value = LocalStorageService.instance.shieldBox.values.toSet();
 
-    scaleMode.value = LocalStorageService.instance.getValue(
-      LocalStorageService.kPlayerScaleMode,
-      0,
-    );
+    getScaleMode();
 
-    aspectByUser.value = LocalStorageService.instance.getValue(
-      LocalStorageService.kPlayerAspectByUser,
-      16 / 9,
-    );
+    getAspectByUser();
 
-    aspectWidth.value = LocalStorageService.instance.getValue(
-      LocalStorageService.kPlayerAspectWidth,
-      16,
-    );
+    getAspectWidth();
 
-    aspectHeight.value = LocalStorageService.instance.getValue(
-      LocalStorageService.kPlayerAspectHeight,
-      9,
-    );
+    getAspectHeight();
 
-    playerVolume.value = LocalStorageService.instance.getValue(
-      LocalStorageService.kPlayerVolume,
-      100.0,
-    );
-    pipHideDanmu.value = LocalStorageService.instance.getValue(LocalStorageService.kPIPHideDanmu, true);
+    getPlayerVolume();
+    getPipHideDanmu();
 
-    windowMaxAuto.value = LocalStorageService.instance.getValue(LocalStorageService.kWindowMaxAuto, false);
-    windowMaxState.value = LocalStorageService.instance.getValue(LocalStorageService.kWindowMaxState, false);
+    getWindowMaxAuto();
+    getWindowMaxState();
 
-    windowPipX.value = LocalStorageService.instance.getValue(LocalStorageService.kWindowPipX, 0.0);
-    windowPipY.value = LocalStorageService.instance.getValue(LocalStorageService.kWindowPipY, 0.0);
-    windowPipWidth.value = LocalStorageService.instance.getValue(LocalStorageService.kWindowPipWidth, 400.0);
-    windowPipHeight.value = LocalStorageService.instance.getValue(LocalStorageService.kWindowPipHeight, 225.0);
+    getWindowPipX();
+    getWindowPipY();
+    getWindowPipWidth();
+    getWindowPipHeight();
 
-    bilibiliLoginTip.value = LocalStorageService.instance.getValue(LocalStorageService.kBilibiliLoginTip, true);
+    getBilibiliLoginTip();
 
-    playerBufferSize.value = LocalStorageService.instance.getValue(LocalStorageService.kPlayerBufferSize, 32);
+    getPlayerBufferSize();
 
-    logEnable.value = LocalStorageService.instance.getValue(LocalStorageService.kLogEnable, false);
+    getLogEnable();
     if (logEnable.value) {
       Log.initWriter();
     }
 
-    firebaseEnable.value = LocalStorageService.instance.getValue(LocalStorageService.kFirebaseEnable, true);
+    getFirebaseEnable();
 
-    customPlayerOutput.value = LocalStorageService.instance.getValue(LocalStorageService.kCustomPlayerOutput, false);
+    getCustomPlayerOutput();
 
     videoOutputDriver.value = LocalStorageService.instance.getValue(
       LocalStorageService.kVideoOutputDriver,
@@ -163,50 +152,38 @@ class AppSettingsController extends GetxController {
       Platform.isAndroid ? "mediacodec" : "auto",
     );
 
-    videoDoubleBuffering.value = LocalStorageService.instance.getValue(
-      LocalStorageService.kVideoDoubleBuffering,
-      false,
-    );
+    getVideoDoubleBuffering();
 
-    enableRtxVsr.value = LocalStorageService.instance.getValue(
-      LocalStorageService.kEnableRtxVsr,
-      false,
-    );
+    getEnableRtxVsr();
 
-    autoUpdateFollowEnable.value =
-        LocalStorageService.instance.getValue(LocalStorageService.kAutoUpdateFollowEnable, true);
+    getAutoUpdateFollowEnable();
 
-    autoUpdateFollowDuration.value =
-        LocalStorageService.instance.getValue(LocalStorageService.kUpdateFollowDuration, 10);
+    getAutoUpdateFollowDuration();
 
-    updateFollowThreadCount.value =
-        LocalStorageService.instance.getValue(LocalStorageService.kUpdateFollowThreadCount, 4);
+    getUpdateFollowThreadCount();
 
-    followSnapshotEnable.value =
-        LocalStorageService.instance.getValue(LocalStorageService.kFollowSnapshotEnable, false);
+    getFollowSnapshotEnable();
 
-    dormancyThreshold.value = LocalStorageService.instance.getValue(LocalStorageService.kDormancyThreshold, 0);
+    getDormancyThreshold();
 
     // danmaku-去重参数
-    danmuFrequencyControl.value =
-        LocalStorageService.instance.getValue(LocalStorageService.kDanmuFrequencyControl, false);
+    getDanmuFrequencyControl();
 
-    danmuMaxFrequency.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmuMaxFrequency, 3);
+    getDanmuMaxFrequency();
 
-    danmuTextNormalization.value =
-        LocalStorageService.instance.getValue(LocalStorageService.kDanmuTextNormalization, true);
+    getDanmuTextNormalization();
 
-    danmuWindowMs.value = LocalStorageService.instance.getValue(LocalStorageService.kDanmuWindowMs, 15);
+    getDanmuWindowMs();
     dbVer = LocalStorageService.instance.getValue(LocalStorageService.kHiveDbVer, 10708);
 
     followSortMethod.value = SortMethodStore.fromStore(LocalStorageService.instance
         .getValue(LocalStorageService.kFollowSortMethod, SortMethod.watchDuration.storeValue));
 
-    followStyleNotGrid.value = LocalStorageService.instance.getValue(LocalStorageService.kFollowStyleNotGrid, true);
+    getFollowStyleNotGrid();
 
-    hideOfflineFollow.value = LocalStorageService.instance.getValue(LocalStorageService.kHideOfflineFollow, false);
+    getHideOfflineFollow();
 
-    hideRemoveFollowButton.value = LocalStorageService.instance.getValue(LocalStorageService.kHideRemoveFollow, true);
+    getHideRemoveFollowButton();
 
     followSnapshot = LocalStorageService.instance.getNullValue(LocalStorageService.kFollowSnapshot, null);
 
@@ -219,11 +196,11 @@ class AppSettingsController extends GetxController {
 
   Future<void> initDataPath() async {
     dbPath = (await getApplicationSupportDirectory()).path;
-    if(!Platform.isAndroid && !Platform.isIOS){
+    if (!Platform.isAndroid && !Platform.isIOS) {
       // linux 应该有问题，但我不熟悉，先这么写
       var pathPortable = p.join(p.dirname(Platform.resolvedExecutable), 'data_hive_ce');
       bool dirPortableExist = await Directory(pathPortable).exists();
-      if(dirPortableExist){
+      if (dirPortableExist) {
         dbPath = pathPortable;
       }
     }
@@ -273,91 +250,43 @@ class AppSettingsController extends GetxController {
     LocalStorageService.instance.setValue(LocalStorageService.kFirstRun, false);
   }
 
+  @SettingItem(defaultValue: true, key: LocalStorageService.kHardwareDecode)
   var hardwareDecode = true.obs;
 
-  void setHardwareDecode(bool e) {
-    hardwareDecode.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kHardwareDecode, e);
-  }
-
+  @SettingItem(defaultValue: 14.0, key: LocalStorageService.kChatTextSize)
   var chatTextSize = 14.0.obs;
 
-  void setChatTextSize(double e) {
-    chatTextSize.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kChatTextSize, e);
-  }
-
+  @SettingItem(defaultValue: 4.0, key: LocalStorageService.kChatTextGap)
   var chatTextGap = 4.0.obs;
 
-  void setChatTextGap(double e) {
-    chatTextGap.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kChatTextGap, e);
-  }
-
+  @SettingItem(defaultValue: false, key: LocalStorageService.kChatBubbleStyle)
   var chatBubbleStyle = false.obs;
 
-  void setChatBubbleStyle(bool e) {
-    chatBubbleStyle.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kChatBubbleStyle, e);
-  }
-
+  @SettingItem(defaultValue: 16.0, key: LocalStorageService.kDanmuSize)
   var danmuSize = 16.0.obs;
 
-  void setDanmuSize(double e) {
-    danmuSize.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmuSize, e);
-  }
-
+  @SettingItem(defaultValue: 10.0, key: LocalStorageService.kDanmuSpeed)
   var danmuSpeed = 10.0.obs;
 
-  void setDanmuSpeed(double e) {
-    danmuSpeed.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmuSpeed, e);
-  }
-
+  @SettingItem(defaultValue: 0.8, key: LocalStorageService.kDanmuArea)
   var danmuArea = 0.8.obs;
 
-  void setDanmuArea(double e) {
-    danmuArea.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmuArea, e);
-  }
-
+  @SettingItem(defaultValue: 1.0, key: LocalStorageService.kDanmuOpacity)
   var danmuOpacity = 1.0.obs;
 
-  void setDanmuOpacity(double e) {
-    danmuOpacity.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmuOpacity, e);
-  }
-
+  @SettingItem(defaultValue: true, key: LocalStorageService.kDanmuEnable)
   var danmuEnable = true.obs;
 
-  void setDanmuEnable(bool e) {
-    danmuEnable.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmuEnable, e);
-  }
-
+  @SettingItem(defaultValue: false, key: LocalStorageService.kDanmakuMaskEnable)
   var danmakuMaskEnable = false.obs;
-
-  void setDanmakuMaskEnable(bool e) {
-    danmakuMaskEnable.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmakuMaskEnable, e);
-  }
 
   /// 弹幕表情包：把 B 站下发的表情渲染成图片。
   /// 关闭后仍然是原来的占位符文本，只是不再下载与合成图片。
+  @SettingItem(defaultValue: true, key: LocalStorageService.kDanmuEmoticonEnable)
   var danmuEmoticonEnable = true.obs;
 
-  void setDanmuEmoticonEnable(bool e) {
-    danmuEmoticonEnable.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmuEmoticonEnable, e);
-  }
-
+  @SettingItem(defaultValue: 2.0, key: LocalStorageService.kDanmuStrokeWidth)
   var danmuStrokeWidth = 2.0.obs;
-
-  void setDanmuStrokeWidth(double e) {
-    danmuStrokeWidth.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmuStrokeWidth, e);
-  }
 
   // ignore: deprecated_member_use
   var danmuFontWeight = FontWeight.normal.index.obs;
@@ -367,96 +296,47 @@ class AppSettingsController extends GetxController {
     LocalStorageService.instance.setValue(LocalStorageService.kDanmuFontWeight, e);
   }
 
+  @SettingItem(defaultValue: false, key: LocalStorageService.kDanmakuFontClamped)
   var danmakuFontClamped = false.obs;
-  void setDanmakuFontClamped(bool e) {
-    danmakuFontClamped.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmakuFontClamped, e);
-  }
+
   var danmakuFontResize = 16.0;
 
+  @SettingItem(defaultValue: 9.0, key: LocalStorageService.kDanmakuFontClampUpSens)
   var danmakuFontClampUpSens = 9.0.obs;
-  void setDanmakuFontClampUpSens(double e) {
-    danmakuFontClampUpSens.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmakuFontClampUpSens, e);
-  }
 
+  @SettingItem(defaultValue: 5.0, key: LocalStorageService.kDanmakuFontClampDownSens)
   var danmakuFontClampDownSens = 5.0.obs;
-  void setDanmakuFontClampDownSens(double e) {
-    danmakuFontClampDownSens.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmakuFontClampDownSens, e);
-  }
 
+  @SettingItem(defaultValue: 2, key: LocalStorageService.kQualityLevel)
   var qualityLevel = 1.obs;
 
-  void setQualityLevel(int level) {
-    qualityLevel.value = level;
-    LocalStorageService.instance.setValue(LocalStorageService.kQualityLevel, level);
-  }
-
+  @SettingItem(defaultValue: 1, key: LocalStorageService.kQualityLevelCellular)
   var qualityLevelCellular = 1.obs;
 
-  void setQualityLevelCellular(int level) {
-    qualityLevelCellular.value = level;
-    LocalStorageService.instance.setValue(LocalStorageService.kQualityLevelCellular, level);
-  }
-
+  @SettingItem(defaultValue: false, key: LocalStorageService.kAutoExitEnable)
   var autoExitEnable = false.obs;
 
-  void setAutoExitEnable(bool e) {
-    autoExitEnable.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kAutoExitEnable, e);
-  }
-
+  @SettingItem(defaultValue: 60, key: LocalStorageService.kAutoExitDuration)
   var autoExitDuration = 60.obs;
 
-  void setAutoExitDuration(int e) {
-    autoExitDuration.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kAutoExitDuration, e);
-  }
-
+  @SettingItem(defaultValue: 60, key: LocalStorageService.kRoomAutoExitDuration)
   var roomAutoExitDuration = 60.obs;
 
-  void setRoomAutoExitDuration(int e) {
-    roomAutoExitDuration.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kRoomAutoExitDuration, e);
-  }
-
+  @SettingItem(defaultValue: false, key: LocalStorageService.kPlayerCompatMode)
   var playerCompatMode = false.obs;
 
-  void setPlayerCompatMode(bool e) {
-    playerCompatMode.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kPlayerCompatMode, e);
-  }
-
+  @SettingItem(defaultValue: 32, key: LocalStorageService.kPlayerBufferSize)
   var playerBufferSize = 32.obs;
 
-  void setPlayerBufferSize(int e) {
-    playerBufferSize.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kPlayerBufferSize, e);
-  }
-
+  @SettingItem(defaultValue: false, key: LocalStorageService.kPlayerAutoPause)
   var playerAutoPause = false.obs;
 
-  void setPlayerAutoPause(bool e) {
-    playerAutoPause.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kPlayerAutoPause, e);
-  }
-
+  @SettingItem(defaultValue: false, key: LocalStorageService.kAutoFullScreen)
   var autoFullScreen = false.obs;
 
-  void setAutoFullScreen(bool e) {
-    autoFullScreen.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kAutoFullScreen, e);
-  }
-
-  // todo: 构造一个settings struct,用于批量生成ui和配置参数
   // 滑动调节亮度/音量上下滑动手势控制
+  @SettingItem(defaultValue: false, key: LocalStorageService.kVerticalDragLock)
   var verticalDragLock = false.obs;
-
-  void setVerticalDragLock(bool e) {
-    verticalDragLock.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kVerticalDragLock, e);
-  }
 
   RxSet<String> shieldList = <String>{}.obs;
 
@@ -473,38 +353,6 @@ class AppSettingsController extends GetxController {
   Future clearShieldList() async {
     shieldList.clear();
     await LocalStorageService.instance.shieldBox.clear();
-  }
-
-  void setScaleMode(int value) {
-    scaleMode.value = value;
-    LocalStorageService.instance.setValue(
-      LocalStorageService.kPlayerScaleMode,
-      value,
-    );
-  }
-
-  void setAspectByUser(double value) {
-    aspectByUser.value = value;
-    LocalStorageService.instance.setValue(
-      LocalStorageService.kPlayerAspectByUser,
-      value,
-    );
-  }
-
-  void setAspectWidth(int value) {
-    aspectWidth.value = value;
-    LocalStorageService.instance.setValue(
-      LocalStorageService.kPlayerAspectWidth,
-      value,
-    );
-  }
-
-  void setAspectHeight(int value) {
-    aspectHeight.value = value;
-    LocalStorageService.instance.setValue(
-      LocalStorageService.kPlayerAspectHeight,
-      value,
-    );
   }
 
   RxList<String> siteSort = RxList<String>();
@@ -527,135 +375,63 @@ class AppSettingsController extends GetxController {
     );
   }
 
+  @SettingItem(defaultValue: 100.0, key: LocalStorageService.kPlayerVolume)
   Rx<double> playerVolume = 100.0.obs;
 
-  void setPlayerVolume(double value) {
-    playerVolume.value = value;
-    LocalStorageService.instance.setValue(
-      LocalStorageService.kPlayerVolume,
-      value,
-    );
-  }
-
+  @SettingItem(defaultValue: true, key: LocalStorageService.kPIPHideDanmu)
   var pipHideDanmu = true.obs;
 
-  void setPIPHideDanmu(bool e) {
-    pipHideDanmu.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kPIPHideDanmu, e);
-  }
   /// window Setting
   // 开屏自动最大化
+  @SettingItem(defaultValue: false, key: LocalStorageService.kWindowMaxAuto)
   var windowMaxAuto = false.obs;
-  void setWindowMaxAuto(bool e){
-    windowMaxAuto.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kWindowMaxAuto, e);
-  }
 
+  @SettingItem(defaultValue: false, key: LocalStorageService.kWindowMaxState)
   var windowMaxState = false.obs;
-  void setWindowMaxState(bool e){
-    windowMaxState.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kWindowMaxState, e);
-  }
 
   /// window小窗size
+  @SettingItem(defaultValue: 0.0, key: LocalStorageService.kWindowPipX)
   var windowPipX = 0.0.obs;
 
-  void setWindowPipX(double e) {
-    windowPipX.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kWindowPipX, e);
-  }
-
+  @SettingItem(defaultValue: 0.0, key: LocalStorageService.kWindowPipY)
   var windowPipY = 0.0.obs;
 
-  void setWindowPipY(double e) {
-    windowPipY.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kWindowPipY, e);
-  }
-
+  @SettingItem(defaultValue: 400.0, key: LocalStorageService.kWindowPipWidth)
   var windowPipWidth = 320.0.obs;
 
-  void setWindowPipWidth(double e) {
-    windowPipWidth.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kWindowPipWidth, e);
-  }
-
+  @SettingItem(defaultValue: 225.0, key: LocalStorageService.kWindowPipHeight)
   var windowPipHeight = 180.0.obs;
 
-  void setWindowPipHeight(double e) {
-    windowPipHeight.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kWindowPipHeight, e);
-  }
-
+  @SettingItem(defaultValue: 0.0, key: LocalStorageService.kDanmuTopMargin)
   var danmuTopMargin = 0.0.obs;
 
-  void setDanmuTopMargin(double e) {
-    danmuTopMargin.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmuTopMargin, e);
-  }
-
+  @SettingItem(defaultValue: 0.0, key: LocalStorageService.kDanmuBottomMargin)
   var danmuBottomMargin = 0.0.obs;
 
-  void setDanmuBottomMargin(double e) {
-    danmuBottomMargin.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmuBottomMargin, e);
-  }
-
   /// 弹幕去重参数设置
+  @SettingItem(defaultValue: true, key: LocalStorageService.kDanmuTextNormalization)
   var danmuTextNormalization = true.obs;
 
-  void setDanmuTextNormalization(bool e) {
-    danmuTextNormalization.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmuTextNormalization, e);
-  }
-
+  @SettingItem(defaultValue: 3, key: LocalStorageService.kDanmuMaxFrequency)
   var danmuMaxFrequency = 3.obs;
 
-  void setDanmuMaxFrequency(int e) {
-    danmuMaxFrequency.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmuMaxFrequency, e);
-  }
-
+  @SettingItem(defaultValue: false, key: LocalStorageService.kDanmuFrequencyControl)
   var danmuFrequencyControl = true.obs;
 
-  void setDanmuFrequencyControl(bool e) {
-    danmuFrequencyControl.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmuFrequencyControl, e);
-  }
-
+  @SettingItem(defaultValue: 15, key: LocalStorageService.kDanmuWindowMs)
   var danmuWindowMs = 15.obs;
 
-  void setDanmuWindowMs(int e) {
-    danmuWindowMs.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDanmuWindowMs, e);
-  }
-
+  @SettingItem(defaultValue: true, key: LocalStorageService.kBilibiliLoginTip)
   var bilibiliLoginTip = true.obs;
 
-  void setBiliBiliLoginTip(bool e) {
-    bilibiliLoginTip.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kBilibiliLoginTip, e);
-  }
-
+  @SettingItem(defaultValue: false, key: LocalStorageService.kLogEnable)
   var logEnable = false.obs;
 
-  void setLogEnable(bool e) {
-    logEnable.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kLogEnable, e);
-  }
-
+  @SettingItem(defaultValue: true, key: LocalStorageService.kFirebaseEnable)
   var firebaseEnable = true.obs;
 
-  void setFirebaseEnable(bool e) {
-    firebaseEnable.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kFirebaseEnable, e);
-  }
-
+  @SettingItem(defaultValue: false, key: LocalStorageService.kCustomPlayerOutput)
   var customPlayerOutput = false.obs;
-
-  void setCustomPlayerOutput(bool e) {
-    customPlayerOutput.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kCustomPlayerOutput, e);
-  }
 
   var videoOutputDriver = "".obs;
 
@@ -678,68 +454,32 @@ class AppSettingsController extends GetxController {
     LocalStorageService.instance.setValue(LocalStorageService.kVideoHardwareDecoder, e);
   }
 
+  @SettingItem(defaultValue: false, key: LocalStorageService.kVideoDoubleBuffering)
   var videoDoubleBuffering = false.obs;
 
-  void setVideoDoubleBuffering(bool e) {
-    videoDoubleBuffering.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kVideoDoubleBuffering, e);
-  }
-
+  @SettingItem(defaultValue: false, key: LocalStorageService.kEnableRtxVsr)
   var enableRtxVsr = false.obs;
 
-  void setEnableRtxVsr(bool e) {
-    enableRtxVsr.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kEnableRtxVsr, e);
-  }
-
+  @SettingItem(defaultValue: true, key: LocalStorageService.kAutoUpdateFollowEnable)
   var autoUpdateFollowEnable = false.obs;
 
-  void setAutoUpdateFollowEnable(bool e) {
-    autoUpdateFollowEnable.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kAutoUpdateFollowEnable, e);
-  }
-
+  @SettingItem(defaultValue: 10, key: LocalStorageService.kUpdateFollowDuration)
   var autoUpdateFollowDuration = 10.obs;
 
-  void setAutoUpdateFollowDuration(int e) {
-    autoUpdateFollowDuration.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kUpdateFollowDuration, e);
-  }
-
+  @SettingItem(defaultValue: 4, key: LocalStorageService.kUpdateFollowThreadCount)
   var updateFollowThreadCount = 4.obs;
 
-  void setUpdateFollowThreadCount(int e) {
-    updateFollowThreadCount.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kUpdateFollowThreadCount, e);
-  }
-
+  @SettingItem(defaultValue: false, key: LocalStorageService.kFollowSnapshotEnable)
   var followSnapshotEnable = false.obs;
 
-  void setFollowSnapshotEnable(bool e) {
-    followSnapshotEnable.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kFollowSnapshotEnable, e);
-  }
-
+  @SettingItem(defaultValue: 0, key: LocalStorageService.kDormancyThreshold)
   var dormancyThreshold = 0.obs;
 
-  void setDormancyThreshold(int e) {
-    dormancyThreshold.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDormancyThreshold, e);
-  }
-
+  @SettingItem(defaultValue: false, key: LocalStorageService.kPlayerForceHttps)
   var playerForceHttps = false.obs;
 
-  void setPlayerForceHttps(bool e) {
-    playerForceHttps.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kPlayerForceHttps, e);
-  }
-
+  @SettingItem(defaultValue: false, key: LocalStorageService.kDouyinHlsFirst)
   var douyinHlsFirst = false.obs;
-
-  void setDouyinHlsFirst(bool e) {
-    douyinHlsFirst.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kDouyinHlsFirst, e);
-  }
 
   var followSortMethod = SortMethod.watchDuration.obs;
 
@@ -749,28 +489,16 @@ class AppSettingsController extends GetxController {
   }
 
   // 关注样式是否卡片化
+  @SettingItem(defaultValue: true, key: LocalStorageService.kFollowStyleNotGrid)
   var followStyleNotGrid = true.obs;
 
-  void setFollowStyleNotGrid(bool e) {
-    followStyleNotGrid.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kFollowStyleNotGrid, e);
-  }
-
   // 隐藏不在线的关注
+  @SettingItem(defaultValue: false, key: LocalStorageService.kHideOfflineFollow)
   var hideOfflineFollow = false.obs;
 
-  void setHideOfflineFollow(bool e) {
-    hideOfflineFollow.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kHideOfflineFollow, e);
-  }
-
   // 隐藏隐藏快速取关按钮
+  @SettingItem(defaultValue: true, key: LocalStorageService.kHideRemoveFollow)
   var hideRemoveFollowButton = true.obs;
-
-  void setHideRemoveFollowButton(bool e) {
-    hideRemoveFollowButton.value = e;
-    LocalStorageService.instance.setValue(LocalStorageService.kHideRemoveFollow, e);
-  }
 
   /// 保存关注列表快照
   FollowSnapshot? followSnapshot;
