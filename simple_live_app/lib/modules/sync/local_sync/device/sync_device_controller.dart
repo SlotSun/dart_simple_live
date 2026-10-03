@@ -100,7 +100,7 @@ class SyncDeviceController extends BaseController {
 
   void syncDouyuAccount() async {
     try {
-      if (PlatformService.instance.douyuCookie.value.isNotEmpty) {
+      if (PlatformService.instance.douyuCookie.value.isEmpty) {
         SmartDialog.showToast("未登录斗鱼");
         return;
       }

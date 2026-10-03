@@ -163,6 +163,9 @@ class PlatformService extends GetxService {
   // logic: 有效则不变，无效且配置did&ltp0并保存
   Future<void> _refreshDouyuCookie() async {
     var cookie = await _douyuSite.refreshCookie(dy_did, dyLtp0);
+    if(cookie.isEmpty){
+      SmartDialog.showToast("斗鱼登录已失效，请重新登录");
+    }
     setDouyuCookie(cookie);
   }
 

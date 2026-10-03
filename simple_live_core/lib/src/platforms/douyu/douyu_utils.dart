@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
@@ -67,6 +67,8 @@ class DouyuUtils {
           .map((raw) => raw.split(';').first.trim())
           .where((s) => s.contains('='))
           .join('; ');
+      // check again
+      cookie = _isCookieExpired(cookie) ? '' : cookie;
       _did = did;
     }
     return cookie;
