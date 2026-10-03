@@ -515,7 +515,8 @@ class Utils {
   }
 
   static int parseVersion(String version) {
-    var sp = version.split('.');
+    // Local and prerelease suffixes are not part of the database version.
+    var sp = version.split(RegExp(r'[-+]')).first.split('.');
     var num = "";
     for (var item in sp) {
       num = num + item.padLeft(2, '0');
