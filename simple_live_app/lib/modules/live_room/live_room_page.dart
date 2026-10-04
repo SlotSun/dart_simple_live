@@ -771,6 +771,17 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                 title: "自定义画面尺寸",
                 onTap: controller.showAspectRatioSheet,
               ),
+              AppStyle.divider,
+              Obx(
+                () => SettingsSwitch(
+                  title: "音量均衡",
+                  subtitle: "自动抬升小音量/压低大音量，约增加 1 秒延迟",
+                  value: AppSettingsController.instance.volumeNorm.value,
+                  onChanged: (e) {
+                    AppSettingsController.instance.setVolumeNorm(e);
+                  },
+                ),
+              ),
             ],
           ),
         ),

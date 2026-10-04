@@ -143,6 +143,9 @@ class LocalStorageService extends GetxService {
   /// 自动全屏
   static const String kAutoFullScreen = "AutoFullScreen";
 
+  /// 音量均衡（dynaudnorm 音频滤镜）
+  static const String kVolumeNorm = "VolumeNorm";
+
   /// 播放器音量
   static const String kPlayerVolume = "PlayerVolume";
 

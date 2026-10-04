@@ -132,6 +132,11 @@ class AppSettingsController extends GetxController {
       Platform.isAndroid ? "mediacodec_embed" : "libmpv",
     );
 
+    volumeNorm.value = LocalStorageService.instance.getValue(
+      LocalStorageService.kVolumeNorm,
+      false,
+    );
+
     audioOutputDriver.value = LocalStorageService.instance.getValue(
       LocalStorageService.kAudioOutputDriver,
       Platform.isAndroid
@@ -438,6 +443,14 @@ class AppSettingsController extends GetxController {
   void setVideoOutputDriver(String e) {
     videoOutputDriver.value = e;
     LocalStorageService.instance.setValue(LocalStorageService.kVideoOutputDriver, e);
+  }
+
+  /// 音量均衡（自动抬升小音量/压低大音量，mpv dynaudnorm 滤镜；播放器侧 ever 监听热切换）
+  var volumeNorm = false.obs;
+
+  void setVolumeNorm(bool e) {
+    volumeNorm.value = e;
+    LocalStorageService.instance.setValue(LocalStorageService.kVolumeNorm, e);
   }
 
   var audioOutputDriver = "".obs;

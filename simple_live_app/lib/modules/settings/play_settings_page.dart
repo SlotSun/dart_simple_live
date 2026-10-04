@@ -128,6 +128,17 @@ class PlaySettingsPage extends GetView<AppSettingsController> {
                         controller.setVerticalDragLock(e);
                       }),
                 ),
+                AppStyle.divider,
+                Obx(
+                  () => SettingsSwitch(
+                    title: "音量均衡",
+                    subtitle: "自动抬升小音量/压低大音量，听感更一致；约增加 1 秒延迟，音乐类直播动态会减弱",
+                    value: controller.volumeNorm.value,
+                    onChanged: (e) {
+                      controller.setVolumeNorm(e);
+                    },
+                  ),
+                ),
               ],
             ),
           ),

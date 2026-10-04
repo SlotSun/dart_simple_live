@@ -27,6 +27,11 @@ import 'package:simple_live_core/simple_live_core.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:window_manager/window_manager.dart';
 
+/// 音量均衡 dynaudnorm 滤镜参数（直播语音向调优）：
+/// f=150ms 帧长 / g=15 高斯窗 → 延迟约 1s（默认 f=500:g=31 会高达 7.5s）
+/// m=5 限最大增益防底噪被抬 / r=0.3 按感知响度(RMS)归一，提升跨房间一致性
+const String volumeNormFilter = 'dynaudnorm=f=150:g=15:m=5:r=0.3';
+
 mixin PlayerMixin {
   GlobalKey<VideoState> globalPlayerKey = GlobalKey<VideoState>();
   GlobalKey globalDanmuKey = GlobalKey();
@@ -93,6 +98,12 @@ mixin PlayerMixin {
     if (Platform.isWindows && AppSettingsController.instance.enableRtxVsr.value) {
       await pp.setProperty('hwdec', 'd3d11va');
       await pp.setProperty('vf', 'd3d11vpp=scale=2:scaling-mode=nvidia');
+    }
+    // 音量均衡：挂 dynaudnorm 音频滤镜（自动抬升小音量/压低大音量）
+    // 参数按直播语音调优：f=150ms 帧长 / g=15 高斯窗（延迟约 1s，默认参数延迟高达 7.5s）
+    // m=5 限最大增益防底噪被抬 / r=0.3 按感知响度(RMS)归一，提升跨直播间响度一致性
+    if (AppSettingsController.instance.volumeNorm.value) {
+      await pp.setProperty('af', volumeNormFilter);
     }
   }
 
@@ -763,6 +774,15 @@ class PlayerController extends BaseController
     initStream();
     //设置音量
     player.setVolume(AppSettingsController.instance.playerVolume.value);
+    // 音量均衡开关热切换：设置页拨动即时生效，无需退出直播间
+    ever(AppSettingsController.instance.volumeNorm, (bool on) async {
+      try {
+        final pp = player.platform as NativePlayer;
+        await pp.setProperty('af', on ? volumeNormFilter : '');
+      } catch (e) {
+        Log.logPrint(e);
+      }
+    });
     super.onInit();
   }
 
