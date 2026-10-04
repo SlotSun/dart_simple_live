@@ -132,6 +132,11 @@ class AppSettingsController extends GetxController {
       Platform.isAndroid ? "mediacodec_embed" : "libmpv",
     );
 
+    messagePanelWidth.value = LocalStorageService.instance.getValue(
+      LocalStorageService.kMessagePanelWidth,
+      300.0,
+    );
+
     audioOutputDriver.value = LocalStorageService.instance.getValue(
       LocalStorageService.kAudioOutputDriver,
       Platform.isAndroid
@@ -438,6 +443,21 @@ class AppSettingsController extends GetxController {
   void setVideoOutputDriver(String e) {
     videoOutputDriver.value = e;
     LocalStorageService.instance.setValue(LocalStorageService.kVideoOutputDriver, e);
+  }
+
+  /// 桌面端直播间右侧消息面板宽度（拖拽分隔条调节，双击分隔条恢复默认）
+  var messagePanelWidth = 300.0.obs;
+
+  void setMessagePanelWidth(double e) {
+    messagePanelWidth.value = e.clamp(220.0, 800.0);
+    LocalStorageService.instance.setValue(
+        LocalStorageService.kMessagePanelWidth, messagePanelWidth.value);
+  }
+
+  /// 保存当前面板宽度（拖拽结束时调用，避免拖拽过程高频写盘）
+  void saveMessagePanelWidth() {
+    LocalStorageService.instance.setValue(
+        LocalStorageService.kMessagePanelWidth, messagePanelWidth.value);
   }
 
   var audioOutputDriver = "".obs;

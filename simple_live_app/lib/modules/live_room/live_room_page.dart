@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:floating/floating.dart';
+import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
@@ -142,6 +143,37 @@ class LiveRoomPage extends GetView<LiveRoomController> {
     );
   }
 
+  /// 播放器与右侧消息面板之间的分隔条：
+  /// 横向拖拽调节面板宽度（实时生效，松手时持久化），双击恢复默认 300
+  Widget buildPanelResizeHandle() {
+    final settings = AppSettingsController.instance;
+    return MouseRegion(
+      cursor: SystemMouseCursors.resizeColumn,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragUpdate: (d) {
+          final w = settings.messagePanelWidth.value - d.delta.dx;
+          settings.messagePanelWidth.value = w.clamp(220.0, 800.0);
+        },
+        onHorizontalDragEnd: (_) {
+          settings.saveMessagePanelWidth();
+        },
+        onDoubleTap: () {
+          settings.setMessagePanelWidth(300.0);
+        },
+        child: Container(
+          width: 8,
+          color: Colors.transparent,
+          alignment: Alignment.center,
+          child: Container(
+            width: 2,
+            color: Colors.grey.withAlpha(50),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget buildTabletUI(BuildContext context) {
     return Column(
       children: [
@@ -151,13 +183,17 @@ class LiveRoomPage extends GetView<LiveRoomController> {
               Expanded(
                 child: buildMediaPlayer(),
               ),
-              SizedBox(
-                width: 300,
-                child: Column(
-                  children: [
-                    buildUserProfile(context),
-                    buildMessageArea(),
-                  ],
+              buildPanelResizeHandle(),
+              Obx(
+                () => SizedBox(
+                  width:
+                      AppSettingsController.instance.messagePanelWidth.value,
+                  child: Column(
+                    children: [
+                      buildUserProfile(context),
+                      buildMessageArea(),
+                    ],
+                  ),
                 ),
               ),
             ],
