@@ -639,11 +639,14 @@ mixin PlayerGestureControlMixin on PlayerStateMixin, PlayerMixin, PlayerSystemMi
     throttle = DelayedThrottle(200);
 
     verticalDragging = true;
-    if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
+    if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS || Platform.isWindows) {
       showGestureTip.value = true;
     }
     if (Platform.isAndroid || Platform.isIOS) {
       _currentVolume = await volumeController.getVolume();
+    } else if (Platform.isWindows) {
+      // Windows 走播放器音量（volume_controller 不支持 Windows 系统音量）
+      _currentVolume = player.state.volume / 100;
     }
     if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
       _currentBrightness = await ScreenBrightnessPlatform.instance.application;
@@ -660,7 +663,7 @@ mixin PlayerGestureControlMixin on PlayerStateMixin, PlayerMixin, PlayerSystemMi
       return;
     }
     if (verticalDragging == false) return;
-    if (!Platform.isAndroid && !Platform.isIOS) {
+    if (!Platform.isAndroid && !Platform.isIOS && !Platform.isWindows) {
       return;
     }
     //String text = "";
@@ -668,7 +671,10 @@ mixin PlayerGestureControlMixin on PlayerStateMixin, PlayerMixin, PlayerSystemMi
 
     Log.logPrint("$verStartPosition/${e.globalPosition.dy}");
 
-    if (leftVerticalDrag) {
+    if (Platform.isWindows) {
+      // Windows 全区域竖滑调音量（不做亮度调节）
+      setGestureVolume(e.globalPosition.dy);
+    } else if (leftVerticalDrag) {
       setGestureBrightness(e.globalPosition.dy);
     } else {
       setGestureVolume(e.globalPosition.dy);
@@ -711,7 +717,13 @@ mixin PlayerGestureControlMixin on PlayerStateMixin, PlayerMixin, PlayerSystemMi
 
   Future _realSetVolume(int volume) async {
     Log.logPrint(volume);
-    volumeController.setVolume(volume / 100);
+    if (Platform.isWindows) {
+      // Windows 用播放器音量并同步到设置（volume_controller 不支持 Windows）
+      player.setVolume(volume.toDouble());
+      AppSettingsController.instance.setPlayerVolume(volume.toDouble());
+    } else {
+      volumeController.setVolume(volume / 100);
+    }
   }
 
   void setGestureBrightness(double dy) {
