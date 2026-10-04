@@ -23,7 +23,7 @@ Widget playerControls(
   LiveRoomController controller,
 ) {
   return Obx(() {
-    if (controller.fullScreenState.value) {
+    if (controller.fullScreenState.value || controller.windowFillState.value) {
       return buildFullControls(
         videoState,
         controller,
@@ -326,6 +326,9 @@ Widget buildFullControls(
                     onPressed: () {
                       if (controller.smallWindowState.value) {
                         controller.exitSmallWindow();
+                      } else if (controller.windowFillState.value &&
+                          !controller.fullScreenState.value) {
+                        controller.exitWindowFill();
                       } else {
                         controller.exitFull();
                       }
@@ -568,6 +571,16 @@ Widget buildControls(
                 ),
                 IconButton(
                   onPressed: () {
+                    controller.enterWindowFill();
+                  },
+                  tooltip: "窗口全屏",
+                  icon: const Icon(
+                    Icons.fit_screen,
+                    color: Colors.white,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
                     controller.enterFullScreen();
                   },
                   icon: const Icon(
@@ -628,7 +641,8 @@ Widget buildDanmuView(VideoState videoState, LiveRoomController controller) {
       () => Offstage(
         offstage: !controller.showDanmakuState.value,
         child: Padding(
-          padding: controller.fullScreenState.value
+          padding: (controller.fullScreenState.value ||
+                  controller.windowFillState.value)
               ? EdgeInsets.only(
                   top: AppSettingsController.instance.danmuTopMargin.value,
                   bottom: AppSettingsController.instance.danmuBottomMargin.value,

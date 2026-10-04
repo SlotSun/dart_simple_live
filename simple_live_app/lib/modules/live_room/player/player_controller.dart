@@ -140,6 +140,9 @@ mixin PlayerStateMixin on PlayerMixin {
   /// 是否处于全屏状态
   RxBool fullScreenState = false.obs;
 
+  /// 是否处于窗口全屏状态（画面占满整个软件窗口，窗口自身状态不变）
+  RxBool windowFillState = false.obs;
+
   /// 是否处于窗口最大化状态
   RxBool windowMaxState = false.obs;
 
@@ -388,6 +391,16 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
     }
     fullScreenState.value = false;
     //danmakuController?.clear();
+  }
+
+  /// 进入窗口全屏：画面占满整个软件窗口（不改变系统级窗口状态，不动标题栏）
+  void enterWindowFill() {
+    windowFillState.value = true;
+  }
+
+  /// 退出窗口全屏
+  void exitWindowFill() {
+    windowFillState.value = false;
   }
 
   Size? _lastWindowSize;

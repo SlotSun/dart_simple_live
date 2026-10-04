@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:floating/floating.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
@@ -87,16 +88,36 @@ class LiveRoomPage extends GetView<LiveRoomController> {
             ),
           );
         }
-        if (controller.fullScreenState.value) {
-          return PopScope(
+        if (controller.fullScreenState.value || controller.windowFillState.value) {
+          Widget fillPage = PopScope(
             canPop: false,
             onPopInvokedWithResult: (e, r) {
-              controller.exitFull();
+              if (controller.fullScreenState.value) {
+                controller.exitFull();
+              } else {
+                controller.exitWindowFill();
+              }
             },
             child: Scaffold(
               body: buildMediaPlayer(),
             ),
           );
+          // 窗口全屏状态下 ESC 退出（系统全屏的 ESC 已由 main.dart 全局处理，避免重复响应）
+          if (!controller.fullScreenState.value) {
+            fillPage = Focus(
+              autofocus: true,
+              onKeyEvent: (node, event) {
+                if (event is KeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.escape) {
+                  controller.exitWindowFill();
+                  return KeyEventResult.handled;
+                }
+                return KeyEventResult.ignored;
+              },
+              child: fillPage,
+            );
+          }
+          return fillPage;
         } else {
           return buildPageUI();
         }
