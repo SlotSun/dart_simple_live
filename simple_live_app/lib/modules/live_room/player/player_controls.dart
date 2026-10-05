@@ -569,14 +569,17 @@ Widget buildControls(
                     ),
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    controller.enterWindowFill();
-                  },
-                  tooltip: "窗口全屏",
-                  icon: const Icon(
-                    Icons.fit_screen,
-                    color: Colors.white,
+                Visibility(
+                  visible: !Platform.isAndroid && !Platform.isIOS,
+                  child: IconButton(
+                    onPressed: () {
+                      controller.enterWindowFill();
+                    },
+                    tooltip: "窗口全屏",
+                    icon: const Icon(
+                      Icons.fit_screen,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
                 IconButton(
