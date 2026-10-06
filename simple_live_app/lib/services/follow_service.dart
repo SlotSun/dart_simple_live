@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
@@ -380,7 +380,9 @@ class FollowService extends GetxService {
   }
 
   Future<void> loadData({bool updateStatus = true, int? cycle}) async {
-    if (_closed) return;
+    if (_closed) {
+      return;
+    }
     // snapshot 恢复跳过第一次状态更新
     if (_snap) {
       _snap = false;
@@ -471,7 +473,9 @@ class FollowService extends GetxService {
         CoreLog.i("Update Follow: List <= 100, updating all ${usersToUpdate.length} users.");
       }
     }
-    if (_closed) return;
+    if (_closed) {
+      return;
+    }
     _cancelStatusUpdate();
     final epoch = _statusEpoch;
     updatedCount = 0;
@@ -488,7 +492,9 @@ class FollowService extends GetxService {
         filterData();
       }
     }
-    if (_closed || epoch != _statusEpoch) return;
+    if (_closed || epoch != _statusEpoch) {
+      return;
+    }
     // 增量检查：自动解冻 lastWatchTime >= cutoff 的用户
     final threshold = AppSettingsController.instance.dormancyThreshold.value;
     if (threshold > 0 && dormantFollowList.isNotEmpty) {
@@ -496,6 +502,7 @@ class FollowService extends GetxService {
       dormantFollowList.removeWhere((u) => u.lastWatchTime != null && u.lastWatchTime! >= cutoff);
     }
 
+    // frequency of snapshot-saving and expireAt calculation depend on user-setting: auto-update
     final minutes = AppSettingsController.instance.autoUpdateFollowDuration.value;
     final expireAt = DateTime.now().add(Duration(minutes: minutes)).microsecondsSinceEpoch;
     await AppSettingsController.instance.setFollowSnapshot(
@@ -504,9 +511,10 @@ class FollowService extends GetxService {
         followSnapshotItems: followList.map((e) => e.toSnapshot()).toList(),
       ),
     );
+    Log.i("FollowService: follow-snapshot has saved, time: ${DateTime.now()}");
   }
 
-  /// In-flight HTTP operations may finish, but queued work and late results are discarded.
+  // 已发出的请求继续执行，旧批次的排队请求和返回结果作废。
   void _cancelStatusUpdate() {
     _statusEpoch++;
     while (_statusWaiters.isNotEmpty) {
@@ -522,20 +530,25 @@ class FollowService extends GetxService {
       identical(followList.firstWhereOrNull((follow) => follow.id == item.id), item);
 
   Future<void> _updateLiveInformation(FollowUser item, int epoch) async {
-    // Share the limit across batches: an invalidated request still occupies its
-    // slot until the provider call completes.
+    // 旧批次已发出的请求仍占用并发名额，直到请求结束。
     while (_activeStatusRequests >= AppSettingsController.instance.updateFollowThreadCount.value.clamp(1, 16)) {
-      if (!_isCurrentStatusRequest(item, epoch)) return;
+      if (!_isCurrentStatusRequest(item, epoch)) {
+        return;
+      }
       final waiter = Completer<void>();
       _statusWaiters.add(waiter);
       await waiter.future;
     }
-    if (!_isCurrentStatusRequest(item, epoch)) return;
+    if (!_isCurrentStatusRequest(item, epoch)) {
+      return;
+    }
     _activeStatusRequests++;
     try {
-      final site = Sites.allSites[item.siteId]!;
-      final detail = await site.liveSite.getRoomDetail(roomId: item.roomId);
-      if (!_isCurrentStatusRequest(item, epoch)) return;
+      var site = Sites.allSites[item.siteId]!;
+      LiveRoomDetail detail = await site.liveSite.getRoomDetail(roomId: item.roomId);
+      if (!_isCurrentStatusRequest(item, epoch)) {
+        return;
+      }
       item.liveStatus.value = detail.status ? 2 : 1;
       item.cover.value = detail.status ? detail.cover : "";
       item.title.value = detail.title;
@@ -546,7 +559,7 @@ class FollowService extends GetxService {
       }
     } finally {
       _activeStatusRequests--;
-      // Wake all waiters so a stale/deleted item cannot consume the only wakeup.
+      // 唤醒全部排队请求，避免已失效的请求占用唯一的唤醒机会。
       while (_statusWaiters.isNotEmpty) {
         _statusWaiters.removeFirst().complete();
       }

@@ -79,7 +79,9 @@ class FollowUserController extends BasePageController<FollowUser> {
     filterData();
     try {
       await FollowService.instance.loadData();
-      if (isClosed || generation != _refreshGeneration) return;
+      if (isClosed || generation != _refreshGeneration) {
+        return;
+      }
       updateTagList();
       filterData();
     } catch (error) {
@@ -87,7 +89,9 @@ class FollowUserController extends BasePageController<FollowUser> {
         handleError(error, showPageError: list.isEmpty);
       }
     } finally {
-      if (!isClosed && generation == _refreshGeneration) pageLoadding.value = false;
+      if (!isClosed && generation == _refreshGeneration) {
+        pageLoadding.value = false;
+      }
     }
   }
 
@@ -137,7 +141,9 @@ class FollowUserController extends BasePageController<FollowUser> {
       list.retainWhere((user) => user.liveStatus.value == 2);
     }
     pageEmpty.value = list.isEmpty && !FollowService.instance.updating.value;
-    if (list.isNotEmpty) pageLoadding.value = false;
+    if (list.isNotEmpty) {
+      pageLoadding.value = false;
+    }
   }
 
   // 用户自定义关注样式
