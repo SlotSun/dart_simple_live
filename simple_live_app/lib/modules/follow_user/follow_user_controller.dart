@@ -70,8 +70,8 @@ class FollowUserController extends BasePageController<FollowUser> {
 
   @override
   Future<void> refreshData() async {
-    final generation = ++_refreshGeneration;
-    pageLoadding.value = list.isEmpty;
+    _refreshGeneration += 1;
+    final generation = _refreshGeneration;
     pageError.value = false;
     currentPage = 2;
     canLoadMore.value = false;
@@ -87,10 +87,6 @@ class FollowUserController extends BasePageController<FollowUser> {
     } catch (error) {
       if (!isClosed && generation == _refreshGeneration) {
         handleError(error, showPageError: list.isEmpty);
-      }
-    } finally {
-      if (!isClosed && generation == _refreshGeneration) {
-        pageLoadding.value = false;
       }
     }
   }
@@ -141,9 +137,6 @@ class FollowUserController extends BasePageController<FollowUser> {
       list.retainWhere((user) => user.liveStatus.value == 2);
     }
     pageEmpty.value = list.isEmpty && !FollowService.instance.updating.value;
-    if (list.isNotEmpty) {
-      pageLoadding.value = false;
-    }
   }
 
   // 用户自定义关注样式
@@ -324,7 +317,7 @@ class FollowUserController extends BasePageController<FollowUser> {
 
   @override
   void onClose() {
-    ++_refreshGeneration;
+    _refreshGeneration += 1;
     onUpdatedIndexedStream?.cancel();
     onUpdatedListStream?.cancel();
     super.onClose();

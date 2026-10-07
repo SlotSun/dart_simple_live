@@ -414,7 +414,7 @@ class FollowService extends GetxService {
 
     // 简单线性加权组合算法，目前认定观看时长和最近观看时间权重一致
     // 如果用户历史行为序列非常长：可替换为时间衰减 + 观看时长加权
-    final ranked = List<FollowUser>.of(followList);
+    final ranked = followList.toList();
     ranked.sort((a, b) {
       // 静态权重
       const double wDuration = 0.5;
@@ -516,7 +516,7 @@ class FollowService extends GetxService {
 
   // 已发出的请求继续执行，旧批次的排队请求和返回结果作废。
   void _cancelStatusUpdate() {
-    _statusEpoch++;
+    _statusEpoch += 1;
     while (_statusWaiters.isNotEmpty) {
       _statusWaiters.removeFirst().complete();
     }
@@ -542,7 +542,7 @@ class FollowService extends GetxService {
     if (!_isCurrentStatusRequest(item, epoch)) {
       return;
     }
-    _activeStatusRequests++;
+    _activeStatusRequests += 1;
     try {
       var site = Sites.allSites[item.siteId]!;
       LiveRoomDetail detail = await site.liveSite.getRoomDetail(roomId: item.roomId);
@@ -558,13 +558,13 @@ class FollowService extends GetxService {
         Log.i('Follow status lookup failed for ${item.id}: ${error.runtimeType}');
       }
     } finally {
-      _activeStatusRequests--;
+      _activeStatusRequests -= 1;
       // 唤醒全部排队请求，避免已失效的请求占用唯一的唤醒机会。
       while (_statusWaiters.isNotEmpty) {
         _statusWaiters.removeFirst().complete();
       }
       if (_isCurrentStatusRequest(item, epoch)) {
-        updatedCount++;
+        updatedCount += 1;
         filterData();
       }
     }
