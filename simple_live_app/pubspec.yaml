@@ -95,51 +95,20 @@ dependencies:
   volume_controller: any
   media_kit:
     git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
+      url: https://github.com/SlotSun/media-kit.git
+      ref: b2bb9ff072905ab96dc07201b8b1a19adfeeac67
       path: ./media_kit
   media_kit_video:
     git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
+      url: https://github.com/SlotSun/media-kit.git
+      ref: b2bb9ff072905ab96dc07201b8b1a19adfeeac67
       path: ./media_kit_video
-  media_kit_libs_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
-      path: ./libs/universal/media_kit_libs_video
 
 dependency_overrides:
   get:
     git:
       url: https://github.com/SlotSun/get.git
       ref: master
-
-  media_kit_libs_linux:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
-      path: ./libs/linux/media_kit_libs_linux
-  media_kit_libs_ios_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
-      path: ./libs/ios/media_kit_libs_ios_video
-  media_kit_libs_android_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
-      path: ./libs/android/media_kit_libs_android_video
-  media_kit_libs_windows_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
-      path: ./libs/windows/media_kit_libs_windows_video
-  media_kit_libs_macos_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
-      path: ./libs/macos/media_kit_libs_macos_video
 
 dev_dependencies:
   flutter_lints: ^6.0.0
