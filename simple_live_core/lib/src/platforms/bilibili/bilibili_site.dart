@@ -1,20 +1,14 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/convert_helper.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
-import 'package:simple_live_core/src/platforms/bilibili/bilibili_danmaku.dart';
-import 'package:simple_live_core/src/interface/live_danmaku.dart';
-import 'package:simple_live_core/src/interface/live_site.dart';
-import 'package:simple_live_core/src/model/live_anchor_item.dart';
-import 'package:simple_live_core/src/model/live_category.dart';
-import 'package:simple_live_core/src/model/live_message.dart';
-import 'package:simple_live_core/src/model/live_play_url.dart';
-import 'package:simple_live_core/src/model/live_room_item.dart';
-import 'package:simple_live_core/src/model/live_search_result.dart';
-import 'package:simple_live_core/src/model/live_room_detail.dart';
-import 'package:simple_live_core/src/model/live_play_quality.dart';
-import 'package:simple_live_core/src/model/live_category_result.dart';
+import 'package:simple_live_core/src/common/qr_status.dart';
+import 'package:simple_live_core/src/model/account_info.dart';
+import 'package:simple_live_core/src/model/account_qr_code.dart';
+
+import 'model/bilibili_user_info.dart';
 
 class BiliBiliSite implements LiveSite {
   @override
@@ -23,7 +17,7 @@ class BiliBiliSite implements LiveSite {
   @override
   String name = "哔哩哔哩直播";
 
-  String cookie = "";
+  String _cookie = "";
   int userId = 0;
 
   @override
@@ -42,16 +36,16 @@ class BiliBiliSite implements LiveSite {
       buvid3 = buvidInfo["b_3"] ?? "";
       buvid4 = buvidInfo["b_4"] ?? "";
     }
-    return cookie.isEmpty
+    return _cookie.isEmpty
         ? {
             "user-agent": kDefaultUserAgent,
             "referer": kDefaultReferer,
             "cookie": 'buvid3=$buvid3;buvid4=$buvid4;',
           }
         : {
-            "cookie": cookie.contains("buvid3")
-                ? cookie
-                : "$cookie;buvid3=$buvid3;buvid4=$buvid4;",
+            "cookie": _cookie.contains("buvid3")
+                ? _cookie
+                : "$_cookie;buvid3=$buvid3;buvid4=$buvid4;",
             "user-agent": kDefaultUserAgent,
             "referer": kDefaultReferer,
           };
@@ -269,7 +263,7 @@ class BiliBiliSite implements LiveSite {
             ? serverHosts.first
             : "broadcastlv.chat.bilibili.com",
         buvid: buvid3,
-        cookie: cookie,
+        cookie: _cookie,
       ),
     );
   }
@@ -408,10 +402,10 @@ class BiliBiliSite implements LiveSite {
   /// ```
   Future<Map> getBuvid() async {
     try {
-      if (cookie.contains("buvid3")) {
+      if (_cookie.contains("buvid3")) {
         return {
-          "b_3": RegExp(r"buvid3=(.*?);").firstMatch(cookie)?.group(1) ?? "",
-          "b_4": RegExp(r"buvid4=(.*?);").firstMatch(cookie)?.group(1) ?? "",
+          "b_3": RegExp(r"buvid3=(.*?);").firstMatch(_cookie)?.group(1) ?? "",
+          "b_4": RegExp(r"buvid4=(.*?);").firstMatch(_cookie)?.group(1) ?? "",
         };
       }
 
@@ -421,7 +415,7 @@ class BiliBiliSite implements LiveSite {
         header: {
           "user-agent": kDefaultUserAgent,
           "referer": kDefaultReferer,
-          "cookie": cookie,
+          "cookie": _cookie,
         },
       );
       return result["data"];
@@ -579,7 +573,81 @@ class BiliBiliSite implements LiveSite {
   }
 
   @override
-  void setSiteAttrs(Map<String, dynamic> data) {
-    // TODO: implement setSiteAttrs
+  void setSiteAttrs(String data) {
+    _cookie = data;
+  }
+
+  @override
+  Future<QRCode> getQRCode() async {
+    var result = await HttpClient.instance.getJson(
+      "https://passport.bilibili.com/x/passport-login/web/qrcode/generate",
+    );
+    if (result["code"] != 0) {
+      throw result["message"];
+    }
+    QRCode qrCode = QRCode(
+      key: result["data"]["qrcode_key"],
+      url: result["data"]["url"],
+    );
+    return qrCode;
+  }
+
+  @override
+  Future<QRPollResult> getQRPollResult({required String qrcodeKey}) async {
+    QRPollResult qrPollResult = QRPollResult(status: QRStatus.failed);
+    var response = await HttpClient.instance.getResponse(
+      "https://passport.bilibili.com/x/passport-login/web/qrcode/poll",
+      queryParameters: {
+        "qrcode_key": qrcodeKey,
+      },
+    );
+    if (response.data["code"] != 0) {
+      throw response.data["message"];
+    }
+    var data = response.data["data"];
+    var code = data["code"];
+    if(code == 0){
+      var cookies = <String>[];
+      response.headers["set-cookie"]?.forEach((element) {
+        var cookie = element.split(";")[0];
+        cookies.add(cookie);
+      });
+      if (cookies.isNotEmpty) {
+        var cookieStr = cookies.join(";");
+        CoreLog.i(cookieStr);
+        qrPollResult.credential = cookieStr;
+        qrPollResult.status = QRStatus.scanned;
+      }
+    } else if (code == 86038) {
+      qrPollResult.status = QRStatus.expired;
+    } else if (code == 86090) {
+      qrPollResult.status = QRStatus.scanned;
+    }
+    return qrPollResult;
+  }
+
+  @override
+  Future<AccountInfo> getAccountInfo({required String credential}) async {
+    AccountInfo res = AccountInfo();
+    try {
+      var result = await HttpClient.instance.getJson(
+        "https://api.bilibili.com/x/member/web/account",
+        header: {
+          "Cookie": credential,
+        },
+      );
+      if (result["code"] == 0) {
+        BiliBiliUserInfoModel info = BiliBiliUserInfoModel.fromJson(result["data"]);
+        res.copyWith(
+          name: info.uname,
+          avatar: info.face,
+          uid: info.userid,
+          credential: credential,
+        ).isValid = true;
+      }
+    } catch (e, s) {
+      CoreLog.e(e.toString(), s);
+    }
+    return res;
   }
 }

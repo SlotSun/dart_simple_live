@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/convert_helper.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
+import 'package:simple_live_core/src/model/account_info.dart';
+import 'package:simple_live_core/src/model/account_qr_code.dart';
 import 'package:simple_live_core/src/platforms/douyin/douyin_utils.dart';
 import 'douyin_request_params.dart';
 
@@ -703,12 +705,31 @@ class DouyinSite implements LiveSite {
   }
 
   @override
-  void setSiteAttrs(Map<String, dynamic> data) {
-    if (data.containsKey('cookie')) {
-      _updateDouyinCookie(data['cookie'] as String);
+  void setSiteAttrs(String data) {
+    var map = jsonDecode(data) as Map<String,String>;
+    if (map.containsKey('cookie')) {
+      _updateDouyinCookie(map['cookie'] as String);
     }
-    if (data.containsKey('hlsFirst')) {
-      hlsFirst = data['hlsFirst'] as bool;
+    if (map.containsKey('hlsFirst')) {
+      hlsFirst = map['hlsFirst'] as bool;
     }
+  }
+
+  @override
+  Future<AccountInfo> getAccountInfo({required String credential}) {
+    // TODO: implement getAccountInfo
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<QRCode> getQRCode() {
+    // TODO: implement getQRCode
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<QRPollResult> getQRPollResult({required String qrcodeKey}) {
+    // TODO: implement getQRPollResult
+    throw UnimplementedError();
   }
 }

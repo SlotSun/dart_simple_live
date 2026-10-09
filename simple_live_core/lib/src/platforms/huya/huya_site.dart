@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
+import 'package:simple_live_core/src/model/account_info.dart';
+import 'package:simple_live_core/src/model/account_qr_code.dart';
 import 'package:simple_live_core/src/platforms/huya/common/huya_request_params.dart';
 import 'package:simple_live_core/src/platforms/huya/huya_utils.dart';
 import 'package:simple_live_core/src/platforms/huya/tars/get_cdn_token_ex_req.dart';
@@ -589,10 +591,29 @@ class HuyaSite implements LiveSite {
   }
 
   @override
-  void setSiteAttrs(Map<String, dynamic> data) {
-    if (data.containsKey('ua')) {
-      HYSDK_UA = data['ua'] as String;
+  void setSiteAttrs(String data) {
+    final map = jsonDecode(data) as Map<String,String>;
+    if (map.containsKey('ua')) {
+      HYSDK_UA = map['ua'] as String;
     }
+  }
+
+  @override
+  Future<AccountInfo> getAccountInfo({required String credential}) {
+    // TODO: implement getAccountInfo
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<QRCode> getQRCode() {
+    // TODO: implement getQRCode
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<QRPollResult> getQRPollResult({required String qrcodeKey}) {
+    // TODO: implement getQRPollResult
+    throw UnimplementedError();
   }
 }
 

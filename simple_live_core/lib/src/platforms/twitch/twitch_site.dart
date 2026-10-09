@@ -3,6 +3,8 @@ import 'dart:math';
 
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
+import 'package:simple_live_core/src/model/account_info.dart';
+import 'package:simple_live_core/src/model/account_qr_code.dart';
 import 'package:simple_live_core/src/platforms/twitch/twitch_danmaku.dart';
 import 'package:simple_live_core/src/platforms/twitch/twitch_models.dart';
 
@@ -308,8 +310,26 @@ class TwitchSite implements LiveSite {
   }
 
   @override
-  Future<void> setSiteAttrs(Map<String, dynamic> data) {
+  Future<void> setSiteAttrs(String data) {
     // TODO: implement setSiteAttrs
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AccountInfo> getAccountInfo({required String credential}) {
+    // TODO: implement getAccountInfo
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<QRCode> getQRCode() {
+    // TODO: implement getQRCode
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<QRPollResult> getQRPollResult({required String qrcodeKey}) {
+    // TODO: implement getQRPollResult
     throw UnimplementedError();
   }
 }
