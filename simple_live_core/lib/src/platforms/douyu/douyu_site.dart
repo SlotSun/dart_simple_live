@@ -2,10 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:dio/dio.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
+import 'package:simple_live_core/src/model/account_info.dart';
+import 'package:simple_live_core/src/model/account_qr_code.dart';
 import 'package:simple_live_core/src/platforms/douyu/douyu_utils.dart';
+
+import '../../common/qr_status.dart';
 
 class DouyuSite implements LiveSite {
   @override
@@ -335,11 +340,98 @@ class DouyuSite implements LiveSite {
   }
 
   @override
-  Future<void> setSiteAttrs(Map<String, dynamic> data) async {
-    if(data.containsKey('cookie')){
-      _cookie = data['cookie'] as String;
+  Future<void> setSiteAttrs(String data) async {
+    final map = jsonDecode(data) as Map<String,String>;
+    if(map.containsKey('cookie')){
+      _cookie = map['cookie'] as String;
       DouyuUtils.setDyDid(_cookie);
     }
+    if(map.containsKey('dy_did')){
+      _dy_did = map['dy_did'] as String;
+    }
+    if(map.containsKey('LTP0')){
+      _ltp0 = map['LTP0'] as String;
+    }
+
+  }
+
+  @override
+  Future<AccountInfo> getAccountInfo({required String credential}) async {
+    setSiteAttrs(credential);
+    var newCookie = await DouyuUtils.refreshCookie(did: _dy_did, ltp0: _ltp0, cookie: _cookie);
+    var newCredential = jsonDecode(credential) as Map<String, String>;
+    newCredential['cookie'] = newCookie;
+    return AccountInfo(
+      uid: DouyuUtils.pickCookie(newCookie, 'acf_uid'),
+      name: DouyuUtils.pickCookie(newCookie, 'acf_nickname'),
+      avatar: Uri.decodeComponent(DouyuUtils.pickCookie(newCookie, 'acf_nickname')),
+      credential: jsonEncode(newCredential),
+      isValid: newCookie.isNotEmpty ? true : false,
+    );
+  }
+
+  @override
+  Future<QRCode> getQRCode() async {
+    var result = await HttpClient.instance.postJson(
+      'https://passport.douyu.com/scan/generateCode',
+      data: {'client_id': '1', 'isMultiAccount': '0'},
+      formUrlEncoded: true,
+      header: DouyuUtils.requestHeader(isLogin: true),
+    );
+    if (result["error"] != 0) {
+      throw result["data"];
+    }
+    QRCode qrCode = QRCode(
+      expireAt: DateTime.now().millisecondsSinceEpoch ~/ 1000 + 300,
+      key: result["data"]["code"],
+      url: result["data"]["url"],
+    );
+    return qrCode;
+  }
+
+  @override
+  Future<QRPollResult> getQRPollResult({required String qrcodeKey}) async {
+    var pollHeader = DouyuUtils.requestHeader(isLogin: true);
+    pollHeader['X-Requested-With'] = 'XMLHttpRequest';
+    var resp = await HttpClient.instance.getResponse(
+      'https://passport.douyu.com/japi/scan/auth',
+      responseType: ResponseType.json,
+      queryParameters: {
+        'code': qrcodeKey,
+        'time': DateTime.now().millisecondsSinceEpoch.toString(),
+      },
+      header: pollHeader,
+    );
+    QRPollResult qrPollResult = QRPollResult(status: QRStatus.failed);
+    var resData = resp.data;
+    switch (resData['error']) {
+      case -2:
+        qrPollResult.status = QRStatus.unscanned;
+        qrPollResult.message = resData['msg'];
+      case 1:
+        qrPollResult.status = QRStatus.scanned;
+        qrPollResult.message = resData['msg'];
+      case -1:
+        qrPollResult.status = QRStatus.expired;
+        qrPollResult.message = resData['msg'];
+      case 0:
+        // 这里就会下发 set-cookie lip0&dy_did 通过 refreshCookie获取最新cookie
+        // cookie-jar maybe better
+        final dy_did = DouyuUtils.pickSetCookie(resp.headers['set-cookie']!, 'dy_did');
+        final ltp0 = DouyuUtils.pickSetCookie(resp.headers['set-cookie']!, 'LTP0');
+        var newCookie = await DouyuUtils.refreshCookie(did: dy_did, ltp0: ltp0, cookie: _cookie);
+        // 拼装一下
+        final Map<String, dynamic> credentialJson = {
+          'dy_did': dy_did,
+          'LTP0': ltp0,
+          'cookie': newCookie
+        };
+        qrPollResult.credential = jsonEncode(credentialJson);
+        qrPollResult.status = QRStatus.loading;
+      default:
+        throw StateError('斗鱼暂时无法确认登录，请刷新重试');
+    }
+    return qrPollResult;
   }
 }
 

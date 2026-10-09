@@ -21,10 +21,15 @@ class DouyuUtils {
 
   static final douyuOrigin = 'https://www.douyu.com';
 
+  static final douyuLoginReferer = 'https://passport.douyu.com/index/login?type=login&client_id=1';
+
 
   // douyu-live-stream
-  static Map<String, String> requestHeader({String roomId = '', String cookie = ''}) {
+  static Map<String, String> requestHeader({String roomId = '', String cookie = '', bool isLogin = false}) {
     var referer = roomId.isEmpty ? douyuOrigin : '$douyuOrigin/$roomId';
+    if(isLogin){
+      referer = douyuLoginReferer;
+    }
     var res = {
       'accept': '*/*',
       'accept-encoding': 'gzip, deflate, br, zstd',
@@ -152,4 +157,32 @@ class DouyuUtils {
     return postData;
   }
   // todo: 获取real_rid 暂未发现 fake_id
+
+  // 从set-cookie中获取字段
+  static String pickSetCookie(List<String> raw, String name) {
+    final items = raw.map((e) => e.toString());
+
+    for (final item in items) {
+      final pair = item.split(';').first.trim();
+      if (pair.startsWith('$name=')) {
+        return pair.substring(name.length + 1);
+      }
+    }
+    return '';
+  }
+  // 从cookie 中获取字段
+  static String pickCookie(String? cookie, String name) {
+    if (cookie == null || cookie.isEmpty) return '';
+
+    for (final part in cookie.split(';')) {
+      final p = part.trim();
+      if (p.isEmpty) continue;
+      final i = p.indexOf('=');
+      if (i <= 0) continue;
+      if (p.substring(0, i).trim() == name) {
+        return p.substring(i + 1).trim();
+      }
+    }
+    return '';
+  }
 }
