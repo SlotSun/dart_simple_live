@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
@@ -10,7 +11,6 @@ import 'package:fractional_indexing_dart/fractional_indexing_dart.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pinyin/pinyin.dart';
-import 'package:pool/pool.dart';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/event_bus.dart';
@@ -26,7 +26,6 @@ import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/models/db/history.dart';
 import 'package:simple_live_app/services/db_service.dart';
 import 'package:simple_live_core/simple_live_core.dart';
-import 'package:synchronized/synchronized.dart';
 
 class FollowService extends GetxService {
   StreamSubscription<dynamic>? subscription;
@@ -55,9 +54,6 @@ class FollowService extends GetxService {
   /// 当前tag的用户列表
   RxList<FollowUser> curTagFollowList = RxList<FollowUser>();
 
-  /// 线程安全
-  final _lock = Lock();
-
   /// 已经更新状态的数量
   var updatedCount = 0;
 
@@ -66,7 +62,10 @@ class FollowService extends GetxService {
 
   Timer? updateTimer;
 
-  int _totalToUpdate = 0;
+  int _statusEpoch = 0;
+  bool _closed = false;
+  int _activeStatusRequests = 0;
+  final Queue<Completer<void>> _statusWaiters = Queue<Completer<void>>();
 
   int _refreshCycle = 0;
 
@@ -381,19 +380,22 @@ class FollowService extends GetxService {
   }
 
   Future<void> loadData({bool updateStatus = true, int? cycle}) async {
+    if (_closed) {
+      return;
+    }
     // snapshot 恢复跳过第一次状态更新
     if (_snap) {
       _snap = false;
       return;
     }
     if (updateStatus) {
-      startUpdateStatus(cycle: cycle);
+      await startUpdateStatus(cycle: cycle);
     } else {
       _updatedListController.add(0);
     }
   }
 
-  void multiRoundPriority() {
+  List<FollowUser> multiRoundPriority() {
     final historyList = DBService.instance.getHistories();
     final Map<String, int> historyRankMap = {for (var i = 0; i < historyList.length; i++) historyList[i].id: i};
     final int maxRank = historyList.isNotEmpty ? historyList.length : 1;
@@ -412,7 +414,8 @@ class FollowService extends GetxService {
 
     // 简单线性加权组合算法，目前认定观看时长和最近观看时间权重一致
     // 如果用户历史行为序列非常长：可替换为时间衰减 + 观看时长加权
-    followList.sort((a, b) {
+    final ranked = followList.toList();
+    ranked.sort((a, b) {
       // 静态权重
       const double wDuration = 0.5;
       const double wRecency = 0.5;
@@ -439,9 +442,10 @@ class FollowService extends GetxService {
 
       return scoreB.compareTo(scoreA);
     });
+    return ranked;
   }
 
-  void startUpdateStatus({int? cycle}) async {
+  Future<void> startUpdateStatus({int? cycle}) async {
     List<FollowUser> usersToUpdate;
     final totalUsers = followList.length;
     final douyinCount = followList.where((x) => x.siteId == 'douyin').length;
@@ -452,9 +456,9 @@ class FollowService extends GetxService {
       final topNCount = (totalUsers * 0.2).round(); // Top 20%
       final bottomNCount = (totalUsers * 0.2).round(); // Bottom 20%
       final middlePartEndIndex = totalUsers - bottomNCount;
-      multiRoundPriority();
-      final topNUsers = followList.sublist(0, topNCount);
-      final middleUsers = followList.sublist(topNCount, middlePartEndIndex);
+      final ranked = multiRoundPriority();
+      final topNUsers = ranked.sublist(0, topNCount);
+      final middleUsers = ranked.sublist(topNCount, middlePartEndIndex);
       if (cycle == 0) {
         usersToUpdate = topNUsers;
         CoreLog.i("Update Follow: Cycle 0, updating top ${usersToUpdate.length}/$totalUsers users.");
@@ -464,31 +468,33 @@ class FollowService extends GetxService {
       }
     } else {
       usersToUpdate = List.from(followList);
+      listSortByMethod(usersToUpdate, AppSettingsController.instance.followSortMethod.value);
       if (cycle != null) {
         CoreLog.i("Update Follow: List <= 100, updating all ${usersToUpdate.length} users.");
       }
     }
-    _totalToUpdate = usersToUpdate.length;
-    updatedCount = 0;
-    updating.value = true;
-
-    if (_totalToUpdate == 0) {
-      updating.value = false;
-      filterData();
+    if (_closed) {
       return;
     }
-
-    var threadCount = AppSettingsController.instance.updateFollowThreadCount.value;
-
-    var pool = Pool(threadCount);
-    var tasks = <Future>[];
-
-    for (var user in usersToUpdate) {
-      tasks.add(pool.withResource(() => updateLiveInformation(user)));
+    _cancelStatusUpdate();
+    final epoch = _statusEpoch;
+    updatedCount = 0;
+    updating.value = usersToUpdate.isNotEmpty;
+    filterData();
+    if (usersToUpdate.isEmpty) {
+      return;
     }
-    await Future.wait(tasks);
-    await pool.close();
-
+    try {
+      await Future.wait(usersToUpdate.map((user) => _updateLiveInformation(user, epoch)));
+    } finally {
+      if (!_closed && epoch == _statusEpoch) {
+        updating.value = false;
+        filterData();
+      }
+    }
+    if (_closed || epoch != _statusEpoch) {
+      return;
+    }
     // 增量检查：自动解冻 lastWatchTime >= cutoff 的用户
     final threshold = AppSettingsController.instance.dormancyThreshold.value;
     if (threshold > 0 && dormantFollowList.isNotEmpty) {
@@ -499,7 +505,7 @@ class FollowService extends GetxService {
     // frequency of snapshot-saving and expireAt calculation depend on user-setting: auto-update
     final minutes = AppSettingsController.instance.autoUpdateFollowDuration.value;
     final expireAt = DateTime.now().add(Duration(minutes: minutes)).microsecondsSinceEpoch;
-    AppSettingsController.instance.setFollowSnapshot(
+    await AppSettingsController.instance.setFollowSnapshot(
       FollowSnapshot(
         expireAt: expireAt,
         followSnapshotItems: followList.map((e) => e.toSnapshot()).toList(),
@@ -508,23 +514,58 @@ class FollowService extends GetxService {
     Log.i("FollowService: follow-snapshot has saved, time: ${DateTime.now()}");
   }
 
-  Future updateLiveInformation(FollowUser item) async {
+  // 已发出的请求继续执行，旧批次的排队请求和返回结果作废。
+  void _cancelStatusUpdate() {
+    _statusEpoch += 1;
+    while (_statusWaiters.isNotEmpty) {
+      _statusWaiters.removeFirst().complete();
+    }
+    updating.value = false;
+  }
+
+  bool _isCurrentStatusRequest(FollowUser item, int epoch) =>
+      !_closed &&
+      epoch == _statusEpoch &&
+      !item.deleted &&
+      identical(followList.firstWhereOrNull((follow) => follow.id == item.id), item);
+
+  Future<void> _updateLiveInformation(FollowUser item, int epoch) async {
+    // 旧批次已发出的请求仍占用并发名额，直到请求结束。
+    while (_activeStatusRequests >= AppSettingsController.instance.updateFollowThreadCount.value.clamp(1, 16)) {
+      if (!_isCurrentStatusRequest(item, epoch)) {
+        return;
+      }
+      final waiter = Completer<void>();
+      _statusWaiters.add(waiter);
+      await waiter.future;
+    }
+    if (!_isCurrentStatusRequest(item, epoch)) {
+      return;
+    }
+    _activeStatusRequests += 1;
     try {
       var site = Sites.allSites[item.siteId]!;
       LiveRoomDetail detail = await site.liveSite.getRoomDetail(roomId: item.roomId);
+      if (!_isCurrentStatusRequest(item, epoch)) {
+        return;
+      }
       item.liveStatus.value = detail.status ? 2 : 1;
       item.cover.value = detail.status ? detail.cover : "";
       item.title.value = detail.title;
       item.online.value = detail.online;
-    } catch (e) {
-      Log.logPrint(e);
+    } catch (error) {
+      if (_isCurrentStatusRequest(item, epoch)) {
+        Log.i('Follow status lookup failed for ${item.id}: ${error.runtimeType}');
+      }
     } finally {
-      await _lock.synchronized(() {
-        updatedCount++;
-      });
-      if (updatedCount >= _totalToUpdate) {
+      _activeStatusRequests -= 1;
+      // 唤醒全部排队请求，避免已失效的请求占用唯一的唤醒机会。
+      while (_statusWaiters.isNotEmpty) {
+        _statusWaiters.removeFirst().complete();
+      }
+      if (_isCurrentStatusRequest(item, epoch)) {
+        updatedCount += 1;
         filterData();
-        updating.value = false;
       }
     }
   }
@@ -760,6 +801,7 @@ class FollowService extends GetxService {
 
   Future inputJson(String content) async {
     var data = jsonDecode(content);
+    _cancelStatusUpdate();
 
     for (var item in data) {
       var follow = FollowUser.fromJson(item);
@@ -779,6 +821,7 @@ class FollowService extends GetxService {
   // 校对思路，followList是基础数据源，tagList为索引数据，重建数据即可
   // 根据此思路，可以重写文件导入导出以及webdav恢复逻辑
   Future<void> followUserAllDataCheck() async {
+    _cancelStatusUpdate();
     var followUserListTemp = DBService.instance.getFollowList();
     var historyListTemp = DBService.instance.getHistories();
     var oldTagList = DBService.instance.getFollowTagList();
@@ -838,6 +881,8 @@ class FollowService extends GetxService {
 
   @override
   void onClose() {
+    _closed = true;
+    _cancelStatusUpdate();
     updateTimer?.cancel();
     subscription?.cancel();
     super.onClose();

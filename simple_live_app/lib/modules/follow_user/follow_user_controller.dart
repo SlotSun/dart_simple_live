@@ -18,6 +18,7 @@ import 'package:simple_live_app/services/follow_service.dart';
 class FollowUserController extends BasePageController<FollowUser> {
   StreamSubscription<dynamic>? onUpdatedIndexedStream;
   StreamSubscription<dynamic>? onUpdatedListStream;
+  int _refreshGeneration = 0;
 
   /// 0:全部 1:直播中 2:未直播
   var filterMode = FollowUserTag(id: "0", tag: "全部", userId: []).obs;
@@ -68,10 +69,26 @@ class FollowUserController extends BasePageController<FollowUser> {
   }
 
   @override
-  Future refreshData() async {
-    await FollowService.instance.loadData();
+  Future<void> refreshData() async {
+    _refreshGeneration += 1;
+    final generation = _refreshGeneration;
+    pageError.value = false;
+    currentPage = 2;
+    canLoadMore.value = false;
     updateTagList();
-    super.refreshData();
+    filterData();
+    try {
+      await FollowService.instance.loadData();
+      if (isClosed || generation != _refreshGeneration) {
+        return;
+      }
+      updateTagList();
+      filterData();
+    } catch (error) {
+      if (!isClosed && generation == _refreshGeneration) {
+        handleError(error, showPageError: list.isEmpty);
+      }
+    }
   }
 
   @override
@@ -119,6 +136,7 @@ class FollowUserController extends BasePageController<FollowUser> {
     if (hideOffline && filterMode.value.tag != "未开播") {
       list.retainWhere((user) => user.liveStatus.value == 2);
     }
+    pageEmpty.value = list.isEmpty && !FollowService.instance.updating.value;
   }
 
   // 用户自定义关注样式
@@ -299,6 +317,7 @@ class FollowUserController extends BasePageController<FollowUser> {
 
   @override
   void onClose() {
+    _refreshGeneration += 1;
     onUpdatedIndexedStream?.cancel();
     onUpdatedListStream?.cancel();
     super.onClose();
