@@ -30,6 +30,10 @@ class DBService extends GetxService {
     await accountBox.put(account.id, account);
   }
 
+  List<Account> getAllAccounts() {
+    return accountBox.values.toList();
+  }
+
   Future<void> clearFollowTag() async {
     await tagBox.clear();
   }

@@ -4,9 +4,6 @@ import 'package:crypto/crypto.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/convert_helper.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
-import 'package:simple_live_core/src/common/qr_status.dart';
-import 'package:simple_live_core/src/model/account_info.dart';
-import 'package:simple_live_core/src/model/account_qr_code.dart';
 
 import 'model/bilibili_user_info.dart';
 
@@ -17,7 +14,7 @@ class BiliBiliSite implements LiveSite {
   @override
   String name = "哔哩哔哩直播";
 
-  String _cookie = "";
+  String cookie = "";
   int userId = 0;
 
   @override
@@ -36,16 +33,16 @@ class BiliBiliSite implements LiveSite {
       buvid3 = buvidInfo["b_3"] ?? "";
       buvid4 = buvidInfo["b_4"] ?? "";
     }
-    return _cookie.isEmpty
+    return cookie.isEmpty
         ? {
             "user-agent": kDefaultUserAgent,
             "referer": kDefaultReferer,
             "cookie": 'buvid3=$buvid3;buvid4=$buvid4;',
           }
         : {
-            "cookie": _cookie.contains("buvid3")
-                ? _cookie
-                : "$_cookie;buvid3=$buvid3;buvid4=$buvid4;",
+            "cookie": cookie.contains("buvid3")
+                ? cookie
+                : "$cookie;buvid3=$buvid3;buvid4=$buvid4;",
             "user-agent": kDefaultUserAgent,
             "referer": kDefaultReferer,
           };
@@ -263,7 +260,7 @@ class BiliBiliSite implements LiveSite {
             ? serverHosts.first
             : "broadcastlv.chat.bilibili.com",
         buvid: buvid3,
-        cookie: _cookie,
+        cookie: cookie,
       ),
     );
   }
@@ -402,10 +399,10 @@ class BiliBiliSite implements LiveSite {
   /// ```
   Future<Map> getBuvid() async {
     try {
-      if (_cookie.contains("buvid3")) {
+      if (cookie.contains("buvid3")) {
         return {
-          "b_3": RegExp(r"buvid3=(.*?);").firstMatch(_cookie)?.group(1) ?? "",
-          "b_4": RegExp(r"buvid4=(.*?);").firstMatch(_cookie)?.group(1) ?? "",
+          "b_3": RegExp(r"buvid3=(.*?);").firstMatch(cookie)?.group(1) ?? "",
+          "b_4": RegExp(r"buvid4=(.*?);").firstMatch(cookie)?.group(1) ?? "",
         };
       }
 
@@ -415,7 +412,7 @@ class BiliBiliSite implements LiveSite {
         header: {
           "user-agent": kDefaultUserAgent,
           "referer": kDefaultReferer,
-          "cookie": _cookie,
+          "cookie": cookie,
         },
       );
       return result["data"];
@@ -574,7 +571,7 @@ class BiliBiliSite implements LiveSite {
 
   @override
   void setSiteAttrs(String data) {
-    _cookie = data;
+    cookie = data;
   }
 
   @override

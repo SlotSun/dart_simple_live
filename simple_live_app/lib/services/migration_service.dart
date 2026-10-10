@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/app/utils/extensions/duration_2_str_utils.dart';
+import 'package:simple_live_app/models/db/account.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/services/db_service.dart';
@@ -107,6 +109,15 @@ class MigrationService {
         }
       }
       Log.i("Migration: initialized lastWatchTime for ${followList.length} follows");
+    }
+
+    // form local-storage cookie -> Accounts after v10815
+    if(curDBVer < 10815){
+      var curTime = DateTime.now().millisecondsSinceEpoch;
+      var biliAc = Account(id: '0', siteId: Constant.kBiliBili, credential: '', createdAt: curTime, updatedAt: curTime);
+      var douyuAc = Account(id: '1', siteId: Constant.kDouyu, credential: '', createdAt: curTime, updatedAt: curTime);
+      DBService.instance.addAccount(biliAc);
+      DBService.instance.addAccount(douyuAc);
     }
     LocalStorageService.instance.settingsBox.put(LocalStorageService.kHiveDbVer, curAppVer);
   }
