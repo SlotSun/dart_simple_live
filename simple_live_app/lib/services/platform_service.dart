@@ -25,14 +25,15 @@ class PlatformService extends GetxService {
   }
 
   // 更新指定的站点账户数据
-  void updateAccount(Account ac) {
+  Future<void> updateAccount(Account ac) async {
     accountList.assignAll(
       accountList.map((a) => a.id == ac.id ? ac : a).toList(),
     );
-    DBService.instance.addAccount(ac);
+    accountList.refresh();
+    await DBService.instance.addAccount(ac);
   }
 
-  void accountLogout(Account ac) {
+  Future<void> accountLogout(Account ac) async {
     var logout = Account(
       id: ac.id,
       siteId: ac.siteId,
@@ -40,7 +41,7 @@ class PlatformService extends GetxService {
       createdAt: ac.createdAt,
       updatedAt: DateTime.now().millisecondsSinceEpoch,
     );
-    updateAccount(logout);
+    await updateAccount(logout);
   }
 
   Future<bool> accountLogin(Account ac) async {
@@ -55,7 +56,7 @@ class PlatformService extends GetxService {
       uid: info.uid,
       credential: info.credential,
     );
-    updateAccount(resAc);
+    await updateAccount(resAc);
     site.liveSite.setSiteAttrs(resAc.credential);
     return true;
   }

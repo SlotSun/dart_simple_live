@@ -1,11 +1,12 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:simple_live_app/app/app_style.dart';
-import 'package:simple_live_app/modules/mine/account/bilibili/qr_login_controller.dart';
+import 'package:simple_live_app/modules/mine/account/qr_login/qr_login_controller.dart';
+import 'package:simple_live_core/simple_live_core.dart';
 
-class BiliBiliQRLoginPage extends GetView<BiliBiliQRLoginController> {
-  const BiliBiliQRLoginPage({super.key});
+class QRLoginPage extends GetView<QRLoginController> {
+  const QRLoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {

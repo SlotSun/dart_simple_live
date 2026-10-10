@@ -27,6 +27,7 @@
         'avatar': avatar,
         'uid': uid,
         'credential': credential,
+        'isValid': isValid,
       };
 
   Map<String, dynamic> toMap() => toJson();
@@ -36,12 +37,14 @@
     String? avatar,
     String? uid,
     String? credential,
+    bool? isValid,
   }) {
     return AccountInfo(
       name: name ?? this.name,
       avatar: avatar ?? this.avatar,
       uid: uid ?? this.uid,
       credential: credential ?? this.credential,
+      isValid: isValid ?? this.isValid,
     );
   }
 

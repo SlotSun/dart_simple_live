@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:dio/dio.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/convert_helper.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
@@ -591,12 +592,13 @@ class BiliBiliSite implements LiveSite {
 
   @override
   Future<QRPollResult> getQRPollResult({required String qrcodeKey}) async {
-    QRPollResult qrPollResult = QRPollResult(status: QRStatus.failed);
+    QRPollResult qrPollResult = QRPollResult(status: QRStatus.unscanned);
     var response = await HttpClient.instance.getResponse(
       "https://passport.bilibili.com/x/passport-login/web/qrcode/poll",
       queryParameters: {
         "qrcode_key": qrcodeKey,
       },
+      responseType: ResponseType.json,
     );
     if (response.data["code"] != 0) {
       throw response.data["message"];
@@ -612,7 +614,9 @@ class BiliBiliSite implements LiveSite {
       if (cookies.isNotEmpty) {
         var cookieStr = cookies.join(";");
         CoreLog.i(cookieStr);
-        qrPollResult.credential = cookieStr;
+        // 统一封装
+        String credential = jsonEncode({'cookie':cookieStr});
+        qrPollResult.credential = credential;
         qrPollResult.status = QRStatus.scanned;
       }
     } else if (code == 86038) {
@@ -629,18 +633,17 @@ class BiliBiliSite implements LiveSite {
     try {
       var result = await HttpClient.instance.getJson(
         "https://api.bilibili.com/x/member/web/account",
-        header: {
-          "Cookie": credential,
-        },
+        header: jsonDecode(credential),
       );
       if (result["code"] == 0) {
         BiliBiliUserInfoModel info = BiliBiliUserInfoModel.fromJson(result["data"]);
-        res.copyWith(
+        res = res.copyWith(
           name: info.uname,
           avatar: info.face,
           uid: info.userid,
           credential: credential,
-        ).isValid = true;
+          isValid: true,
+        );
       }
     } catch (e, s) {
       CoreLog.e(e.toString(), s);
