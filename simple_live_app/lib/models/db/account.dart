@@ -1,6 +1,8 @@
 ﻿import 'package:hive_ce/hive.dart';
 
-@HiveType(typeId: 6)
+part 'account.g.dart';
+
+@HiveType(typeId: 8)
 class Account {
   /// 全局唯一ID
   @HiveField(0)
@@ -27,7 +29,7 @@ class Account {
   final String credential;
 
   /// 是否当前激活账号
-  @HiveField(6)
+  @HiveField(6, defaultValue: true)
   final bool isActive;
 
   /// 创建/更新时间
@@ -35,6 +37,15 @@ class Account {
   final int createdAt;
   @HiveField(8, defaultValue: 0)
   final int updatedAt;
+
+  @HiveField(9, defaultValue: false)
+  final bool supportQRLogin;
+
+  @HiveField(10, defaultValue: false)
+  final bool supportCookieLogin;
+
+  @HiveField(11, defaultValue: false)
+  final bool supportWebLogin;
 
   Account({
     required this.id,
@@ -46,6 +57,9 @@ class Account {
     this.isActive = true,
     required this.createdAt,
     required this.updatedAt,
+    this.supportCookieLogin = false,
+    this.supportQRLogin = false,
+    this.supportWebLogin = false,
   });
 
   factory Account.fromJson(Map<String, dynamic> json) {
@@ -59,6 +73,9 @@ class Account {
       isActive: json['isActive'] as bool? ?? true,
       createdAt: json['createdAt'] as int,
       updatedAt: json['updatedAt'] as int,
+      supportCookieLogin: json['supportCookieLogin'] as bool,
+      supportQRLogin: json['supportQRLogin'] as bool,
+      supportWebLogin: json['supportWebLogin'] as bool,
     );
   }
 
@@ -72,6 +89,9 @@ class Account {
         'isActive': isActive,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
+        'supportCookieLogin': supportCookieLogin,
+        'supportQRLogin': supportQRLogin,
+        'supportWebLogin': supportWebLogin,
       };
 
   Account copyWith({
@@ -84,6 +104,9 @@ class Account {
     bool? isActive,
     int? createdAt,
     int? updatedAt,
+    bool? supportCookieLogin,
+    bool? supportQRLogin,
+    bool? supportWebLogin,
   }) {
     return Account(
       id: id ?? this.id,
@@ -95,6 +118,9 @@ class Account {
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      supportCookieLogin: supportCookieLogin ?? this.supportCookieLogin,
+      supportQRLogin: supportQRLogin ?? this.supportQRLogin,
+      supportWebLogin: supportWebLogin ?? this.supportWebLogin,
     );
   }
 
@@ -109,7 +135,10 @@ class Account {
         'credential: $credential, '
         'isActive: $isActive, '
         'createdAt: $createdAt, '
-        'updatedAt: $updatedAt'
+        'updatedAt: $updatedAt, '
+        'supportQRLogin: $supportQRLogin, '
+        'supportCookieLogin: $supportCookieLogin, '
+        'supportWebLogin: $supportWebLogin'
         ')';
   }
 }
