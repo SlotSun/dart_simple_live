@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
@@ -341,13 +342,13 @@ class DouyuSite implements LiveSite {
 
   @override
   Future<void> setSiteAttrs(String data) async {
-    final map = jsonDecode(data) as Map<String,String>;
+    final map = jsonDecode(data) as Map<String, dynamic>;
     if(map.containsKey('cookie')){
       _cookie = map['cookie'] as String;
-      DouyuUtils.setDyDid(_cookie);
     }
     if(map.containsKey('dy_did')){
       _dy_did = map['dy_did'] as String;
+      DouyuUtils.setDyDid(_dy_did);
     }
     if(map.containsKey('LTP0')){
       _ltp0 = map['LTP0'] as String;
@@ -359,12 +360,12 @@ class DouyuSite implements LiveSite {
   Future<AccountInfo> getAccountInfo({required String credential}) async {
     setSiteAttrs(credential);
     var newCookie = await DouyuUtils.refreshCookie(did: _dy_did, ltp0: _ltp0, cookie: _cookie);
-    var newCredential = jsonDecode(credential) as Map<String, String>;
+    var newCredential = jsonDecode(credential) as Map<String, dynamic>;
     newCredential['cookie'] = newCookie;
     return AccountInfo(
       uid: DouyuUtils.pickCookie(newCookie, 'acf_uid'),
-      name: DouyuUtils.pickCookie(newCookie, 'acf_nickname'),
-      avatar: Uri.decodeComponent(DouyuUtils.pickCookie(newCookie, 'acf_nickname')),
+      name: Uri.decodeComponent(DouyuUtils.pickCookie(newCookie, 'acf_nickname')),
+      avatar: '${Uri.decodeComponent(DouyuUtils.pickCookie(newCookie, 'acf_avatar'))}middle.jpg',
       credential: jsonEncode(newCredential),
       isValid: newCookie.isNotEmpty ? true : false,
     );
@@ -372,6 +373,21 @@ class DouyuSite implements LiveSite {
 
   @override
   Future<QRCode> getQRCode() async {
+    var didRes = await HttpClient.instance.getText(
+      'https://passport.douyu.com/lapi/did/api/get',
+      queryParameters: {'client_id': '1', 'callback': 'cb'},
+      header: DouyuUtils.requestHeader(isLogin: true),
+    );
+    var text = (didRes ?? '').trim();
+    if (text.isNotEmpty && !text.startsWith('{')) {
+      final start = text.indexOf('(');
+      final end = text.lastIndexOf(')');
+      if (start != -1 && end > start) {
+        text = text.substring(start + 1, end).trim();
+      }
+    }
+    _dy_did = (jsonDecode(text) as Map<String, dynamic>)['data']['did'] ?? '10000000000000000000000000001501';
+    DouyuUtils.setDyDid(_dy_did);
     var result = await HttpClient.instance.postJson(
       'https://passport.douyu.com/scan/generateCode',
       data: {'client_id': '1', 'isMultiAccount': '0'},
@@ -415,19 +431,23 @@ class DouyuSite implements LiveSite {
         qrPollResult.status = QRStatus.expired;
         qrPollResult.message = resData['msg'];
       case 0:
-        // 这里就会下发 set-cookie lip0&dy_did 通过 refreshCookie获取最新cookie
+        final url = resData['data']?['url'] as String?;
+        if (url == null || url.isEmpty) {
+          throw StateError('斗鱼未返回登录确认地址');
+        }
+        // 这里就会下发 set-cookie lip0 通过 refreshCookie获取最新cookie
         // cookie-jar maybe better
-        final dy_did = DouyuUtils.pickSetCookie(resp.headers['set-cookie']!, 'dy_did');
-        final ltp0 = DouyuUtils.pickSetCookie(resp.headers['set-cookie']!, 'LTP0');
-        var newCookie = await DouyuUtils.refreshCookie(did: dy_did, ltp0: ltp0, cookie: _cookie);
+        var pollCookie = resp.headers['set-cookie']!;
+        final ltp0 = DouyuUtils.pickSetCookie(pollCookie, 'LTP0');
+        var newCookie = await DouyuUtils.refreshCookie(did: _dy_did, ltp0: ltp0, cookie: _cookie);
         // 拼装一下
         final Map<String, dynamic> credentialJson = {
-          'dy_did': dy_did,
+          'dy_did': _dy_did,
           'LTP0': ltp0,
           'cookie': newCookie
         };
         qrPollResult.credential = jsonEncode(credentialJson);
-        qrPollResult.status = QRStatus.loading;
+        qrPollResult.status = QRStatus.scanned;
       default:
         throw StateError('斗鱼暂时无法确认登录，请刷新重试');
     }

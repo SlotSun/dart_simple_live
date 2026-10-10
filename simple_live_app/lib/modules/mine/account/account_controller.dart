@@ -8,6 +8,7 @@ import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/models/db/account.dart';
+import 'package:simple_live_app/routes/app_navigation.dart';
 import 'package:simple_live_app/routes/route_path.dart';
 import 'package:simple_live_app/services/platform_service.dart';
 
@@ -25,7 +26,7 @@ class AccountController extends GetxController {
     if (ac.credential.isNotEmpty) {
       var result = await Utils.showAlertDialog("确定要退出${site.name}账号吗？", title: "退出登录");
       if (result) {
-        PlatformService.instance.accountLogout(ac);
+        await PlatformService.instance.accountLogout(ac);
       }
     } else {
       login();
@@ -58,7 +59,7 @@ class AccountController extends GetxController {
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Get.back();
-              Get.toNamed(RoutePath.kBiliBiliQRLogin);
+              AppNavigator.toQRCoreLogin(account: curAccount);
             },
           ),
           ListTile(
@@ -108,6 +109,8 @@ class AccountController extends GetxController {
     }
     var res = await PlatformService.instance.accountLogin(curAccount.copyWith(credential: jsonEncode(params)));
     if (res) {
+      SmartDialog.showToast('${site.name}登录成功!');
+    } else {
       SmartDialog.showToast('${site.name}参数认证错误，请重新设置');
     }
   }

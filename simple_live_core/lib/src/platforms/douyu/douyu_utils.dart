@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
@@ -46,9 +47,8 @@ class DouyuUtils {
     return res;
   }
 
-  static void setDyDid(String cookie) {
-    final match = RegExp(r'dy_did=([^;]+)').firstMatch(cookie);
-    _did = match?.group(1) ?? _did;
+  static void setDyDid(String dy_did) {
+    _did = dy_did;
   }
 
   static Future<String> refreshCookie({String did = '', String ltp0 = '', String cookie = ''}) async {
@@ -160,12 +160,10 @@ class DouyuUtils {
 
   // 从set-cookie中获取字段
   static String pickSetCookie(List<String> raw, String name) {
-    final items = raw.map((e) => e.toString());
-
-    for (final item in items) {
-      final pair = item.split(';').first.trim();
-      if (pair.startsWith('$name=')) {
-        return pair.substring(name.length + 1);
+    for (final e in raw) {
+      final c = Cookie.fromSetCookieValue(e);
+      if (c.name == name){
+        return c.value;
       }
     }
     return '';

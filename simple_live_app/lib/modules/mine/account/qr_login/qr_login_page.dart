@@ -11,7 +11,7 @@ class QRLoginPage extends GetView<QRLoginController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("哔哩哔哩账号登录")),
+      appBar: AppBar(title: Text("${controller.site.name}账号登录")),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -68,10 +68,10 @@ class QRLoginPage extends GetView<QRLoginController> {
               },
             ),
           ),
-          const Padding(
+          Padding(
             padding: AppStyle.edgeInsetsA24,
             child: Text(
-              "请使用哔哩哔哩手机客户端扫描二维码登录",
+              "请使用${controller.site.name}手机客户端扫描二维码登录",
               textAlign: TextAlign.center,
             ),
           ),
