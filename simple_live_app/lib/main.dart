@@ -27,7 +27,6 @@ import 'package:simple_live_app/modules/settings/appstyle_settings/appstyle_sett
 import 'package:simple_live_app/routes/app_analytics_observer.dart';
 import 'package:simple_live_app/routes/app_pages.dart';
 import 'package:simple_live_app/routes/route_path.dart';
-import 'package:simple_live_app/services/bilibili_account_service.dart';
 import 'package:simple_live_app/services/db_service.dart';
 import 'package:simple_live_app/services/firebase_service.dart' as app;
 import 'package:simple_live_app/services/follow_block_service.dart';
@@ -74,7 +73,6 @@ void main(List<String> arguments) async {
   await initServices();
   await initWindow();
 
-  await MigrationService.migrateDataByVersion();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   //设置状态栏为透明
   SystemUiOverlayStyle systemUiOverlayStyle = const SystemUiOverlayStyle(
@@ -114,13 +112,14 @@ Future initServices() async {
 
   await Get.put(AppStyleSettingController()).init();
 
-  Get.put(BiliBiliAccountService());
+  Get.put(FollowService());
+
+  // platformService need migrate
+  await MigrationService.migrateDataByVersion();
 
   Get.put(PlatformService());
 
   Get.put(SyncService());
-
-  Get.put(FollowService());
 
   Get.put(HistoryService());
 

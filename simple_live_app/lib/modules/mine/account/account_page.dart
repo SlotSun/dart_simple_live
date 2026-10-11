@@ -54,21 +54,6 @@ class AccountPage extends GetView<AccountController> {
                 },
               ),
             ),
-            Obx(
-              () => ListTile(
-                leading: Image.asset(
-                  'assets/images/douyin.png',
-                  width: 36,
-                  height: 36,
-                ),
-                title: const Text("抖音直播"),
-                subtitle: Text(PlatformService.instance.douyinName.value),
-                trailing: PlatformService.instance.douyinLogined.value
-                    ? const Icon(Icons.logout)
-                    : const Icon(Icons.chevron_right),
-                onTap: controller.douyinTap,
-              ),
-            ),
           ],
         ),
       ),

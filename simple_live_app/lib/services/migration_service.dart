@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
@@ -112,12 +113,61 @@ class MigrationService {
     }
 
     // form local-storage cookie -> Accounts after v10815
-    if(curDBVer < 10815){
+    if (curDBVer <= 10815) {
       var curTime = DateTime.now().millisecondsSinceEpoch;
-      var biliAc = Account(id: '0', siteId: Constant.kBiliBili, credential: '', createdAt: curTime, updatedAt: curTime);
-      var douyuAc = Account(id: '1', siteId: Constant.kDouyu, credential: '', createdAt: curTime, updatedAt: curTime);
-      DBService.instance.addAccount(biliAc);
-      DBService.instance.addAccount(douyuAc);
+      var accountList = DBService.instance.getAllAccounts();
+      var existingSiteIds = accountList.map((e) => e.siteId).toSet();
+      // migration from map<String, cookie> to AccountModel
+      var biliCredential = jsonEncode({
+        'cookie': LocalStorageService.instance.getValue(LocalStorageService.kBilibiliCookie, ''),
+      });
+      var douyuCredential = jsonEncode({
+        'cookie': LocalStorageService.instance.getValue(LocalStorageService.kDouyuCookie, ''),
+        'dy_did': LocalStorageService.instance.getValue(LocalStorageService.kDouyuDyDid, ''),
+        'LTP0': LocalStorageService.instance.getValue(LocalStorageService.kDouyuLTP0, ''),
+      });
+
+      var douyinCredential = jsonEncode({
+        'cookie': LocalStorageService.instance.getValue(LocalStorageService.kDouyinCookie, ''),
+      });
+
+      final defaults = [
+        Account(
+          id: '0',
+          siteId: Constant.kBiliBili,
+          credential: biliCredential,
+          isActive: false,
+          supportCookieLogin: true,
+          supportQRLogin: true,
+          supportWebLogin: true,
+          createdAt: curTime,
+          updatedAt: curTime,
+        ),
+        Account(
+            id: '1',
+            siteId: Constant.kDouyu,
+            credential: douyuCredential,
+            isActive: false,
+            supportCookieLogin: true,
+            supportQRLogin: true,
+            createdAt: curTime,
+            updatedAt: curTime),
+        Account(
+          id: '2',
+          siteId: Constant.kDouyin,
+          credential: douyinCredential,
+          isActive: false,
+          supportCookieLogin: true,
+          createdAt: curTime,
+          updatedAt: curTime,
+        ),
+      ];
+
+      for (final ac in defaults) {
+        if (existingSiteIds.contains(ac.siteId) == false) {
+          DBService.instance.addAccount(ac);
+        }
+      }
     }
     LocalStorageService.instance.settingsBox.put(LocalStorageService.kHiveDbVer, curAppVer);
   }

@@ -1,3 +1,4 @@
+import 'package:simple_live_app/models/db/account.dart';
 import 'package:simple_live_app/models/sync_client_info_model.dart';
 import 'package:simple_live_app/requests/http_client.dart';
 import 'package:simple_live_app/services/sync_service.dart';
@@ -94,47 +95,11 @@ class SyncClientRequest {
     }
   }
 
-  Future<bool> syncBiliAccount(SyncClinet client, String cookie) async {
-    var url = "http://${client.address}:${client.port}/sync/account/bilibili";
+  Future<bool> syncAccount(SyncClinet client, Account account) async {
+    var url = "http://${client.address}:${client.port}/sync/account/account";
     var data = await HttpClient.instance.postJson(
       url,
-      data: {
-        "cookie": cookie,
-      },
-    );
-
-    if (data["status"]) {
-      return true;
-    } else {
-      throw data["message"];
-    }
-  }
-
-  Future<bool> syncDouyuAccount(SyncClinet client, String cookie, String did, String ltp0) async {
-    var url = "http://${client.address}:${client.port}/sync/account/douyu";
-    var data = await HttpClient.instance.postJson(
-      url,
-      data: {
-        "cookie": cookie,
-        'dy_did': did,
-        'ltp0': ltp0,
-      },
-    );
-
-    if (data["status"]) {
-      return true;
-    } else {
-      throw data["message"];
-    }
-  }
-
-  Future<bool> syncDouyinAccount(SyncClinet client, String cookie) async {
-    var url = "http://${client.address}:${client.port}/sync/account/douyin";
-    var data = await HttpClient.instance.postJson(
-      url,
-      data: {
-        "cookie": cookie,
-      },
+      data: account.toJson(),
     );
 
     if (data["status"]) {

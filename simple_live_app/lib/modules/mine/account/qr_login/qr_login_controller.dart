@@ -8,9 +8,8 @@ import 'package:simple_live_app/models/db/account.dart';
 import 'package:simple_live_app/services/platform_service.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 
-
 class QRLoginController extends GetxController {
-  Account account= Get.arguments;
+  Account account = Get.arguments;
   late Site site;
   @override
   void onInit() {

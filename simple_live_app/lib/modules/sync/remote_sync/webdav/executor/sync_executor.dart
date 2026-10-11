@@ -2,6 +2,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/modules/sync/remote_sync/webdav/interface/sync_resource.dart';
 import 'package:simple_live_app/modules/sync/remote_sync/webdav/resources/blockwords_sync_resource.dart';
@@ -20,8 +21,7 @@ class SyncExecutor {
 
   SyncExecutor._();
 
-  List<SyncResource> _resources = [
-  ];
+  List<SyncResource> _resources = [];
 
   void buildExecutorAttr(
     DAVClient davClient, {
@@ -77,7 +77,12 @@ class SyncExecutor {
 
     if (mode != SyncMode.recoveryAll) {
       final zipBytes = ZipEncoder().encode(uploadArchive);
-      await _davClient.backup(Uint8List.fromList(zipBytes));
+      var res = await _davClient.backup(Uint8List.fromList(zipBytes));
+      if (res) {
+        SmartDialog.showToast('上传成功');
+      } else {
+        SmartDialog.showToast('上传失败');
+      }
     }
   }
 

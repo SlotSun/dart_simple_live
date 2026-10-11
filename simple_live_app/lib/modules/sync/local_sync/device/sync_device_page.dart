@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/modules/sync/local_sync/device/sync_device_controller.dart';
 import 'package:simple_live_app/widgets/settings/settings_card.dart';
 
@@ -60,7 +61,7 @@ class SyncDevicePage extends GetView<SyncDeviceController> {
                   title: const Text("同步哔哩哔哩账号"),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    controller.syncBiliAccount();
+                    controller.syncAccount(siteId: Constant.kBiliBili);
                   },
                 ),
                 AppStyle.divider,
@@ -69,7 +70,7 @@ class SyncDevicePage extends GetView<SyncDeviceController> {
                   title: const Text("同步斗鱼账号"),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    controller.syncDouyuAccount();
+                    controller.syncAccount(siteId: Constant.kDouyu);
                   },
                 ),
                 AppStyle.divider,
@@ -78,7 +79,7 @@ class SyncDevicePage extends GetView<SyncDeviceController> {
                   title: const Text("同步抖音账号"),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    controller.syncDouyinAccount();
+                    controller.syncAccount(siteId: Constant.kDouyin);
                   },
                 ),
               ],

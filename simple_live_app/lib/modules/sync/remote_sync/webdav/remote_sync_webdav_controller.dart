@@ -147,7 +147,6 @@ class RemoteSyncWebDAVController extends BaseController {
     try {
       await _sync(mode: SyncMode.uploadAll);
       SmartDialog.dismiss();
-      SmartDialog.showToast("上传成功");
       DateTime uploadTime = DateTime.now();
       lastUploadTime.value = Utils.parseTime(uploadTime);
       LocalStorageService.instance

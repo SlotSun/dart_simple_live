@@ -162,18 +162,18 @@ class FollowInfoController extends BasePageController<FollowUser> {
     LiveRoomDetail detail = await targetSite.liveSite.getRoomDetail(roomId: targetRoomId);
     // 复制并更新关键信息
     final FollowUser newFollow = FollowUser(
-      id: '${targetSite.id}_$targetRoomId',
-      roomId: targetRoomId,
-      siteId: targetSite.id,
-      userName: detail.userName,
-      face: detail.userAvatar,
-      addTime: current.addTime,
-      watchDuration: current.watchDuration,
-      watchDurationSec: current.watchDurationSec,
-      tag: current.tag,
-      remark: current.remark,
-      romanName: current.romanName
-    )..liveStatus.value = current.liveStatus.value;
+        id: '${targetSite.id}_$targetRoomId',
+        roomId: targetRoomId,
+        siteId: targetSite.id,
+        userName: detail.userName,
+        face: detail.userAvatar,
+        addTime: current.addTime,
+        watchDuration: current.watchDuration,
+        watchDurationSec: current.watchDurationSec,
+        tag: current.tag,
+        remark: current.remark,
+        romanName: current.romanName)
+      ..liveStatus.value = current.liveStatus.value;
 
     // 替换关注
     await FollowService.instance.removeFollowUser(current.id);

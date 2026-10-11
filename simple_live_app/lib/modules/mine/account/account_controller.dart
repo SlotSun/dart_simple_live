@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -9,7 +8,6 @@ import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/models/db/account.dart';
 import 'package:simple_live_app/routes/app_navigation.dart';
-import 'package:simple_live_app/routes/route_path.dart';
 import 'package:simple_live_app/services/platform_service.dart';
 
 class AccountController extends GetxController {
@@ -23,24 +21,24 @@ class AccountController extends GetxController {
   void tap(Account ac) async {
     curAccount = ac;
     site = Sites.allSites[curAccount.siteId]!;
-    if (ac.credential.isNotEmpty) {
+    if (ac.isActive) {
       var result = await Utils.showAlertDialog("确定要退出${site.name}账号吗？", title: "退出登录");
       if (result) {
         await PlatformService.instance.accountLogout(ac);
       }
     } else {
-      login();
+      login(ac);
     }
   }
 
-  void login() {
+  void login(Account account) {
     Utils.showBottomSheet(
       title: "登录${site.name}",
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Visibility(
-            visible: (Platform.isAndroid || Platform.isIOS || Platform.isWindows) && site.id == Constant.kBiliBili,
+            visible: account.supportWebLogin,
             child: ListTile(
               leading: const Icon(Icons.account_circle_outlined),
               title: const Text("Web登录"),
@@ -48,19 +46,22 @@ class AccountController extends GetxController {
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 Get.back();
-                AppNavigator.toBiliBiliWebLogin(account: curAccount);
+                AppNavigator.toBiliBiliWebLogin(account: account);
               },
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.qr_code),
-            title: const Text("扫码登录"),
-            subtitle: Text("使用${site.name}APP扫描二维码登录"),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Get.back();
-              AppNavigator.toQRCoreLogin(account: curAccount);
-            },
+          Visibility(
+            visible: account.supportQRLogin,
+            child: ListTile(
+              leading: const Icon(Icons.qr_code),
+              title: const Text("扫码登录"),
+              subtitle: Text("使用${site.name}APP扫描二维码登录"),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Get.back();
+                AppNavigator.toQRCoreLogin(account: curAccount);
+              },
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.edit_outlined),
@@ -112,26 +113,6 @@ class AccountController extends GetxController {
       SmartDialog.showToast('${site.name}登录成功!');
     } else {
       SmartDialog.showToast('${site.name}参数认证错误，请重新设置');
-    }
-  }
-
-  // 需要用户手动复制抖音的Cookie
-  void douyinTap() async {
-    if (PlatformService.instance.douyinLogined.value) {
-      var result = await Utils.showAlertDialog("确定要清除抖音Cookie吗？", title: "清除Cookie");
-      if (result) {
-        PlatformService.instance.douyinLogout();
-      }
-    } else {
-      final cookie = await Utils.showEditTextDialog(
-        "",
-        title: "请输入抖音Cookie",
-        hintText: "__ac_signature=...;sessionid=...;",
-      );
-      if (cookie == null || cookie.isEmpty) return;
-      PlatformService.instance.setDouyinCookie(cookie);
-      // 检查输入的cookie是否有效
-      await PlatformService.instance.loadDouyinUserInfo();
     }
   }
 }
