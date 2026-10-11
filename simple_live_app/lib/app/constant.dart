@@ -5,6 +5,7 @@ class Constant {
   static const String kUpdateFollow = "UpdateFollow";
   static const String kUpdateHistory = "UpdateHistory";
   static const String kUpdateDanmaku = "UpdateDanmaku";
+  static const String kUpdateAccount = "UpdateAccount";
 
   static final Map<String, HomePageItem> allHomePages = {
     "recommend": HomePageItem(

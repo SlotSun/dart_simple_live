@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/constant.dart';
+import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/models/db/account.dart';
@@ -14,11 +16,18 @@ import 'package:simple_live_core/simple_live_core.dart';
 class PlatformService extends GetxService {
   static PlatformService get instance => Get.find<PlatformService>();
 
+  StreamSubscription<dynamic>? subscription;
+
   RxList<Account> accountList = RxList();
 
   void _initAccount() {
     accountList.value = DBService.instance.getAllAccounts();
+    // 自动更新
+    for (var account in accountList) {
+      accountLogin(account);
+    }
   }
+
 
   // 更新指定的站点账户数据
   Future<void> updateAccount(Account ac) async {
@@ -43,14 +52,20 @@ class PlatformService extends GetxService {
   Future<bool> accountLogin(Account ac) async {
     var site = Sites.allSites[ac.siteId]!;
     AccountInfo info = await site.liveSite.getAccountInfo(credential: ac.credential);
-    if (!info.isValid) {
-      return false;
-    }
     var resAc = ac.copyWith(
-        userName: info.name, avatar: info.avatar, uid: info.uid, credential: info.credential, isActive: info.isValid);
+      userName: info.name,
+      avatar: info.avatar,
+      uid: info.uid,
+      credential: info.credential,
+      isActive: info.isValid,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+    );
     await updateAccount(resAc);
     site.liveSite.setSiteAttrs(resAc.credential);
-    return true;
+    if(!info.isValid){
+      SmartDialog.showToast('${site.name}账号失效，请重新设置');
+    }
+    return info.isValid;
   }
 
   // ==================== 抖音 ====================
@@ -113,9 +128,18 @@ class PlatformService extends GetxService {
 
   @override
   void onInit() {
+    subscription = EventBus.instance.listen(Constant.kUpdateAccount, (data) {
+      Log.i('update Account');
+      _initAccount();
+    });
     _initAccount();
     _updateDouyinAttr();
     _initHuya();
     super.onInit();
+  }
+
+  @override
+  void onClose(){
+    subscription?.cancel();
   }
 }

@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:archive/archive.dart';
+import 'package:simple_live_app/app/constant.dart';
+import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/models/db/account.dart';
 import 'package:simple_live_app/modules/sync/remote_sync/webdav/interface/sync_resource.dart';
 import 'package:simple_live_app/services/db_service.dart';
@@ -19,7 +21,7 @@ class UserAccountCookieSyncResource implements SyncResource<List<Account>> {
     final file = archive.findFile(fileName);
     if (file == null) return null;
     final jsonData = jsonDecode(utf8.decode(file.content))['data'];
-    List<Account>? res = (jsonData['data'] as List).map((e) => Account.fromJson(e)).toList();
+    List<Account>? res = (jsonData as List).map((e) => Account.fromJson(e)).toList();
     return res;
   }
 
@@ -30,6 +32,7 @@ class UserAccountCookieSyncResource implements SyncResource<List<Account>> {
     for (var item in data) {
       await DBService.instance.addAccount(item);
     }
+    EventBus.instance.emit(Constant.kUpdateAccount, 0);;
   }
 
   @override

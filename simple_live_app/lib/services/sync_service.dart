@@ -370,6 +370,7 @@ class SyncService extends GetxService {
       Account account = Account.fromJson(jsonBody);
       PlatformService.instance.updateAccount(account);
       SmartDialog.showToast('已同步${account.siteId}账号');
+      EventBus.instance.emit(Constant.kUpdateAccount, 0);
       return toJsonResponse({
         'status': true,
         'message': 'success',
