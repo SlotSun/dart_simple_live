@@ -44,14 +44,14 @@ class BiliBiliWebLoginController extends BaseController {
       }
       var cookieStr = cookies.map((e) => "${e.name}=${e.value}").join(";");
       Log.i(cookieStr);
-      var credential = jsonEncode({'cookie':cookieStr});
+      var credential = jsonEncode({'cookie': cookieStr});
 
-      var res =  await PlatformService.instance.accountLogin(
+      var res = await PlatformService.instance.accountLogin(
         account.copyWith(
           credential: credential,
         ),
       );
-      if(res == false){
+      if (res == false) {
         SmartDialog.showToast('登录错误请重新登录！');
       }
       Get.back();

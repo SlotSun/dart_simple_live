@@ -17,8 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:simple_live_app/modules/live_room/danmaku/danmaku_emoticon.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 
-LiveMessageEmoticon _emot(String? name, String url) =>
-    LiveMessageEmoticon(name: name, url: url, width: 20, height: 20);
+LiveMessageEmoticon _emot(String? name, String url) => LiveMessageEmoticon(name: name, url: url, width: 20, height: 20);
 
 /// 把片段列表压成便于断言的形式
 List<String> _shape(List<DanmakuSegment> segments) {
@@ -123,8 +122,7 @@ void main() {
   group('DanmakuEmoticonRenderer.canRender', () {
     test('只认非空的表情列表', () {
       expect(DanmakuEmoticonRenderer.canRender(null), isFalse);
-      expect(
-          DanmakuEmoticonRenderer.canRender(<LiveMessageEmoticon>[]), isFalse);
+      expect(DanmakuEmoticonRenderer.canRender(<LiveMessageEmoticon>[]), isFalse);
       expect(DanmakuEmoticonRenderer.canRender('普通载荷'), isFalse);
       expect(
         DanmakuEmoticonRenderer.canRender([_emot('[doge]', 'https://x/y.png')]),
@@ -172,8 +170,7 @@ void main() {
     }
 
     test('缓存命中时返回独立句柄：连续渲染两次都不会画到已释放的图', () async {
-      DanmakuEmoticonRenderer.debugImageProviderFactory =
-          (_) => MemoryImage(png);
+      DanmakuEmoticonRenderer.debugImageProviderFactory = (_) => MemoryImage(png);
 
       final first = await render();
       final second = await render();
@@ -189,8 +186,7 @@ void main() {
     });
 
     test('clearCache 会把缓存的源图句柄一并释放（否则是永久泄漏）', () async {
-      DanmakuEmoticonRenderer.debugImageProviderFactory =
-          (_) => MemoryImage(png);
+      DanmakuEmoticonRenderer.debugImageProviderFactory = (_) => MemoryImage(png);
 
       final bitmap = await render();
       expect(bitmap, isNotNull);
@@ -213,8 +209,7 @@ void main() {
     });
 
     test('clearCache 只释放缓存本体，不影响已分发出去的合成位图', () async {
-      DanmakuEmoticonRenderer.debugImageProviderFactory =
-          (_) => MemoryImage(png);
+      DanmakuEmoticonRenderer.debugImageProviderFactory = (_) => MemoryImage(png);
 
       final first = await render();
       expect(first, isNotNull);
@@ -255,8 +250,7 @@ void main() {
     });
 
     setUp(() {
-      DanmakuEmoticonRenderer.debugImageProviderFactory =
-          (_) => MemoryImage(png);
+      DanmakuEmoticonRenderer.debugImageProviderFactory = (_) => MemoryImage(png);
     });
 
     tearDown(() {
@@ -304,8 +298,7 @@ void main() {
 
     test('渲染链路抛异常时自己吞掉，不让异常外溢成 fatal', () async {
       _ThrowingImageStream.addListenerCalls = 0;
-      DanmakuEmoticonRenderer.debugImageProviderFactory =
-          (_) => _ThrowingImageProvider();
+      DanmakuEmoticonRenderer.debugImageProviderFactory = (_) => _ThrowingImageProvider();
 
       await expectLater(
         DanmakuEmoticonRenderer.apply(
@@ -400,8 +393,7 @@ void main() {
       expect(
         bitmap.width,
         closeTo(
-          (bitmap.height - option.strokeWidth) * kMaxEmoteAspectRatio +
-              option.strokeWidth,
+          (bitmap.height - option.strokeWidth) * kMaxEmoteAspectRatio + option.strokeWidth,
           0.01,
         ),
       );
@@ -484,8 +476,7 @@ class _ThrowingImageProvider extends ImageProvider<Object> {
   Future<Object> obtainKey(ImageConfiguration configuration) async => this;
 
   @override
-  ImageStream createStream(ImageConfiguration configuration) =>
-      _ThrowingImageStream();
+  ImageStream createStream(ImageConfiguration configuration) => _ThrowingImageStream();
 }
 
 class _ThrowingImageStream extends ImageStream {

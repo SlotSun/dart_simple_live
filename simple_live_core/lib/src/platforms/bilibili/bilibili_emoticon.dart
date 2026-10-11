@@ -81,8 +81,7 @@ _SingleEmoticon? _readSingleEmoticon(List<dynamic> meta) {
 /// 两个解析入口共用同一个判据，因此 [result] 的最终长度就是上限本身，
 /// 出口不需要再 `sublist` 截断一次——截断会掩盖「已经解析出来又被丢掉」
 /// 这类看不见的行为（单表情恰好是整条弹幕唯一的表情时尤其致命）。
-bool _isFull(List<LiveMessageEmoticon> result) =>
-    result.length >= _maxEmoticons;
+bool _isFull(List<LiveMessageEmoticon> result) => result.length >= _maxEmoticons;
 
 /// 情况 2：`info[0][15]["extra"]["emots"]` 的占位符映射
 void _parseExtraEmots(
@@ -128,9 +127,7 @@ void _parseExtraEmots(
       // 与 info[0][13] 是同一张图，或整条弹幕就是这个裸名 key —— 两种都是
       // B 站单独发的大表情。不标 large 的话，随后 info[0][13] 会因 url 去重
       // 被丢弃，渲染层就按行内小表情口径把它画得很小
-      large: url == bigEmoticonUrl ||
-          (!_isPlaceholder(name) &&
-              _standaloneEmoticonName(message.trim()) == name),
+      large: url == bigEmoticonUrl || (!_isPlaceholder(name) && _standaloneEmoticonName(message.trim()) == name),
       emoticonUnique: _asString(value?['emoticon_unique']),
     ));
   }
@@ -189,8 +186,7 @@ String? _standaloneEmoticonName(String trimmed) {
   if (trimmed.contains('[') || trimmed.contains(']')) {
     return null;
   }
-  if (trimmed.length > _maxEmoticonNameLength ||
-      _whitespace.hasMatch(trimmed)) {
+  if (trimmed.length > _maxEmoticonNameLength || _whitespace.hasMatch(trimmed)) {
     return null;
   }
   return trimmed;

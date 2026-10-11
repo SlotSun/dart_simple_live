@@ -167,9 +167,7 @@ double emoteDisplayHeight(
   // 下界也要夹进上界内：fontSize 来自持久化设置，脏数据把它撑到极大时下界会
   // 反超上界，`num.clamp` 直接抛 ArgumentError；聊天区是在 build 里同步调它，
   // 异常会打断整帧渲染。
-  final ceiling = maxHeight == null
-      ? kMaxEmoteLogicalHeight
-      : math.min(maxHeight, kMaxEmoteLogicalHeight);
+  final ceiling = maxHeight == null ? kMaxEmoteLogicalHeight : math.min(maxHeight, kMaxEmoteLogicalHeight);
   return raw.clamp(math.min(fontSize * 1.2, ceiling), ceiling);
 }
 
@@ -219,8 +217,7 @@ class DanmakuEmoticonRenderer {
 
   /// 测试用：缓存当前持有的源图句柄（用来断言清缓存时确实释放了它们）。
   @visibleForTesting
-  static List<ui.Image> get debugCachedSourceImages =>
-      _ImageHandleCache.debugCachedImages;
+  static List<ui.Image> get debugCachedSourceImages => _ImageHandleCache.debugCachedImages;
 
   /// [DanmakuContentItem.extra] 是否符合表情弹幕的载荷约定
   static bool canRender(Object? extra) {
@@ -289,8 +286,7 @@ class DanmakuEmoticonRenderer {
       return null;
     }
 
-    final emoteSegments =
-        segments.whereType<DanmakuEmoticonSegment>().toList(growable: false);
+    final emoteSegments = segments.whereType<DanmakuEmoticonSegment>().toList(growable: false);
     final generation = _cacheGeneration;
     final dpr = _devicePixelRatio();
     // 每个句柄都由调用方负责归还（见 [_ImageHandleCache.load]）：栅格化一结束
@@ -583,8 +579,7 @@ class DanmakuEmoticonRenderer {
         fontFamily: fontFamily,
       ))
       ..addText(text);
-    return builder.build()
-      ..layout(const ui.ParagraphConstraints(width: double.infinity));
+    return builder.build()..layout(const ui.ParagraphConstraints(width: double.infinity));
   }
 
   static String _cacheKey(
@@ -635,9 +630,8 @@ class DanmakuEmoticonRenderer {
     required double fontSize,
     required double dpr,
   }) {
-    final display = emoticon.large
-        ? emoteDisplayHeight(emoticon, fontSize: fontSize, dpr: dpr)
-        : fontSize * _emoteScale;
+    final display =
+        emoticon.large ? emoteDisplayHeight(emoticon, fontSize: fontSize, dpr: dpr) : fontSize * _emoteScale;
     return display * dpr;
   }
 
@@ -813,16 +807,14 @@ class _ImageHandleCache {
   }
 
   /// 仅供测试：当前缓存持有的源图句柄。
-  static List<ui.Image> get debugCachedImages =>
-      _cache.values.map((info) => info.image).toList();
+  static List<ui.Image> get debugCachedImages => _cache.values.map((info) => info.image).toList();
 }
 
 /// 合成位图缓存，命中时用 [ui.Image.clone] 分发独立句柄。
 class _CompositeCache {
   static const int _maxEntries = 64;
 
-  static final LinkedHashMap<String, DanmakuEmoticonBitmap> _cache =
-      LinkedHashMap();
+  static final LinkedHashMap<String, DanmakuEmoticonBitmap> _cache = LinkedHashMap();
 
   static DanmakuEmoticonBitmap? get(String key) {
     final bitmap = _cache.remove(key);

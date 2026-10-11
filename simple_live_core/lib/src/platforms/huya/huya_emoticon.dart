@@ -1,4 +1,4 @@
-﻿part of 'huya_danmaku.dart';
+part of 'huya_danmaku.dart';
 
 // "wupui", "getExpressionEmoticonPackage" ->pkgId = 1
 const Map<String, String> _huyaEmoticons = {

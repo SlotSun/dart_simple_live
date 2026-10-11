@@ -1,4 +1,4 @@
-﻿import 'dart:math';
+import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/platforms/huya/common/huya_vip_room_id.dart';
@@ -26,8 +26,7 @@ int rotl64(int t) {
 // 从 danmaku.websocket拉起，则只返回最后一个，实现增量SC
 // 接口数据错误不在考虑范围内
 // lPid--s = a.lPresenterUid == topSid
-Future<List<LiveSuperChatMessage>> getHuyaSuperChatMessageList(
-    {required int lPid, bool first = false}) async {
+Future<List<LiveSuperChatMessage>> getHuyaSuperChatMessageList({required int lPid, bool first = false}) async {
   final BaseTarsHttp messageBoardClient = BaseTarsHttp(
     "http://wup.huya.com",
     "wupui",
@@ -84,14 +83,15 @@ Future<List<LiveSuperChatMessage>> getHuyaSuperChatMessageList(
   // huya 按 money->level->countDown 排序 调整为 startTime 逆序 最新的在最前面
   messages.sort((a, b) => b.startTime.compareTo(a.startTime));
   if (first) {
-    return messages.length > 10 ? messages.sublist(0,10) : messages;
-  } else if(messages.isNotEmpty) {
+    return messages.length > 10 ? messages.sublist(0, 10) : messages;
+  } else if (messages.isNotEmpty) {
     // 当响应时必不可能为empty，测试安全
     return [messages.first];
   } else {
     return messages;
   }
 }
+
 class RequestIdGenerator {
   static int _counter = 0;
 
@@ -122,17 +122,18 @@ List<int> sendWupData({
       sBuffer: RequestPacket.cache_sBuffer,
       context: RequestPacket.cache_context,
       status: RequestPacket.cache_status,
-    )..body = bodyMap;
+    )
+    ..body = bodyMap;
   var s = getTraceId();
   var traceId = "$s:$s:0:0";
   var socketCmd = WebSocketCommand()
     ..cmdType = 3
     ..traceId = traceId
     ..data = message.toByteArray();
-  try{
+  try {
     var md5Res = md5.convert(req.toByteArray());
     socketCmd.md5 = md5Res.toString();
-  }catch(e){
+  } catch (e) {
     CoreLog.error("sparkMd5:$e");
   }
   // end build
@@ -148,7 +149,7 @@ String getTraceId() {
   });
 }
 
-bool isVipRoom(String roomId){
+bool isVipRoom(String roomId) {
   bool res = false;
   res = vipRoomIds.contains(roomId);
   return res;

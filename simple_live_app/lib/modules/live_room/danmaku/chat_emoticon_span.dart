@@ -32,8 +32,7 @@ List<InlineSpan> buildChatMessageSpans(
   }
 
   final segments = splitDanmakuSegments(message.message, emoticons);
-  if (segments.isEmpty ||
-      (segments.length == 1 && segments.first is DanmakuTextSegment)) {
+  if (segments.isEmpty || (segments.length == 1 && segments.first is DanmakuTextSegment)) {
     return [TextSpan(text: message.message, style: style)];
   }
 
@@ -100,8 +99,7 @@ const String kEmoticonPlaceholder = '\uFFFC';
 const String kEmoticonFallbackText = '[表情]';
 
 /// 剥掉表情占位符与首尾空白后，选区里剩下的真实文字。
-String stripEmoticonPlaceholder(String text) =>
-    text.replaceAll(kEmoticonPlaceholder, '').trim();
+String stripEmoticonPlaceholder(String text) => text.replaceAll(kEmoticonPlaceholder, '').trim();
 
 /// 这条选区该不该建上下文菜单。
 ///

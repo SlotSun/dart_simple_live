@@ -1,5 +1,3 @@
-﻿
-
 import 'package:tars_dart/tars/codec/tars_displayer.dart';
 import 'package:tars_dart/tars/codec/tars_input_stream.dart';
 import 'package:tars_dart/tars/codec/tars_output_stream.dart';
@@ -23,8 +21,7 @@ class GetGameEventMessageBoardRsp extends TarsStruct {
   @override
   Object deepCopy() {
     return GetGameEventMessageBoardRsp()
-      ..tMessageBoardPanel =
-      tMessageBoardPanel.deepCopy() as GameEventMessageBoardPanel;
+      ..tMessageBoardPanel = tMessageBoardPanel.deepCopy() as GameEventMessageBoardPanel;
   }
 
   @override

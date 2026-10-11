@@ -4,18 +4,18 @@ import 'package:tars_dart/tars/codec/tars_input_stream.dart';
 import 'package:tars_dart/tars/codec/tars_output_stream.dart';
 import 'package:tars_dart/tars/codec/tars_struct.dart';
 
-class EnterChannelReq extends TarsStruct{
+class EnterChannelReq extends TarsStruct {
   HuyaUserId tUserId = HuyaUserId(); //tag 1
-  int lTid = 0;//tag 2
-  int lSid = 0;//tag 3
-  int iChannelTyp = 0;//tag 4
+  int lTid = 0; //tag 2
+  int lSid = 0; //tag 3
+  int iChannelTyp = 0; //tag 4
 
   @override
   void readFrom(TarsInputStream _is) {
-    tUserId              = _is.read(tUserId, 1, false);
-    lTid                 = _is.read(lTid, 2, false);
-    lSid                 = _is.read(lSid, 3, false);
-    iChannelTyp          = _is.read(iChannelTyp, 4, false);
+    tUserId = _is.read(tUserId, 1, false);
+    lTid = _is.read(lTid, 2, false);
+    lSid = _is.read(lSid, 3, false);
+    iChannelTyp = _is.read(iChannelTyp, 4, false);
   }
 
   @override
@@ -32,8 +32,7 @@ class EnterChannelReq extends TarsStruct{
       ..tUserId = tUserId
       ..lTid = lTid
       ..lSid = lSid
-      ..iChannelTyp = iChannelTyp
-    ;
+      ..iChannelTyp = iChannelTyp;
   }
 
   @override

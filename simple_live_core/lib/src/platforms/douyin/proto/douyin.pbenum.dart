@@ -17,21 +17,17 @@ import 'package:protobuf/protobuf.dart' as $pb;
 class CommentTypeTag extends $pb.ProtobufEnum {
   static const CommentTypeTag COMMENTTYPETAGUNKNOWN =
       CommentTypeTag._(0, _omitEnumNames ? '' : 'COMMENTTYPETAGUNKNOWN');
-  static const CommentTypeTag COMMENTTYPETAGSTAR =
-      CommentTypeTag._(1, _omitEnumNames ? '' : 'COMMENTTYPETAGSTAR');
+  static const CommentTypeTag COMMENTTYPETAGSTAR = CommentTypeTag._(1, _omitEnumNames ? '' : 'COMMENTTYPETAGSTAR');
 
   static const $core.List<CommentTypeTag> values = <CommentTypeTag>[
     COMMENTTYPETAGUNKNOWN,
     COMMENTTYPETAGSTAR,
   ];
 
-  static final $core.List<CommentTypeTag?> _byValue =
-      $pb.ProtobufEnum.$_initByValueList(values, 1);
-  static CommentTypeTag? valueOf($core.int value) =>
-      value < 0 || value >= _byValue.length ? null : _byValue[value];
+  static final $core.List<CommentTypeTag?> _byValue = $pb.ProtobufEnum.$_initByValueList(values, 1);
+  static CommentTypeTag? valueOf($core.int value) => value < 0 || value >= _byValue.length ? null : _byValue[value];
 
   const CommentTypeTag._(super.value, super.name);
 }
 
-const $core.bool _omitEnumNames =
-    $core.bool.fromEnvironment('protobuf.omit_enum_names');
+const $core.bool _omitEnumNames = $core.bool.fromEnvironment('protobuf.omit_enum_names');

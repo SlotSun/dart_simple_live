@@ -24,21 +24,21 @@ class DouyuUtils {
 
   static final douyuLoginReferer = 'https://passport.douyu.com/index/login?type=login&client_id=1';
 
-
   // douyu-live-stream
   static Map<String, String> requestHeader({String roomId = '', String cookie = '', bool isLogin = false}) {
     var referer = roomId.isEmpty ? douyuOrigin : '$douyuOrigin/$roomId';
-    if(isLogin){
+    if (isLogin) {
       referer = douyuLoginReferer;
     }
     var res = {
       'accept': '*/*',
       'accept-encoding': 'gzip, deflate, br, zstd',
       'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,zh-Hans;q=0.5',
-      'origin':  douyuOrigin,
+      'origin': douyuOrigin,
       'referer': referer,
       "content-type": "application/x-www-form-urlencoded",
-      'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43',
+      'user-agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43',
       'cookie': 'dy_did=$_did; acf_did=$_did',
     };
     if (cookie.isNotEmpty) {
@@ -95,7 +95,7 @@ class DouyuUtils {
   }
 
   static String? _getJwtToken(String cookie) {
-    if(cookie.isNotEmpty){
+    if (cookie.isNotEmpty) {
       for (final pair in cookie.split(';')) {
         final p = pair.trim();
         if (p.startsWith('acf_jwt_token=')) {
@@ -162,12 +162,13 @@ class DouyuUtils {
   static String pickSetCookie(List<String> raw, String name) {
     for (final e in raw) {
       final c = Cookie.fromSetCookieValue(e);
-      if (c.name == name){
+      if (c.name == name) {
         return c.value;
       }
     }
     return '';
   }
+
   // 从cookie 中获取字段
   static String pickCookie(String? cookie, String name) {
     if (cookie == null || cookie.isEmpty) return '';

@@ -139,7 +139,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
     scrollController.addListener(scrollListener);
     subscription = EventBus.instance.listen(Constant.kUpdateDanmaku, (data) {
-      if(danmakuController?.option.fontSize != data as double ){
+      if (danmakuController?.option.fontSize != data as double) {
         updateDanmuOption(danmakuController?.option.copyWith(fontSize: data));
       }
     });
@@ -384,7 +384,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       bool contain = superChats.any(
         (s) => s.price == scData.price && s.userName == scData.userName && s.message == scData.message,
       );
-      if(!contain){
+      if (!contain) {
         superChats.insert(0, msg.data);
         if (superChats.length > 20) {
           superChats.removeRange(20, superChats.length);
