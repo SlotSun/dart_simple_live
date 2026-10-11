@@ -13,17 +13,6 @@ class BiliBiliUserInfoModel {
     this.rank,
   });
 
-  factory BiliBiliUserInfoModel.fromJson(Map<String, dynamic> json) => BiliBiliUserInfoModel(
-        mid: asT<int?>(json['mid']),
-        uname: asT<String?>(json['uname']),
-        userid: asT<String?>(json['userid']),
-        sign: asT<String?>(json['sign']),
-        birthday: asT<String?>(json['birthday']),
-        sex: asT<String?>(json['sex']),
-        nickFree: asT<bool?>(json['nick_free']),
-        rank: asT<String?>(json['rank']),
-      );
-
   int? mid;
   String? uname;
   String? userid;
@@ -32,6 +21,17 @@ class BiliBiliUserInfoModel {
   String? sex;
   bool? nickFree;
   String? rank;
+
+  factory BiliBiliUserInfoModel.fromJson(Map<String, dynamic> json) => BiliBiliUserInfoModel(
+    mid: asT<int?>(json['mid']),
+    uname: asT<String?>(json['uname']),
+    userid: asT<String?>(json['userid']),
+    sign: asT<String?>(json['sign']),
+    birthday: asT<String?>(json['birthday']),
+    sex: asT<String?>(json['sex']),
+    nickFree: asT<bool?>(json['nick_free']),
+    rank: asT<String?>(json['rank']),
+  );
 
   @override
   String toString() {

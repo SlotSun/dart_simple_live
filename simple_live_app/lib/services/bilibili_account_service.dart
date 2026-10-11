@@ -55,7 +55,6 @@ class BiliBiliAccountService extends GetxService {
   void setSite() {
     var site = (Sites.allSites[Constant.kBiliBili]!.liveSite as BiliBiliSite);
     site.userId = uid;
-    site.cookie = cookie;
   }
 
   void setCookie(String cookie) {

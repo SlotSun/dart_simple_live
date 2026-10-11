@@ -40,7 +40,7 @@ class AccountController extends GetxController {
         mainAxisSize: MainAxisSize.min,
         children: [
           Visibility(
-            visible: (Platform.isAndroid || Platform.isIOS) && site.id == Constant.kBiliBili,
+            visible: (Platform.isAndroid || Platform.isIOS || Platform.isWindows) && site.id == Constant.kBiliBili,
             child: ListTile(
               leading: const Icon(Icons.account_circle_outlined),
               title: const Text("Web登录"),
@@ -48,7 +48,7 @@ class AccountController extends GetxController {
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 Get.back();
-                Get.toNamed(RoutePath.kBiliBiliWebLogin);
+                AppNavigator.toBiliBiliWebLogin(account: curAccount);
               },
             ),
           ),

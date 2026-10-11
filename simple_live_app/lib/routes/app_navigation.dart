@@ -59,6 +59,11 @@ class AppNavigator {
     Get.toNamed(RoutePath.kAccountQRLogin, arguments: account);
   }
 
+  /// 跳转至哔哩哔哩网页登录
+  static Future toBiliBiliWebLogin({required Account account}) async {
+    Get.toNamed(RoutePath.kBiliBiliWebLogin, arguments: account);
+  }
+
   /// 跳转至哔哩哔哩登录
   static Future toBiliBiliLogin() async {
     if (Platform.isAndroid || Platform.isIOS) {
