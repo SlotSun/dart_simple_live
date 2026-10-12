@@ -41,7 +41,7 @@ class PlatformService extends GetxService {
   Future<void> accountLogout(Account ac) async {
     var logout = ac.copyWith(
       id: ac.id,
-      siteId: ac.siteId,
+      userName: '',
       credential: '',
       isActive: false,
       updatedAt: DateTime.now().millisecondsSinceEpoch,
