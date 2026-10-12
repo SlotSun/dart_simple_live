@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import 'package:simple_live_tv_app/app/app_focus_node.dart';
 import 'package:simple_live_tv_app/app/controller/base_controller.dart';
 import 'package:simple_live_tv_app/app/utils.dart';
+import 'package:simple_live_tv_app/models/db/account.dart';
 import 'package:simple_live_tv_app/routes/app_navigation.dart';
-import 'package:simple_live_tv_app/services/bilibili_account_service.dart';
 
 class SettingsController extends BaseController
     with GetTickerProviderStateMixin {
@@ -53,20 +53,15 @@ class SettingsController extends BaseController
   var updateFollowThreadFocusNode = AppFocusNode();
 
   var bilibiliFoucsNode = AppFocusNode();
+  var douyuFocusNode = AppFocusNode();
   var versionFocusNode = AppFocusNode();
-  void bilibiliTap() async {
-    if (BiliBiliAccountService.instance.logined.value) {
-      var result = await Utils.showAlertDialog("确定要退出哔哩哔哩账号吗？", title: "退出登录");
-      if (result) {
-        BiliBiliAccountService.instance.logout();
-      }
-    } else {
-      AppNavigator.toBiliBiliLogin();
-    }
-  }
 
   void checkUpdate() {
     SmartDialog.showToast("检查更新中...");
     Utils.checkUpdate(showMsg: true);
+  }
+
+  Future<void> accountTap(Account account) async {
+    AppNavigator.toQRCoreLogin(account: account);
   }
 }

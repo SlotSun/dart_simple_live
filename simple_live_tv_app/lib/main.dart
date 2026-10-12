@@ -13,14 +13,16 @@ import 'package:simple_live_tv_app/app/app_style.dart';
 import 'package:simple_live_tv_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_tv_app/app/log.dart';
 import 'package:simple_live_tv_app/app/utils.dart';
+import 'package:simple_live_tv_app/models/db/account.dart';
 import 'package:simple_live_tv_app/models/db/follow_user.dart';
 import 'package:simple_live_tv_app/models/db/history.dart';
 import 'package:simple_live_tv_app/routes/app_pages.dart';
 import 'package:simple_live_tv_app/routes/route_path.dart';
-import 'package:simple_live_tv_app/services/bilibili_account_service.dart';
 import 'package:simple_live_tv_app/services/db_service.dart';
 import 'package:simple_live_tv_app/services/follow_user_service.dart';
 import 'package:simple_live_tv_app/services/local_storage_service.dart';
+import 'package:simple_live_tv_app/services/migration_service.dart';
+import 'package:simple_live_tv_app/services/platform_service.dart';
 import 'package:simple_live_tv_app/services/sync_service.dart';
 
 void main() async {
@@ -40,6 +42,9 @@ void main() async {
 }
 
 Future initServices() async {
+
+  //包信息
+  Utils.packageInfo = await PackageInfo.fromPlatform();
   //日志信息
   CoreLog.enableLog = !kReleaseMode;
   CoreLog.requestLogType = RequestLogType.short;
@@ -64,6 +69,7 @@ Future initServices() async {
 
   Hive.registerAdapter(FollowUserAdapter());
   Hive.registerAdapter(HistoryAdapter());
+  Hive.registerAdapter(AccountAdapter());
 
   //包信息
   Utils.packageInfo = await PackageInfo.fromPlatform();
@@ -74,11 +80,13 @@ Future initServices() async {
   //初始化设置控制器
   Get.put(AppSettingsController());
 
-  Get.put(BiliBiliAccountService());
+  await MigrationService.migrateDataByVersion();
 
   Get.put(SyncService());
 
   Get.put(FollowUserService());
+
+  Get.put(PlatformService());
 }
 
 class MyApp extends StatelessWidget {

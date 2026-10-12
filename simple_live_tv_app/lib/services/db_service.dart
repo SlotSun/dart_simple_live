@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:simple_live_tv_app/models/db/account.dart';
 import 'package:simple_live_tv_app/models/db/follow_user.dart';
 
 import 'package:simple_live_tv_app/models/db/history.dart';
@@ -8,10 +9,20 @@ class DBService extends GetxService {
   static DBService get instance => Get.find<DBService>();
   late Box<History> historyBox;
   late Box<FollowUser> followBox;
+  late Box<Account> accountBox;
 
   Future init() async {
     historyBox = await Hive.openBox("TVHostiry");
     followBox = await Hive.openBox("TVFollowUser");
+    accountBox = await Hive.openBox("account");
+  }
+
+  Future addAccount(Account account) async {
+    await accountBox.put(account.id, account);
+  }
+
+  List<Account> getAllAccounts() {
+    return accountBox.values.toList();
   }
 
   bool getFollowExist(String id) {

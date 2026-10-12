@@ -27,6 +27,8 @@ class RoutePath {
   /// 哔哩哔哩登录
   static const kBiliBiliQRLogin = "/bilibili/qr_login";
 
+  /// 二维码登录
+  static const kAccountQRLogin = "/qr_login/qr_login";
   /// 设置
   static const kSettings = "/settings";
 

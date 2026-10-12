@@ -4,11 +4,13 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_tv_app/app/app_focus_node.dart';
 import 'package:simple_live_tv_app/app/app_style.dart';
+import 'package:simple_live_tv_app/app/constant.dart';
 import 'package:simple_live_tv_app/app/controller/app_settings_controller.dart';
+import 'package:simple_live_tv_app/app/sites.dart';
 import 'package:simple_live_tv_app/app/utils.dart';
 import 'package:simple_live_tv_app/modules/settings/settings_controller.dart';
-import 'package:simple_live_tv_app/services/bilibili_account_service.dart';
 import 'package:simple_live_tv_app/services/follow_user_service.dart';
+import 'package:simple_live_tv_app/services/platform_service.dart';
 import 'package:simple_live_tv_app/widgets/app_scaffold.dart';
 import 'package:simple_live_tv_app/widgets/button/highlight_button.dart';
 import 'package:simple_live_tv_app/widgets/button/highlight_list_tile.dart';
@@ -413,68 +415,69 @@ class SettingsPage extends GetView<SettingsController> {
   }
 
   Widget buildAccountSettings() {
-    return ListView(
-      padding: AppStyle.edgeInsetsA48,
-      children: [
-        Obx(
-          () => HighlightListTile(
-            focusNode: controller.bilibiliFoucsNode,
-            autofocus: controller.bilibiliFoucsNode.isFoucsed.value,
-            title: "哔哩哔哩账号",
-            subtitle: BiliBiliAccountService.instance.logined.value
-                ? "已登录：${BiliBiliAccountService.instance.name.value}"
-                : "未登录，点击登录",
+    return Obx(
+      () => ListView(
+        padding: AppStyle.edgeInsetsA48,
+        children: [
+          ...PlatformService.instance.accountList.map(
+            (account) {
+              var item = account;
+              var site = Sites.allSites[item.siteId]!;
+              return Column(
+                children: [
+                  Obx(
+                    () => HighlightListTile(
+                      focusNode:
+                          site.id == Constant.kBiliBili ? controller.bilibiliFoucsNode : controller.douyuFocusNode,
+                      autofocus: site.id == Constant.kBiliBili
+                          ? controller.bilibiliFoucsNode.isFoucsed.value
+                          : controller.douyuFocusNode.isFoucsed.value,
+                      title: site.name,
+                      subtitle: item.isActive ? item.userName : '暂未登录',
+                      leading: Image.asset(
+                        site.logo,
+                        width: 64.w,
+                        height: 64.w,
+                      ),
+                      onTap: () {
+                        controller.accountTap(item);
+                      },
+                    ),
+                  ),
+                  AppStyle.vGap24,
+                ],
+              );
+            },
+          ),
+          HighlightListTile(
+            focusNode: AppFocusNode(),
+            title: "虎牙账号",
+            subtitle: "无需登录",
             leading: Image.asset(
-              "assets/images/bilibili.png",
+              "assets/images/huya.png",
               width: 64.w,
               height: 64.w,
             ),
-            onTap: controller.bilibiliTap,
+            onTap: () {
+              SmartDialog.showToast("无需登录虎牙，您可以直接观看直播");
+            },
           ),
-        ),
-        AppStyle.vGap24,
-        HighlightListTile(
-          focusNode: AppFocusNode(),
-          title: "斗鱼账号",
-          subtitle: "无需登录",
-          leading: Image.asset(
-            "assets/images/douyu.png",
-            width: 64.w,
-            height: 64.w,
-          ),
-          onTap: () {
-            SmartDialog.showToast("无需登录斗鱼，您可以直接观看直播");
-          },
-        ),
-        AppStyle.vGap24,
-        HighlightListTile(
-          focusNode: AppFocusNode(),
-          title: "虎牙账号",
-          subtitle: "无需登录",
-          leading: Image.asset(
-            "assets/images/huya.png",
-            width: 64.w,
-            height: 64.w,
-          ),
-          onTap: () {
-            SmartDialog.showToast("无需登录虎牙，您可以直接观看直播");
-          },
-        ),
-        AppStyle.vGap24,
-        HighlightListTile(
-          focusNode: AppFocusNode(),
-          title: "抖音账号",
-          subtitle: "无需登录",
-          leading: Image.asset(
-            "assets/images/douyin.png",
-            width: 64.w,
-            height: 64.w,
-          ),
-          onTap: () {
-            SmartDialog.showToast("无需登录抖音，您可以直接观看直播");
-          },
-        )
-      ],
+          AppStyle.vGap24,
+          HighlightListTile(
+            focusNode: AppFocusNode(),
+            title: "抖音账号",
+            subtitle: "无需登录",
+            leading: Image.asset(
+              "assets/images/douyin.png",
+              width: 64.w,
+              height: 64.w,
+            ),
+            onTap: () {
+              SmartDialog.showToast("无需登录抖音，您可以直接观看直播");
+            },
+          )
+        ],
+      ),
     );
   }
 
