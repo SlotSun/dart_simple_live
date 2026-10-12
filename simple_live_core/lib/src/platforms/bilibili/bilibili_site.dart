@@ -613,6 +613,7 @@ class BiliBiliSite implements LiveSite {
       );
       if (result["code"] == 0) {
         BiliBiliUserInfoModel info = BiliBiliUserInfoModel.fromJson(result["data"]);
+        userId = info.mid!; // danmaku_arg needs
         res = res.copyWith(
           name: info.uname,
           avatar: info.face,
