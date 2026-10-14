@@ -128,9 +128,9 @@ class PlatformService extends GetxService {
 
   @override
   void onInit() {
-    subscription = EventBus.instance.listen(Constant.kUpdateAccount, (data) {
+    subscription = EventBus.instance.listen(Constant.kUpdateAccount, (account) {
       Log.i('update Account');
-      _initAccount();
+      accountLogin(account);
     });
     _initAccount();
     _updateDouyinAttr();

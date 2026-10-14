@@ -5,6 +5,9 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:network_info_plus/network_info_plus.dart';
+import 'package:shelf/shelf.dart' as shelf;
+import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:shelf_router/shelf_router.dart';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/event_bus.dart';
@@ -15,11 +18,7 @@ import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/models/db/history.dart';
 import 'package:simple_live_app/services/db_service.dart';
-import 'package:simple_live_app/services/platform_service.dart';
 import 'package:udp/udp.dart';
-import 'package:shelf/shelf.dart' as shelf;
-import 'package:shelf/shelf_io.dart' as shelf_io;
-import 'package:shelf_router/shelf_router.dart';
 import 'package:uuid/uuid.dart';
 
 class SyncService extends GetxService {
@@ -368,9 +367,8 @@ class SyncService extends GetxService {
       var jsonBody = json.decode(body);
       // 收发迁移至 account
       Account account = Account.fromJson(jsonBody);
-      PlatformService.instance.updateAccount(account);
       SmartDialog.showToast('已同步${account.siteId}账号');
-      EventBus.instance.emit(Constant.kUpdateAccount, 0);
+      EventBus.instance.emit<Account>(Constant.kUpdateAccount, account);
       return toJsonResponse({
         'status': true,
         'message': 'success',
