@@ -25,7 +25,7 @@ class FollowUserItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var site = Sites.allSites[item.siteId]!;
-    return Container(
+    return Ink(
       decoration: BoxDecoration(
         gradient: playing
             ? LinearGradient(

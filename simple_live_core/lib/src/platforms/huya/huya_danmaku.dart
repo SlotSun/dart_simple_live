@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/web_socket_util.dart';
 import 'package:simple_live_core/src/platforms/huya/model/huya_damaku_model.dart';
-import 'package:simple_live_core/src/platforms/huya/tars/enter_channel_req.dart';
 import 'package:simple_live_core/src/platforms/huya/tars/huya_danmaku.dart';
 import 'package:simple_live_core/src/platforms/huya/tars/types.dart';
 import 'package:tars_dart/tars/codec/tars_input_stream.dart';
@@ -43,8 +42,6 @@ class HuyaDanmaku implements LiveDanmaku {
     return "webh5&${(now.year % 100).toString().padLeft(2, '0')}${twoDigits(now.month)}${twoDigits(now.day)}${twoDigits(now.hour)}${twoDigits(now.minute)}&websocket";
   }
 
-  String cookie =
-      "__yamid_new=CB839821F9D0000153B312C11F40C3A0; game_did=c2NmeJsovdYnQ--7ekVF9JDx9YgQBaX9Xb4; SoundValue=0.50; guid=0a7d4b0826af6c69380199dc9adc6b50; __yamid_tt1=0.6713380860053619; alphaValue=0.80; _qimei_fingerprint=f573835586d8fec5ce3c6cc8a9ae286e; guid=0a7d4b0826af6c69380199dc9adc6b50; udb_guiddata=1a85f8398bc4400eb85f02564f4f321f; udb_appid=5002; udb_deviceid=w_1143239981674745856; isInLiveRoom=true; __yasmid=0.6713380860053619; _yasids=__rootsid%3DCBC935D812800001D2591C504BA0A320; udb_passdata=3; rep_cnt=38; _rep_cnt=3; sdid=csid_beac615f0cf34135b6ea6e1530a0853f; huya_flash_rep_cnt=60; huya_web_rep_cnt=214; huya_ua=webh5&0.1.0&websocket";
   String device = "chrome";
   @override
   int heartbeatTime = 60 * 1000;
@@ -120,7 +117,6 @@ class HuyaDanmaku implements LiveDanmaku {
       ..lUid = 0
       ..sGuid = "0a7d4b0826af6c69380199dc9adc6b50"
       ..sToken = ""
-      ..sCookie = cookie
       ..sHuYaUA = ua
       ..sDeviceInfo = device;
     var req = GetLivingInfoReq()
@@ -137,9 +133,8 @@ class HuyaDanmaku implements LiveDanmaku {
   List<int> buildDoLaunchData({required String ua, required String device}) {
     HuyaUserId userId = HuyaUserId()
       ..lUid = 0
-      ..sGuid = "0a7d4b0826af6c69380199dc9adc6b50"
+      ..sGuid = ""
       ..sToken = ""
-      ..sCookie = cookie
       ..sHuYaUA = ua
       ..sDeviceInfo = device;
     var userBase = LiveUserBase()
@@ -151,28 +146,8 @@ class HuyaDanmaku implements LiveDanmaku {
       ..liveUb = userBase
       ..supportDomain = true;
     var wupData = sendWupData(
-      servantName: "doLaunch",
-      funcName: "OnClientReady",
-      req: req,
-    );
-    return wupData;
-  }
-
-  List<int> buildEnterChanelData() {
-    HuyaUserId userId = HuyaUserId()
-      ..lUid = 0
-      ..sGuid = "0a7d4b0826af6c69380199dc9adc6b50"
-      ..sToken = ""
-      ..sCookie = cookie
-      ..sHuYaUA = dHuyaUa
-      ..sDeviceInfo = device;
-    var req = EnterChannelReq()
-      ..tUserId = userId
-      ..lSid = danmakuArgs.subSid
-      ..lTid = danmakuArgs.topSid;
-    var wupData = sendWupData(
-      servantName: "ActivityUIServer",
-      funcName: "OnClientReady",
+      servantName: "liveui",
+      funcName: "doLaunch",
       req: req,
     );
     return wupData;
@@ -182,11 +157,10 @@ class HuyaDanmaku implements LiveDanmaku {
     try {
       var pid = danmakuArgs.topSid;
       var data = buildJoinGroupData(pid: pid);
-      // var doLaunchData = buildDoLaunchData(ua: dHuyaUa, device: device);
-      // var liveInfoData = buildLiveInfoData(pid: pid, ua: dHuyaUa, device: device);
-      // var enterChannelData = buildEnterChanelData();
-      // webScoketUtils?.sendMessage(liveInfoData);
-      // webScoketUtils?.sendMessage(doLaunchData);
+      var doLaunchData = buildDoLaunchData(ua: dHuyaUa, device: device);
+      var liveInfoData = buildLiveInfoData(pid: pid, ua: dHuyaUa, device: device);
+      webScoketUtils?.sendMessage(liveInfoData);
+      webScoketUtils?.sendMessage(doLaunchData);
       webScoketUtils?.sendMessage(data);
       // webScoketUtils?.sendMessage(enterChannelData);
     } catch (e) {
@@ -222,10 +196,10 @@ class HuyaDanmaku implements LiveDanmaku {
 
           // websocket maybe need cookie check, reg temp instead
           // xxx(来自一元上头条)
-          RegExp scReg = RegExp(r'\(来自.+?上头条\)');
-          if (scReg.hasMatch(content)) {
-            callSc();
-          }
+          // RegExp scReg = RegExp(r'\(来自.+?上头条\)');
+          // if (scReg.hasMatch(content)) {
+          //   callSc();
+          // }
           var color = messageNotice.bulletFormat.fontColor;
           var emoticons = _getHuyaEmoticonsFromContent(content: content);
           onMessage?.call(
@@ -258,12 +232,12 @@ class HuyaDanmaku implements LiveDanmaku {
         for (var item in wsPushMessageV2.vMsgItem) {
           // match uri
           // '110003': ai(666,大气，NB etc)
-          // '2001314': sc
+          // '2001317': sc
           // '1400': 醒目留言
           // '8006': sc-countDown
           // '6220': RankInfoNotice
           // '1091000': pk
-          if (item.iUri == 2001314) {
+          if (item.iUri == 2001317) {
             callSc();
           }
         }
