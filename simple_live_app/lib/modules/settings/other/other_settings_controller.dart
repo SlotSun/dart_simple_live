@@ -14,7 +14,7 @@ import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/services/firebase_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
-import 'package:window_manager/window_manager.dart';
+import 'package:simple_live_app/services/window_service.dart';
 
 class OtherSettingsController extends BaseController {
   RxList<LogFileModel> logFiles = <LogFileModel>[].obs;
@@ -240,10 +240,10 @@ class OtherSettingsController extends BaseController {
     });
   }
 
-  Future<void> setWindowMaxAuto(bool e) async {
+  void setWindowMaxAuto(bool e) {
     AppSettingsController.instance.setWindowMaxAuto(e);
     if (e) {
-      var maxState = await windowManager.isMaximized();
+      var maxState = WindowService.mainWindow.isMaximized;
       AppSettingsController.instance.setWindowMaxState(maxState);
     }
   }

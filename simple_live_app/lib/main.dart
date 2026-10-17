@@ -40,7 +40,6 @@ import 'package:simple_live_app/services/window_service.dart';
 import 'package:simple_live_app/src/rust/frb_generated.dart';
 import 'package:simple_live_app/widgets/status/app_loadding_widget.dart';
 import 'package:simple_live_core/simple_live_core.dart';
-import 'package:window_manager/window_manager.dart';
 
 void main(List<String> arguments) async {
   final action = arguments.isEmpty ? null : arguments.first.toLowerCase();
@@ -94,7 +93,6 @@ Future initWindow() async {
   if (!(Platform.isMacOS || Platform.isWindows || Platform.isLinux)) {
     return;
   }
-  await windowManager.ensureInitialized();
   WindowService.instance.init();
 }
 
@@ -222,11 +220,11 @@ class MyApp extends StatelessWidget {
                           GestureRecognizerFactoryWithHandlers<FourthButtonTapGestureRecognizer>(
                         () => FourthButtonTapGestureRecognizer(),
                         (FourthButtonTapGestureRecognizer instance) {
-                          instance.onTapDown = (TapDownDetails details) async {
+                          instance.onTapDown = (TapDownDetails details) {
                             //如果处于全屏状态，退出全屏
                             if (!Platform.isAndroid && !Platform.isIOS) {
-                              if (await windowManager.isFullScreen()) {
-                                await windowManager.setFullScreen(false);
+                              if (WindowService.mainWindow.isFullScreen) {
+                                WindowService.mainWindow.isFullScreen = false;
                                 return;
                               }
                             }
@@ -242,8 +240,8 @@ class MyApp extends StatelessWidget {
                           // ESC退出全屏
                           // 如果处于全屏状态，退出全屏
                           if (!Platform.isAndroid && !Platform.isIOS) {
-                            if (await windowManager.isFullScreen()) {
-                              await windowManager.setFullScreen(false);
+                            if (WindowService.mainWindow.isFullScreen) {
+                              WindowService.mainWindow.isFullScreen = false;
                               EventBus.instance.emit(EventBus.kEscapePressed, 0);
                               return;
                             }

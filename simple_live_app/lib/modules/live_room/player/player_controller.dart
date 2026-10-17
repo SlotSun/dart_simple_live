@@ -352,14 +352,14 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
       // fix: pip->full->normal bug
       // 不再考虑从什么状态切换，逻辑混乱，而是确定窗口状态直接设置属性
       // 记忆进入全屏前的状态
-      windowMaxState.value = await windowManager.isMaximized();
+      windowMaxState.value = WindowService.mainWindow.isMaximized;
       // 读取窗口大小
       smallWindowState.value = false; // no pip
       WindowService.instance.isPIP = smallWindowState.value;
-      await windowManager.setFullScreen(true); // in full
-      await windowManager.setTitleBarStyle(TitleBarStyle.hidden); // no title
-      await WindowService.instance.danmakuFontClamped();
-      await windowManager.setAlwaysOnTop(false);
+      WindowService.mainWindow.isFullScreen = true; // in full
+      WindowService.mainWindow.titleBarStyle = TitleBarStyle.hidden; // no title
+      WindowService.instance.danmakuFontClamped();
+      WindowService.mainWindow.isAlwaysOnTop = true;
     }
     //danmakuController?.clear();
   }
@@ -373,18 +373,18 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
       setPortraitOrientation();
     } else {
       // 退回原来的大小
-      if (windowMaxState.value) await windowManager.maximize();
+      if (windowMaxState.value) WindowService.mainWindow.maximize();
       if (_lastWindowSize != null) {
-        await windowManager.setSize(_lastWindowSize!);
+        WindowService.mainWindow.setSize(_lastWindowSize!.toNative(), false);
       }
       if (_lastWindowPosition != null) {
-        await windowManager.setPosition(_lastWindowPosition!);
+        WindowService.mainWindow.position = _lastWindowPosition!.toNative();
       }
       Log.d('last_window_size:${_lastWindowSize?.width}__${_lastWindowSize?.height}');
       Log.d('last_window_position:${_lastWindowPosition?.dx}__${_lastWindowPosition?.dy}');
-      windowManager.setFullScreen(false);
-      windowManager.setTitleBarStyle(TitleBarStyle.normal);
-      await WindowService.instance.danmakuFontClamped();
+      WindowService.mainWindow.isFullScreen = false; // out full
+      WindowService.mainWindow.titleBarStyle = TitleBarStyle.normal;
+      WindowService.instance.danmakuFontClamped();
     }
     fullScreenState.value = false;
     //danmakuController?.clear();
@@ -401,11 +401,11 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
       WindowService.instance.isPIP = smallWindowState.value;
       // 进入小窗会自动恢复默认弹幕大小
       // 读取窗口大小
-      _lastWindowSize = await windowManager.getSize();
-      _lastWindowPosition = await windowManager.getPosition();
+      _lastWindowSize = WindowService.mainWindow.size.toSize();
+      _lastWindowPosition = WindowService.mainWindow.position.toOffset();
       Log.d('last_window_size:${_lastWindowSize?.width}__${_lastWindowSize?.height}');
       Log.d('last_window_position:${_lastWindowPosition?.dx}__${_lastWindowPosition?.dy}');
-      windowManager.setTitleBarStyle(TitleBarStyle.hidden);
+      WindowService.mainWindow.titleBarStyle = TitleBarStyle.hidden;
       // 获取视频窗口大小
       var width = player.state.width ?? 16;
       var height = player.state.height ?? 9;
@@ -415,14 +415,14 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
       var pHeight = AppSettingsController.instance.windowPipHeight.value;
       // 横屏还是竖屏
       if (height < width) {
-        windowManager.setSize(Size(pWidth, pHeight));
-        windowManager.setPosition(Offset(px, py));
+        WindowService.mainWindow.setSize(Size(pWidth, pHeight).toNative(), false);
+        WindowService.mainWindow.position = Offset(px, py).toNative();
       } else {
-        windowManager.setSize(Size(pHeight, pWidth));
-        windowManager.setPosition(Offset(px, py));
+        WindowService.mainWindow.setSize(Size(pHeight, pWidth).toNative(), false);
+        WindowService.mainWindow.position = Offset(px, py).toNative();
       }
 
-      windowManager.setAlwaysOnTop(true);
+      WindowService.mainWindow.isAlwaysOnTop = true;
     }
   }
 
@@ -432,11 +432,11 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
       fullScreenState.value = false;
       smallWindowState.value = false;
       WindowService.instance.isPIP = smallWindowState.value;
-      windowManager.setTitleBarStyle(TitleBarStyle.normal);
-      windowManager.setSize(_lastWindowSize!);
-      windowManager.setPosition(_lastWindowPosition!);
-      windowManager.setAlwaysOnTop(false);
-      //windowManager.setAlignment(Alignment.center);
+      WindowService.mainWindow.titleBarStyle = TitleBarStyle.normal;
+      WindowService.mainWindow.setSize(_lastWindowSize!.toNative(),false);
+      WindowService.mainWindow.position = _lastWindowPosition!.toNative();
+      WindowService.mainWindow.isAlwaysOnTop = false;
+      //WindowService.mainWindow.setAlignment(Alignment.center);
     }
   }
 

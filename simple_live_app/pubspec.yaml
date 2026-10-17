@@ -109,6 +109,10 @@ dependency_overrides:
     git:
       url: https://github.com/SlotSun/get.git
       ref: master
+  window_manager:
+    git:
+      url: https://github.com/leanflutter/window_manager.git
+      ref: main
 
 dev_dependencies:
   flutter_lints: ^6.0.0
