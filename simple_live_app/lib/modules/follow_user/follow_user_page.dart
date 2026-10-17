@@ -152,12 +152,13 @@ class FollowUserPage extends GetView<FollowUserController> {
                   var mode = AppSettingsController.instance.followStyleNotGrid.value;
                   var crossCount = mode ? count : c;
                   var padding = mode ? null : AppStyle.edgeInsetsA12;
+                  double mainAxisSpacing = mode ? 0.0 : 12.0;
                   return PageGridView(
                     pageController: controller,
                     padding: padding,
                     firstRefresh: true,
                     showPCRefreshButton: false,
-                    mainAxisSpacing: 12,
+                    mainAxisSpacing: mainAxisSpacing,
                     crossAxisSpacing: 12,
                     crossAxisCount: crossCount,
                     itemBuilder: (_, i) {
