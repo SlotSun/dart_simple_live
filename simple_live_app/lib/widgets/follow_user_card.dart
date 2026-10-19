@@ -115,13 +115,15 @@ class FollowUserCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
-                      Text.rich(
-                        TextSpan(
-                          text: item.userName,
-                        ),
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      Text(
+                        item.userName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          height: 1.4,
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
