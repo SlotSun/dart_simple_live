@@ -184,6 +184,84 @@ class Utils {
     );
   }
 
+  static void showScRightDialog({
+    required String title,
+    Function()? onDismiss,
+    required Widget child,
+    int? duration,
+    double width = 300,
+    bool useSystem = false,
+  }) {
+    SmartDialog.show(
+      alignment: Alignment.topRight,
+      animationBuilder: (controller, child, animationParam) {
+        //从右到左
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1, 0),
+            end: Offset.zero,
+          ).animate(controller.view),
+          child: child,
+        );
+      },
+      tag: 'sc',
+      keepSingle: true,
+      maskColor: Colors.transparent,
+      animationTime: const Duration(milliseconds: 200),
+      displayTime: duration != null ? Duration(seconds: duration) : null,
+      builder: (context) => Material(
+        color: duration != null ? Colors.transparent : Get.theme.cardColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(4),
+          bottomLeft: Radius.circular(4),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: SizedBox(
+          width: width + MediaQuery.of(context).padding.right,
+          child: Padding(
+            padding: EdgeInsets.only(
+              right: MediaQuery.of(context).padding.right,
+            ),
+            child: SafeArea(
+              left: false,
+              right: false,
+              child: MediaQuery(
+                data: const MediaQueryData(padding: EdgeInsets.zero),
+                child: Column(
+                  children: [
+                    ListTile(
+                      visualDensity: VisualDensity.compact,
+                      contentPadding: EdgeInsets.zero,
+                      leading: IconButton(
+                        onPressed: () {
+                          SmartDialog.dismiss(status: SmartStatus.allCustom).then(
+                            (value) => onDismiss?.call(),
+                          );
+                        },
+                        icon: const Icon(Icons.arrow_back),
+                      ),
+                      title: Text(
+                        title,
+                        style: Get.textTheme.titleMedium,
+                      ),
+                    ),
+                    Divider(
+                      height: 1,
+                      color: Colors.grey.withAlpha(25),
+                    ),
+                    Expanded(
+                      child: child,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   static void hideRightDialog() {
     SmartDialog.dismiss(status: SmartStatus.allCustom);
   }

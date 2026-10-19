@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:simple_live_app/app/app_style.dart';
@@ -30,6 +31,7 @@ import 'package:simple_live_app/services/history_service.dart';
 import 'package:simple_live_app/src/rust/api/danmaku_mask.dart';
 import 'package:simple_live_app/widgets/desktop_refresh_button.dart';
 import 'package:simple_live_app/widgets/follow_user_item.dart';
+import 'package:simple_live_app/widgets/superchat_card.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -60,8 +62,10 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   }
 
   late Rx<Site> rxSite;
+
   Site get site => rxSite.value;
   late Rx<String> rxRoomId;
+
   String get roomId => rxRoomId.value;
 
   Rx<LiveRoomDetail?> detail = Rx<LiveRoomDetail?>(null);
@@ -269,6 +273,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       }
     });
   }
+
   // 弹窗逻辑
 
   void refreshRoom() {
@@ -388,6 +393,10 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
         superChats.insert(0, msg.data);
         if (superChats.length > 20) {
           superChats.removeRange(20, superChats.length);
+        }
+        // 全屏下显示15s
+        if (AppSettingsController.instance.autoShowFullSCEnable.value) {
+          showSuperChatSheet(duration: 15);
         }
       }
     }
@@ -641,6 +650,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   }
 
   int mediaErrorRetryCount = 0;
+
   @override
   void mediaError(String error) async {
     super.mediaEnd();
@@ -1113,6 +1123,58 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
         ),
       ),
     );
+  }
+
+  // 弹出sc列表
+  void showSuperChatSheet({int? duration}) {
+    if (fullScreenState.value) {
+      if (isVertical.value && duration == null) {
+        // 不适配竖屏直播间
+        Utils.showBottomSheet(
+          title: "SC列表",
+          child: Obx(
+            () => Stack(
+              children: [
+                ListView.separated(
+                  padding: AppStyle.edgeInsetsA12,
+                  itemCount: superChats.length,
+                  separatorBuilder: (_, i) => AppStyle.vGap12,
+                  itemBuilder: (_, i) {
+                    var item = superChats[i];
+                    return SuperChatCard(
+                      item,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      } else {
+        // 完全封装
+        Utils.showScRightDialog(
+          title: "SC列表",
+          duration: duration,
+          child: Obx(
+            () => Stack(
+              children: [
+                ListView.separated(
+                  padding: AppStyle.edgeInsetsA12,
+                  itemCount: duration == null ? superChats.length : math.min(superChats.length, 3),
+                  separatorBuilder: (_, i) => AppStyle.vGap12,
+                  itemBuilder: (_, i) {
+                    var item = superChats[i];
+                    return SuperChatCard(
+                      item,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    }
   }
 
   void showAutoExitSheet() {

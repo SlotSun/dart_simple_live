@@ -168,6 +168,16 @@ Widget buildFullControls(
                   ),
                   IconButton(
                     onPressed: () {
+                      controller.showSuperChatSheet();
+                    },
+                    icon: const Icon(
+                      RemixIcons.discuss_line,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
                       showFollowUser(controller);
                     },
                     icon: const Icon(

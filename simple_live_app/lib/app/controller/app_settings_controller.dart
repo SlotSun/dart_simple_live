@@ -92,6 +92,8 @@ class AppSettingsController extends GetxController {
 
     getVerticalDragLock();
 
+    getAutoShowFullSCEnable();
+
     // ignore: invalid_use_of_protected_member
     shieldList.value = LocalStorageService.instance.shieldBox.values.toSet();
 
@@ -337,6 +339,10 @@ class AppSettingsController extends GetxController {
   // 滑动调节亮度/音量上下滑动手势控制
   @SettingItem(defaultValue: false, key: LocalStorageService.kVerticalDragLock)
   var verticalDragLock = false.obs;
+  
+  // 控制全屏模式是否弹出SC
+  @SettingItem(defaultValue: false, key: 'kAutoShowFullSCEnable')
+  var autoShowFullSCEnable = false.obs;
 
   RxSet<String> shieldList = <String>{}.obs;
 

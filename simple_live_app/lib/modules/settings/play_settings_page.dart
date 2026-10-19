@@ -164,6 +164,17 @@ class PlaySettingsPage extends GetView<AppSettingsController> {
                     ),
                   ),
                 ),
+                AppStyle.divider,
+                Obx(
+                  () => SettingsSwitch(
+                    title: "全屏模式自动SC弹出",
+                    subtitle: '会持续10秒',
+                    value: controller.autoShowFullSCEnable.value,
+                    onChanged: (e) {
+                      controller.setAutoShowFullSCEnable(e);
+                    },
+                  ),
+                ),
               ],
             ),
           ),
