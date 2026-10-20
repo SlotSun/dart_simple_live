@@ -322,18 +322,19 @@ class Utils {
         title: Text(title),
         content: Padding(
           padding: AppStyle.edgeInsetsT12,
-          child: TextField(
+          child: TextFormField(
             controller: textEditingController,
+            autofocus: true,
             decoration: InputDecoration(
               border: const OutlineInputBorder(),
-              //prefixText: title,
               contentPadding: AppStyle.edgeInsetsA12,
               hintText: hintText ?? title,
             ),
-            // style: TextStyle(
-            //     height: 1.0,
-            //     color: Get.isDarkMode ? Colors.white : Colors.black),
-            autofocus: true,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            validator: (text) {
+              if (validate == null) return null;
+              return validate(text ?? '') ? null : '内容格式不正确';
+            },
           ),
         ),
         actions: [
