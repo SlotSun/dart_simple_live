@@ -79,16 +79,8 @@ class FollowUserController extends BasePageController<FollowUser> {
     if (page > 1) {
       return Future.value([]);
     }
-    if (filterMode.value.tag == "全部") {
-      return FollowService.instance.followList.value;
-    } else if (filterMode.value.tag == "直播中") {
-      return FollowService.instance.liveList.value;
-    } else if (filterMode.value.tag == "未开播") {
-      return FollowService.instance.notLiveList.value;
-    } else {
-      FollowService.instance.filterDataByTag(filterMode.value);
-      return FollowService.instance.curTagFollowList.value;
-    }
+    FollowService.instance.filterDataByTag(filterMode.value);
+    return FollowService.instance.curTagFollowList.value;
   }
 
   void updateTagList() {
@@ -105,20 +97,8 @@ class FollowUserController extends BasePageController<FollowUser> {
   void filterData() {
     bool hideOffline = AppSettingsController.instance.hideOfflineFollow.value;
 
-    if (filterMode.value.tag == "全部") {
-      list.assignAll(FollowService.instance.followList.value);
-    } else if (filterMode.value.tag == "直播中") {
-      list.assignAll(FollowService.instance.liveList.value);
-    } else if (filterMode.value.tag == "未开播") {
-      list.assignAll(FollowService.instance.notLiveList.value);
-    } else {
-      FollowService.instance.filterDataByTag(filterMode.value);
-      list.assignAll(FollowService.instance.curTagFollowList);
-    }
-
-    if (hideOffline && filterMode.value.tag != "未开播") {
-      list.retainWhere((user) => user.liveStatus.value == 2);
-    }
+    FollowService.instance.filterDataByTag(filterMode.value, hideOffline: hideOffline);
+    list.assignAll(FollowService.instance.curTagFollowList);
   }
 
   // 用户自定义关注样式
