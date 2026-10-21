@@ -646,10 +646,10 @@ class FollowService extends GetxService {
         type: FileType.custom,
         allowedExtensions: ['json'],
       );
-      if (file == null) {
+      if (file.isEmpty) {
         return;
       }
-      var jsonFile = File(file.files.single.path!);
+      var jsonFile = File(file.single.path!);
       await inputJson(await jsonFile.readAsString());
       SmartDialog.showToast("导入成功");
     } catch (e) {

@@ -503,15 +503,14 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
           allowedExtensions: ["jpg"],
           type: FileType.image,
           fileName: "${DateTime.now().millisecondsSinceEpoch}.jpg",
+          bytes: imageData,
         );
         if (path == null) {
           SmartDialog.showToast("取消保存");
           SmartDialog.dismiss(status: SmartStatus.loading);
           return;
         }
-        var file = File(path);
-        await file.writeAsBytes(imageData);
-        SmartDialog.showToast("已保存截图至${file.path}");
+        SmartDialog.showToast("已保存截图至$path");
       }
     } catch (e) {
       Log.logPrint(e);

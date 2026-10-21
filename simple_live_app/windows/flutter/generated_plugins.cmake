@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
   firebase_core
   flutter_inappwebview_windows
+  flutter_secure_storage_windows
   media_kit_video
   screen_retriever_windows
   share_plus
