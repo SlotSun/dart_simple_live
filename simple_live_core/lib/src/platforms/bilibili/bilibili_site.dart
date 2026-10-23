@@ -28,6 +28,7 @@ class BiliBiliSite implements LiveSite {
   String buvid3 = "";
   String buvid4 = "";
   String accessId = "";
+
   Future<Map<String, String>> getHeader() async {
     if (buvid3.isEmpty) {
       var buvidInfo = await getBuvid();
@@ -475,6 +476,7 @@ class BiliBiliSite implements LiveSite {
     44,
     52
   ];
+
   Future<(String, String)> getWbiKeys() async {
     if (kImgKey.isNotEmpty && kSubKey.isNotEmpty) {
       return (kImgKey, kSubKey);
@@ -545,7 +547,12 @@ class BiliBiliSite implements LiveSite {
 
   @override
   void setSiteAttrs(String data) {
-    final map = jsonDecode(data) as Map<String, dynamic>;
+    final Map<String, dynamic> map;
+    try {
+      map = jsonDecode(data) as Map<String, dynamic>;
+    } catch (e) {
+      return;
+    }
     if (map.containsKey('cookie')) {
       cookie = map['cookie'];
     }

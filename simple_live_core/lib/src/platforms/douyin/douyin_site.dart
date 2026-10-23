@@ -677,7 +677,12 @@ class DouyinSite implements LiveSite {
 
   @override
   void setSiteAttrs(String data) {
-    final map = jsonDecode(data) as Map<String, dynamic>;
+    final Map<String, dynamic> map;
+    try {
+      map = jsonDecode(data) as Map<String, dynamic>;
+    } catch (e) {
+      return;
+    }
     if (map.containsKey('cookie')) {
       _updateDouyinCookie(map['cookie'] as String);
     }

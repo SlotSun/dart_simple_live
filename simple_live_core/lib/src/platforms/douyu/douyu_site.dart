@@ -322,7 +322,12 @@ class DouyuSite implements LiveSite {
 
   @override
   Future<void> setSiteAttrs(String data) async {
-    final map = jsonDecode(data) as Map<String, dynamic>;
+    final Map<String, dynamic> map;
+    try {
+      map = jsonDecode(data) as Map<String, dynamic>;
+    } catch (e) {
+      return;
+    }
     if (map.containsKey('cookie')) {
       _cookie = map['cookie'] as String;
     }
