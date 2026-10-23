@@ -30,6 +30,8 @@ dependencies:
   firebase_core: ^4.13.0
   intl: ^0.20.2 # 国际化
   pinyin: ^3.3.0
+  cryptography: ^2.9.0
+  cryptography_flutter: ^2.3.4
   qr_flutter: ^4.1.0 # 二维码生成
   dynamic_color: ^2.1.0 # 动态颜色
   path: any

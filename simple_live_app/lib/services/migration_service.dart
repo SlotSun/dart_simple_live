@@ -168,6 +168,12 @@ class MigrationService {
           DBService.instance.addAccount(ac);
         }
       }
+      // 移除过期敏感字段
+      LocalStorageService.instance.removeValue(LocalStorageService.kBilibiliCookie);
+      LocalStorageService.instance.removeValue(LocalStorageService.kDouyuCookie);
+      LocalStorageService.instance.removeValue(LocalStorageService.kDouyuDyDid);
+      LocalStorageService.instance.removeValue(LocalStorageService.kDouyuLTP0);
+      LocalStorageService.instance.removeValue(LocalStorageService.kDouyinCookie);
     }
     LocalStorageService.instance.settingsBox.put(LocalStorageService.kHiveDbVer, curAppVer);
   }
