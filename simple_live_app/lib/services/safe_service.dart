@@ -63,7 +63,7 @@ class SafeService extends GetxService {
         var secretKey = await SecureStoreService.instance.getAppSecureKey();
         try {
           wPassword = await AesUtils.decrypt(wPassword, secretKey!);
-        } on Exception catch (e) {
+        } catch (e) {
           wPassword = '';
         }
       }

@@ -34,6 +34,8 @@ import 'package:simple_live_app/modules/settings/indexed_settings/indexed_settin
 import 'package:simple_live_app/modules/settings/other/other_settings_controller.dart';
 import 'package:simple_live_app/modules/settings/other/other_settings_page.dart';
 import 'package:simple_live_app/modules/settings/play_settings_page.dart';
+import 'package:simple_live_app/modules/settings/safe_settings/safe_settings_controller.dart';
+import 'package:simple_live_app/modules/settings/safe_settings/safe_settings_page.dart';
 import 'package:simple_live_app/modules/sync/local_sync/device/sync_device_controller.dart';
 import 'package:simple_live_app/modules/sync/local_sync/device/sync_device_page.dart';
 import 'package:simple_live_app/modules/sync/local_sync/local_sync_controller.dart';
@@ -242,6 +244,14 @@ class AppPages {
       page: () => const OtherSettingsPage(),
       bindings: [
         BindingsBuilder.put(() => OtherSettingsController()),
+      ],
+    ),
+    //安全设置
+    GetPage(
+      name: RoutePath.kSettingsSafe,
+      page: () => const SafeSettingPage(),
+      bindings: [
+        BindingsBuilder.put(() => SafeSettingsController()),
       ],
     ),
     //关注设置

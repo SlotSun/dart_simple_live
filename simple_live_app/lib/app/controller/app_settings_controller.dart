@@ -11,7 +11,6 @@ import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils/setting_gen_util.dart';
 import 'package:simple_live_app/models/db/follow_snapshot.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
-import 'package:simple_live_app/services/secure_store_service.dart';
 
 part 'app_settings_controller.g.dart';
 
