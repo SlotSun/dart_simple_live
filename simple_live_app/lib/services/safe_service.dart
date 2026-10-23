@@ -23,7 +23,7 @@ class SafeService extends GetxService {
         for (final account in list) {
           try {
             account.credential = await AesUtils.decrypt(account.credential, key!);
-          } on Exception catch (e, s) {
+          } catch (e, s) {
             Log.e('decode_account_credential: $e', s);
           }
         }
@@ -33,10 +33,8 @@ class SafeService extends GetxService {
   }
 
   /// 加密指定账号
-  Future<List<Account>> encodeAccount(Account ac) async {
-    List<Account> list = DBService.instance.getAllAccounts();
+  Future<void> encodeAccount(Account ac) async {
     var plainCredential = ac.credential;
-
     // 加密模式, 尝试写入, 无key直接重置所有数据
     if (AppSettingsController.instance.appSafeEnable.value) {
       if (AppSettingsController.instance.appStoreKey.value) {
@@ -46,13 +44,14 @@ class SafeService extends GetxService {
         await reset();
       }
     }
-
+    var dbAc = DBService.instance.getAccount(ac.id);
     // credential 更新入库
-    if (ac.credential != plainCredential) {
-      ac.credential = plainCredential;
-      await DBService.instance.addAccount(ac);
+    if (dbAc.credential != plainCredential) {
+      var itemAc  = ac.copyWith(
+        credential: plainCredential
+      );
+      await DBService.instance.addAccount(itemAc);
     }
-    return list;
   }
 
   /// webdavPassword

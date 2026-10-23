@@ -30,6 +30,10 @@ class DBService extends GetxService {
     await accountBox.put(account.id, account);
   }
 
+  Account getAccount(String id) {
+    return accountBox.values.firstWhere((item)=>item.id == id);
+  }
+
   List<Account> getAllAccounts() {
     return accountBox.values.toList();
   }

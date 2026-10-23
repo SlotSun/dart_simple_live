@@ -35,8 +35,11 @@ class PlatformService extends GetxService {
 
   // 更新指定的站点账户数据
   Future<void> updateAccount(Account ac) async {
-    accountList.assignAll(await SafeService.instance.encodeAccount(ac));
+    accountList.assignAll(
+      accountList.map((a) => a.id == ac.id ? ac : a).toList(),
+    );
     accountList.refresh();
+    await SafeService.instance.encodeAccount(ac);
   }
 
   Future<void> accountLogout(Account ac) async {
@@ -64,8 +67,8 @@ class PlatformService extends GetxService {
     if (!info.isValid) {
       SmartDialog.showToast('${site.name}账号失效，请重新设置');
     } else {
-      await updateAccount(resAc);
       site.liveSite.setSiteAttrs(resAc.credential);
+      await updateAccount(resAc);
     }
     return info.isValid;
   }
