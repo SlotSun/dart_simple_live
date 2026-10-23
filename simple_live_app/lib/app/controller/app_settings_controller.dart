@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:simple_live_app/app/constant.dart';
@@ -11,11 +11,21 @@ import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils/setting_gen_util.dart';
 import 'package:simple_live_app/models/db/follow_snapshot.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
+import 'package:simple_live_app/services/secure_store_service.dart';
 
 part 'app_settings_controller.g.dart';
 
 class AppSettingsController extends GetxController {
   static AppSettingsController get instance => Get.find<AppSettingsController>();
+
+  /// app-data-safe
+  @SettingItem(defaultValue: false, key: 'kAppSafeEnable')
+  var appSafeEnable = false.obs;
+
+  @SettingItem(defaultValue: 'AoZora', key: 'kAppAuthorName')
+  var appAuthorName = 'AoZora';
+
+  var appStoreKey = false.obs;
 
   /// 缩放模式
   @SettingItem(defaultValue: 0, key: LocalStorageService.kPlayerScaleMode)
@@ -43,6 +53,8 @@ class AppSettingsController extends GetxController {
   Future<void> onInit() async {
     getThemeMode();
     firstRun = LocalStorageService.instance.getValue(LocalStorageService.kFirstRun, true);
+    getAppSafeEnable();
+    getAppAuthorName();
     getDanmuSize();
     getDanmuOpacity();
     getDanmuArea();

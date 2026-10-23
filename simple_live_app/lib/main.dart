@@ -35,6 +35,8 @@ import 'package:simple_live_app/services/history_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
 import 'package:simple_live_app/services/migration_service.dart';
 import 'package:simple_live_app/services/platform_service.dart';
+import 'package:simple_live_app/services/safe_service.dart';
+import 'package:simple_live_app/services/secure_store_service.dart';
 import 'package:simple_live_app/services/sync_service.dart';
 import 'package:simple_live_app/services/window_service.dart';
 import 'package:simple_live_app/src/rust/frb_generated.dart';
@@ -105,10 +107,13 @@ Future initServices() async {
   Utils.packageInfo = await PackageInfo.fromPlatform();
   //本地存储
   Log.d("Init LocalStorage Service");
+  Get.put(SecureStoreService());
   await Get.put(LocalStorageService()).init();
   await Get.put(DBService()).init();
   //初始化设置控制器
   await Get.put(AppSettingsController()).onInit();
+
+  await Get.put(SafeService()).onInit();
 
   await Get.put(AppStyleSettingController()).init();
 
@@ -117,7 +122,7 @@ Future initServices() async {
   // platformService need migrate
   await MigrationService.migrateDataByVersion();
 
-  Get.put(PlatformService());
+  await Get.put(PlatformService()).onInit();
 
   Get.put(SyncService());
 

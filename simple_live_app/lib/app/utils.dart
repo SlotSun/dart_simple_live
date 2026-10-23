@@ -315,8 +315,10 @@ class Utils {
     String confirm = '',
     String cancel = '',
     TextValidate? validate,
+    List<Widget>? actions,
+    TextEditingController? textController,
   }) async {
-    final TextEditingController textEditingController = TextEditingController(text: content);
+    final TextEditingController textEditingController = textController??TextEditingController(text: content);
     var result = await Get.dialog(
       AlertDialog(
         title: Text(title),
@@ -338,6 +340,7 @@ class Utils {
           ),
         ),
         actions: [
+          ...?actions,
           TextButton(
             onPressed: Get.back,
             child: const Text("取消"),

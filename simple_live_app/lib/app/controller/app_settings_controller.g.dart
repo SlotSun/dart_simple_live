@@ -2,6 +2,24 @@
 part of "app_settings_controller.dart";
 
 extension AppSettingsControllerSettingGen on AppSettingsController {
+  void setAppSafeEnable(bool e) {
+    appSafeEnable.value = e;
+    LocalStorageService.instance.setValue(kAppSafeEnable, e);
+  }
+
+  void getAppSafeEnable() {
+    appSafeEnable.value = LocalStorageService.instance.getValue(kAppSafeEnable, false);
+  }
+
+  void setAppAuthorName(String e) {
+    appAuthorName = e;
+    LocalStorageService.instance.setValue(kAppAuthorName, e);
+  }
+
+  void getAppAuthorName() {
+    appAuthorName = LocalStorageService.instance.getValue(kAppAuthorName, 'AoZora');
+  }
+
   void setScaleMode(int e) {
     scaleMode.value = e;
     LocalStorageService.instance.setValue(kScaleMode, e);
@@ -553,6 +571,8 @@ extension AppSettingsControllerSettingGen on AppSettingsController {
 }
 
 // storage keys
+const String kAppSafeEnable = 'kAppSafeEnable';
+const String kAppAuthorName = 'kAppAuthorName';
 const String kScaleMode = "ScaleMode";
 const String kAspectByUser = "PlayerAspectByUser";
 const String kAspectWidth = "PlayerAspectWidth";
