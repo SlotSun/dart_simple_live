@@ -26,7 +26,7 @@ class Account {
 
   /// 凭证
   @HiveField(5, defaultValue: '')
-  final String credential;
+  String credential;
 
   /// 是否当前激活账号
   @HiveField(6, defaultValue: true)
