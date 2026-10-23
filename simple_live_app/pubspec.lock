@@ -976,8 +976,8 @@ packages:
     dependency: "direct main"
     description:
       path: media_kit
-      ref: ccd38d67f961e703cde3f9a4e010425574cca202
-      resolved-ref: ccd38d67f961e703cde3f9a4e010425574cca202
+      ref: "15bb693c0dced866ce1c1d6dad88947c056fcd9c"
+      resolved-ref: "15bb693c0dced866ce1c1d6dad88947c056fcd9c"
       url: "https://github.com/SlotSun/media-kit.git"
     source: git
     version: "1.1.11"
@@ -985,8 +985,8 @@ packages:
     dependency: "direct main"
     description:
       path: media_kit_video
-      ref: ccd38d67f961e703cde3f9a4e010425574cca202
-      resolved-ref: ccd38d67f961e703cde3f9a4e010425574cca202
+      ref: "15bb693c0dced866ce1c1d6dad88947c056fcd9c"
+      resolved-ref: "15bb693c0dced866ce1c1d6dad88947c056fcd9c"
       url: "https://github.com/SlotSun/media-kit.git"
     source: git
     version: "1.2.5"
@@ -1688,14 +1688,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.8.1"
-  wakelock_plus_ohos:
-    dependency: transitive
-    description:
-      name: wakelock_plus_ohos
-      sha256: b22af297411555b5ec0fe43ec2960cd5f019dd23b83853214ebe6dcc97b337bd
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.3"
   wakelock_plus_platform_interface:
     dependency: transitive
     description:

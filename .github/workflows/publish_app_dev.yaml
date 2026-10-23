@@ -214,7 +214,8 @@ jobs:
               libxkbcommon-dev libxrandr-dev libxss-dev libxv-dev libxvidcore-dev \
               linux-libc-dev nasm ninja-build pkg-config python3 python3-docutils wayland-protocols \
               x11proto-core-dev zlib1g-dev libfdk-aac-dev libtheora-dev libwebp-dev \
-              unixodbc-dev libpq-dev libxxhash-dev libaom-dev libbs2b-dev libcaca-dev libcdio-paranoia-dev
+              unixodbc-dev libpq-dev libxxhash-dev libaom-dev libbs2b-dev libcaca-dev libcdio-paranoia-dev \
+              libsecret-1-0 libsecret-1-dev
       # 打开 Linux Desktop 支持
       - name: Enable Flutter Desktop
         run: flutter config --enable-linux-desktop
@@ -316,9 +317,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - runner: ubuntu-24.04
+          - runner: ubuntu-25.08
             arch: x86_64
-          - runner: ubuntu-24.04-arm
+          - runner: ubuntu-25.08-arm
             arch: aarch64
     runs-on: ${{ matrix.runner }}
     permissions:
