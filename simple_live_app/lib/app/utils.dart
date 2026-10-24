@@ -185,7 +185,7 @@ class Utils {
   }
 
   static void showScRightDialog({
-    required String title,
+    String? title,
     Function()? onDismiss,
     required Widget child,
     int? duration,
@@ -229,26 +229,31 @@ class Utils {
                 data: const MediaQueryData(padding: EdgeInsets.zero),
                 child: Column(
                   children: [
-                    ListTile(
-                      visualDensity: VisualDensity.compact,
-                      contentPadding: EdgeInsets.zero,
-                      leading: IconButton(
-                        onPressed: () {
-                          SmartDialog.dismiss(status: SmartStatus.allCustom).then(
-                            (value) => onDismiss?.call(),
-                          );
-                        },
-                        icon: const Icon(Icons.arrow_back),
-                      ),
-                      title: Text(
-                        title,
-                        style: Get.textTheme.titleMedium,
-                      ),
-                    ),
-                    Divider(
-                      height: 1,
-                      color: Colors.grey.withAlpha(25),
-                    ),
+                    // hide title when auto-sc
+                    ...(title != null
+                        ? [
+                            ListTile(
+                              visualDensity: VisualDensity.compact,
+                              contentPadding: EdgeInsets.zero,
+                              leading: IconButton(
+                                onPressed: () {
+                                  SmartDialog.dismiss(status: SmartStatus.allCustom).then(
+                                    (value) => onDismiss?.call(),
+                                  );
+                                },
+                                icon: const Icon(Icons.arrow_back),
+                              ),
+                              title: Text(
+                                title,
+                                style: Get.textTheme.titleMedium,
+                              ),
+                            ),
+                            Divider(
+                              height: 1,
+                              color: Colors.grey.withAlpha(25),
+                            ),
+                          ]
+                        : []),
                     Expanded(
                       child: child,
                     ),
@@ -318,7 +323,7 @@ class Utils {
     List<Widget>? actions,
     TextEditingController? textController,
   }) async {
-    final TextEditingController textEditingController = textController??TextEditingController(text: content);
+    final TextEditingController textEditingController = textController ?? TextEditingController(text: content);
     var result = await Get.dialog(
       AlertDialog(
         title: Text(title),
