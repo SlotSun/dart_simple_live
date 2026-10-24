@@ -162,7 +162,6 @@ class HuyaDanmaku implements LiveDanmaku {
       webScoketUtils?.sendMessage(liveInfoData);
       webScoketUtils?.sendMessage(doLaunchData);
       webScoketUtils?.sendMessage(data);
-      // webScoketUtils?.sendMessage(enterChannelData);
     } catch (e) {
       CoreLog.error("join_data_error:$e");
     }
@@ -194,6 +193,10 @@ class HuyaDanmaku implements LiveDanmaku {
           var uname = messageNotice.userInfo.sNickName;
           var content = messageNotice.content;
 
+          // skip sys-information
+          if(uname == '系统消息'){
+            return;
+          }
           // websocket maybe need cookie check, reg temp instead
           // xxx(来自一元上头条)
           // RegExp scReg = RegExp(r'\(来自.+?上头条\)');
