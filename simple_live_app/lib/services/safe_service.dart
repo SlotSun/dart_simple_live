@@ -18,14 +18,22 @@ class SafeService extends GetxService {
   Future<List<Account>> getDecodeAccounts() async {
     List<Account> list = DBService.instance.getAllAccounts();
     if (AppSettingsController.instance.appSafeEnable.value) {
-      if (AppSettingsController.instance.appStoreKey.value) {
-        var key = await SecureStoreService.instance.getAppSecureKey();
-        for (final account in list) {
+      for (int i = 0; i < list.length; i++) {
+        Account account = list[i];
+        if (AppSettingsController.instance.appStoreKey.value) {
+          var key = await SecureStoreService.instance.getAppSecureKey();
           try {
             account.credential = await AesUtils.decrypt(account.credential, key!);
           } catch (e, s) {
             Log.e('decode_account_credential: $e', s);
           }
+        } else {
+          list[i] = account.copyWith(
+            id: account.id,
+            userName: '',
+            credential: '',
+            isActive: false,
+          );
         }
       }
     }
@@ -47,9 +55,7 @@ class SafeService extends GetxService {
     var dbAc = DBService.instance.getAccount(ac.id);
     // credential 更新入库
     if (dbAc.credential != plainCredential) {
-      var itemAc  = ac.copyWith(
-        credential: plainCredential
-      );
+      var itemAc = ac.copyWith(credential: plainCredential);
       await DBService.instance.addAccount(itemAc);
     }
   }
@@ -57,14 +63,16 @@ class SafeService extends GetxService {
   /// webdavPassword
   Future<String> getDecodeWPassword() async {
     var wPassword = LocalStorageService.instance.getValue(LocalStorageService.kWebDAVPassword, '');
-    if (wPassword.isNotEmpty) {
-      if (AppSettingsController.instance.appSafeEnable.value && AppSettingsController.instance.appStoreKey.value) {
+    if (wPassword.isNotEmpty && AppSettingsController.instance.appSafeEnable.value) {
+      if (AppSettingsController.instance.appStoreKey.value) {
         var secretKey = await SecureStoreService.instance.getAppSecureKey();
         try {
           wPassword = await AesUtils.decrypt(wPassword, secretKey!);
         } catch (e) {
           wPassword = '';
         }
+      } else {
+        wPassword = '';
       }
     }
     return wPassword;
