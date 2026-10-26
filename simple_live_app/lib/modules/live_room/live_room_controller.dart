@@ -28,7 +28,7 @@ import 'package:simple_live_app/services/db_service.dart';
 import 'package:simple_live_app/services/follow_block_service.dart';
 import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/services/history_service.dart';
-import 'package:simple_live_app/src/rust/api/danmaku_mask.dart';
+import 'package:simple_live_app/rust/api/danmaku_mask.dart';
 import 'package:simple_live_app/widgets/desktop_refresh_button.dart';
 import 'package:simple_live_app/widgets/follow_user_item.dart';
 import 'package:simple_live_app/widgets/superchat_card.dart';
