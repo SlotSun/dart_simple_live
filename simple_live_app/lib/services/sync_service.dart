@@ -5,21 +5,20 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:network_info_plus/network_info_plus.dart';
+import 'package:shelf/shelf.dart' as shelf;
+import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:shelf_router/shelf_router.dart';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
+import 'package:simple_live_app/models/db/account.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/models/db/history.dart';
-import 'package:simple_live_app/services/bilibili_account_service.dart';
 import 'package:simple_live_app/services/db_service.dart';
-import 'package:simple_live_app/services/platform_service.dart';
 import 'package:udp/udp.dart';
-import 'package:shelf/shelf.dart' as shelf;
-import 'package:shelf/shelf_io.dart' as shelf_io;
-import 'package:shelf_router/shelf_router.dart';
 import 'package:uuid/uuid.dart';
 
 class SyncService extends GetxService {
@@ -193,9 +192,7 @@ class SyncService extends GetxService {
       serverRouter.post('/sync/tag', _syncFollowUserTagRequest);
       serverRouter.post('/sync/history', _syncHistoryReuqest);
       serverRouter.post('/sync/blocked_word', _syncBlockedWordReuqest);
-      serverRouter.post('/sync/account/bilibili', _syncBiliAccountReuqest);
-      serverRouter.post('/sync/account/douyu', _syncDouyuAccountRequest);
-      serverRouter.post('/sync/account/douyin', _syncDouyinAccountRequest);
+      serverRouter.post('/sync/account/account', _syncAccountRequest);
 
       var server = await shelf_io.serve(
         serverRouter.call,
@@ -362,61 +359,16 @@ class SyncService extends GetxService {
     }
   }
 
-  /// 同步哔哩哔哩账号
-  Future<shelf.Response> _syncBiliAccountReuqest(shelf.Request request) async {
+  /// 同步平台账号
+  Future<shelf.Response> _syncAccountRequest(shelf.Request request) async {
     try {
       var body = await request.readAsString();
-      Log.d('_syncBiliAccountReuqest: $body');
+      Log.d('_syncAccountRequest: $body');
       var jsonBody = json.decode(body);
-      var cookie = jsonBody['cookie'];
-      BiliBiliAccountService.instance.setCookie(cookie);
-      BiliBiliAccountService.instance.loadUserInfo();
-      SmartDialog.showToast('已同步哔哩哔哩账号');
-      return toJsonResponse({
-        'status': true,
-        'message': 'success',
-      });
-    } catch (e) {
-      return toJsonResponse({
-        'status': false,
-        'message': e.toString(),
-      });
-    }
-  }
-
-  /// 同步斗鱼账号
-  Future<shelf.Response> _syncDouyuAccountRequest(shelf.Request request) async {
-    try {
-      var body = await request.readAsString();
-      Log.d('_syncDouyuAccountRequest: $body');
-      var jsonBody = json.decode(body);
-      // 和 client data 保持一致
-      var cookie = jsonBody['cookie'];
-      var did = jsonBody['dy_did'];
-      var ltp0 = jsonBody['ltp0'];
-      PlatformService.instance.setDouyuCookie(cookie);
-      PlatformService.instance.setDouyuDidAndLtp0(did,ltp0);
-      SmartDialog.showToast('已同步斗鱼账号');
-      return toJsonResponse({
-        'status': true,
-        'message': 'success',
-      });
-    } catch (e) {
-      return toJsonResponse({
-        'status': false,
-        'message': e.toString(),
-      });
-    }
-  }
-  /// 同步抖音账号
-  Future<shelf.Response> _syncDouyinAccountRequest(shelf.Request request) async {
-    try {
-      var body = await request.readAsString();
-      Log.d('_syncDouyinAccountRequest: $body');
-      var jsonBody = json.decode(body);
-      var cookie = jsonBody['cookie'];
-      PlatformService.instance.setDouyinCookie(cookie);
-      SmartDialog.showToast('已同步抖音账号');
+      // 收发迁移至 account
+      Account account = Account.fromJson(jsonBody);
+      SmartDialog.showToast('已同步${account.siteId}账号');
+      EventBus.instance.emit<Account>(Constant.kUpdateAccount, account);
       return toJsonResponse({
         'status': true,
         'message': 'success',

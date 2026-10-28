@@ -184,6 +184,89 @@ class Utils {
     );
   }
 
+  static void showScRightDialog({
+    String? title,
+    Function()? onDismiss,
+    required Widget child,
+    int? duration,
+    double width = 300,
+    bool useSystem = false,
+  }) {
+    SmartDialog.show(
+      alignment: Alignment.topRight,
+      animationBuilder: (controller, child, animationParam) {
+        //从右到左
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1, 0),
+            end: Offset.zero,
+          ).animate(controller.view),
+          child: child,
+        );
+      },
+      tag: 'sc',
+      keepSingle: true,
+      maskColor: Colors.transparent,
+      animationTime: const Duration(milliseconds: 200),
+      displayTime: duration != null ? Duration(seconds: duration) : null,
+      builder: (context) => Material(
+        color: duration != null ? Colors.transparent : Get.theme.cardColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(4),
+          bottomLeft: Radius.circular(4),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: SizedBox(
+          width: width + MediaQuery.of(context).padding.right,
+          child: Padding(
+            padding: EdgeInsets.only(
+              right: MediaQuery.of(context).padding.right,
+            ),
+            child: SafeArea(
+              left: false,
+              right: false,
+              child: MediaQuery(
+                data: const MediaQueryData(padding: EdgeInsets.zero),
+                child: Column(
+                  children: [
+                    // hide title when auto-sc
+                    ...(title != null
+                        ? [
+                            ListTile(
+                              visualDensity: VisualDensity.compact,
+                              contentPadding: EdgeInsets.zero,
+                              leading: IconButton(
+                                onPressed: () {
+                                  SmartDialog.dismiss(status: SmartStatus.allCustom).then(
+                                    (value) => onDismiss?.call(),
+                                  );
+                                },
+                                icon: const Icon(Icons.arrow_back),
+                              ),
+                              title: Text(
+                                title,
+                                style: Get.textTheme.titleMedium,
+                              ),
+                            ),
+                            Divider(
+                              height: 1,
+                              color: Colors.grey.withAlpha(25),
+                            ),
+                          ]
+                        : []),
+                    Expanded(
+                      child: child,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   static void hideRightDialog() {
     SmartDialog.dismiss(status: SmartStatus.allCustom);
   }
@@ -237,28 +320,32 @@ class Utils {
     String confirm = '',
     String cancel = '',
     TextValidate? validate,
+    List<Widget>? actions,
+    TextEditingController? textController,
   }) async {
-    final TextEditingController textEditingController = TextEditingController(text: content);
+    final TextEditingController textEditingController = textController ?? TextEditingController(text: content);
     var result = await Get.dialog(
       AlertDialog(
         title: Text(title),
         content: Padding(
           padding: AppStyle.edgeInsetsT12,
-          child: TextField(
+          child: TextFormField(
             controller: textEditingController,
+            autofocus: true,
             decoration: InputDecoration(
               border: const OutlineInputBorder(),
-              //prefixText: title,
               contentPadding: AppStyle.edgeInsetsA12,
               hintText: hintText ?? title,
             ),
-            // style: TextStyle(
-            //     height: 1.0,
-            //     color: Get.isDarkMode ? Colors.white : Colors.black),
-            autofocus: true,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            validator: (text) {
+              if (validate == null) return null;
+              return validate(text ?? '') ? null : '内容格式不正确';
+            },
           ),
         ),
         actions: [
+          ...?actions,
           TextButton(
             onPressed: Get.back,
             child: const Text("取消"),

@@ -376,9 +376,7 @@ class CryptoUtility {
   }
 
   String base64Encode(String inputString, {int selectedAlphabet = 0}) {
-    var binaryString = inputString.codeUnits
-        .map((c) => c.toRadixString(2).padLeft(8, '0'))
-        .join('');
+    var binaryString = inputString.codeUnits.map((c) => c.toRadixString(2).padLeft(8, '0')).join('');
 
     final paddingLength = (6 - binaryString.length % 6) % 6;
     binaryString += '0' * paddingLength;
@@ -388,9 +386,7 @@ class CryptoUtility {
       base64Indices.add(int.parse(binaryString.substring(i, i + 6), radix: 2));
     }
 
-    var outputString = base64Indices
-        .map((index) => base64Alphabet[selectedAlphabet][index])
-        .join('');
+    var outputString = base64Indices.map((index) => base64Alphabet[selectedAlphabet][index]).join('');
 
     outputString += '=' * (paddingLength ~/ 2);
     return outputString;
@@ -407,8 +403,7 @@ class CryptoUtility {
             (abogusBytesStr.codeUnitAt(i + 1) << 8) |
             abogusBytesStr.codeUnitAt(i + 2);
       } else if (i + 1 < abogusBytesStr.length) {
-        n = (abogusBytesStr.codeUnitAt(i) << 16) |
-            (abogusBytesStr.codeUnitAt(i + 1) << 8);
+        n = (abogusBytesStr.codeUnitAt(i) << 16) | (abogusBytesStr.codeUnitAt(i + 1) << 8);
       } else {
         n = abogusBytesStr.codeUnitAt(i) << 16;
       }
@@ -465,14 +460,10 @@ class BrowserFingerprintGenerator {
     return (browsers[browserType] ?? generateChromeFingerprint)();
   }
 
-  static String generateChromeFingerprint() =>
-      _generateFingerprint(platform: "Win32");
-  static String generateFirefoxFingerprint() =>
-      _generateFingerprint(platform: "Win32");
-  static String generateSafariFingerprint() =>
-      _generateFingerprint(platform: "MacIntel");
-  static String generateEdgeFingerprint() =>
-      _generateFingerprint(platform: "Win32");
+  static String generateChromeFingerprint() => _generateFingerprint(platform: "Win32");
+  static String generateFirefoxFingerprint() => _generateFingerprint(platform: "Win32");
+  static String generateSafariFingerprint() => _generateFingerprint(platform: "MacIntel");
+  static String generateEdgeFingerprint() => _generateFingerprint(platform: "Win32");
 
   static String _generateFingerprint({required String platform}) {
     final random = Random();
@@ -515,10 +506,8 @@ class ABogus {
   ];
   final Uint8List uaKey = Uint8List.fromList([0, 1, 14]);
 
-  final String character =
-      "Dkdpgh2ZmsQB80/MfvV36XI1R45-WUAlEixNLwoqYTOPuzKFjJnry79HbGcaStCe";
-  final String character2 =
-      "ckdp1h4ZKsUB80/Mfvw36XIgR25+WQAlEi7NLboqYTOPuzmFjJnryx9HVGDaStCe";
+  final String character = "Dkdpgh2ZmsQB80/MfvV36XI1R45-WUAlEixNLwoqYTOPuzKFjJnry79HbGcaStCe";
+  final String character2 = "ckdp1h4ZKsUB80/Mfvw36XIgR25+WQAlEi7NLboqYTOPuzmFjJnryx9HVGDaStCe";
   late final List<String> characterList;
   late final CryptoUtility cryptoUtility;
 
@@ -621,10 +610,8 @@ class ABogus {
       : userAgent = userAgent != null && userAgent.isNotEmpty
             ? userAgent
             : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0",
-        browserFp = fp != null && fp.isNotEmpty
-            ? fp
-            : BrowserFingerprintGenerator.generateFingerprint(
-                browserType: "Edge"),
+        browserFp =
+            fp != null && fp.isNotEmpty ? fp : BrowserFingerprintGenerator.generateFingerprint(browserType: "Edge"),
         options = options ?? [0, 1, 14] {
     characterList = [character, character2];
     cryptoUtility = CryptoUtility(salt, characterList);
@@ -657,10 +644,8 @@ class ABogus {
 
     final startEncryption = DateTime.now().millisecondsSinceEpoch;
 
-    final array1 =
-        cryptoUtility.paramsToArray(cryptoUtility.paramsToArray(params));
-    final array2 =
-        cryptoUtility.paramsToArray(cryptoUtility.paramsToArray(body));
+    final array1 = cryptoUtility.paramsToArray(cryptoUtility.paramsToArray(params));
+    final array2 = cryptoUtility.paramsToArray(cryptoUtility.paramsToArray(body));
     final array3 = cryptoUtility.paramsToArray(
       cryptoUtility.base64Encode(
         StringProcessor.toCharStr(
@@ -724,8 +709,7 @@ class ABogus {
     abDir[64] = browserFp.length;
     abDir[65] = browserFp.length;
 
-    final sortedValues =
-        sortIndex.map((i) => abDir[i] ?? 0).toList().cast<int>();
+    final sortedValues = sortIndex.map((i) => abDir[i] ?? 0).toList().cast<int>();
     final edgeFpArray = StringProcessor.toOrdArray(browserFp);
 
     var abXor = 0;
@@ -739,8 +723,7 @@ class ABogus {
     sortedValues.addAll(edgeFpArray);
     sortedValues.add(abXor);
 
-    final abogusBytesStr = StringProcessor.generateRandomBytes() +
-        cryptoUtility.transformBytes(sortedValues);
+    final abogusBytesStr = StringProcessor.generateRandomBytes() + cryptoUtility.transformBytes(sortedValues);
 
     final abogus = cryptoUtility.abogusEncode(abogusBytesStr, 0);
     final finalParams = "$params&a_bogus=$abogus";

@@ -1,4 +1,4 @@
-﻿import 'package:simple_live_core/src/platforms/huya/tars/types.dart';
+import 'package:simple_live_core/src/platforms/huya/tars/types.dart';
 import 'package:tars_dart/tars/codec/tars_displayer.dart';
 import 'package:tars_dart/tars/codec/tars_input_stream.dart';
 import 'package:tars_dart/tars/codec/tars_output_stream.dart';
@@ -15,13 +15,13 @@ class GameEventMessageBoardInfo extends TarsStruct {
 
   @override
   void readFrom(TarsInputStream _is) {
-    tMessageUser         = _is.read(tMessageUser, 0, false);
-    sContent             = _is.read(sContent, 1, false);
-    iCost                = _is.read(iCost, 2, false);
-    iTotalSec            = _is.read(iTotalSec, 4, false);
-    iCountDown           = _is.read(iCountDown, 5, false);
-    lMessageId           = _is.read(lMessageId, 9, false);
-    iCostPay             = _is.read(iCostPay, 12, false);
+    tMessageUser = _is.read(tMessageUser, 0, false);
+    sContent = _is.read(sContent, 1, false);
+    iCost = _is.read(iCost, 2, false);
+    iTotalSec = _is.read(iTotalSec, 4, false);
+    iCountDown = _is.read(iCountDown, 5, false);
+    lMessageId = _is.read(lMessageId, 9, false);
+    iCostPay = _is.read(iCostPay, 12, false);
   }
 
   @override
@@ -44,8 +44,7 @@ class GameEventMessageBoardInfo extends TarsStruct {
       ..iTotalSec = iTotalSec
       ..iCountDown = iCountDown
       ..lMessageId = lMessageId
-      ..iCostPay = iCostPay
-    ;
+      ..iCostPay = iCostPay;
   }
 
   @override

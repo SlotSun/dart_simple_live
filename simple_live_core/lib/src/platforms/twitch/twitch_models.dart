@@ -18,9 +18,7 @@ class Data {
 
   factory Data.fromJson(Map<String, dynamic> json) {
     return Data(
-      userOrError: json['userOrError'] != null
-          ? UserOrError.fromJson(json['userOrError'])
-          : null,
+      userOrError: json['userOrError'] != null ? UserOrError.fromJson(json['userOrError']) : null,
       user: json['user'] != null ? User.fromJson(json['user']) : null,
     );
   }
@@ -107,13 +105,9 @@ class User {
       primaryColorHex: json['primaryColorHex'] ?? '',
       isPartner: json['isPartner'] ?? false,
       profileImageUrl: json['profileImageURL'] ?? '',
-      primaryTeam: json['primaryTeam'] != null
-          ? PrimaryTeam.fromJson(json['primaryTeam'])
-          : null,
+      primaryTeam: json['primaryTeam'] != null ? PrimaryTeam.fromJson(json['primaryTeam']) : null,
       channel: Channel.fromJson(json['channel']),
-      lastBroadcast: json['lastBroadcast'] != null
-          ? LastBroadcast.fromJson(json['lastBroadcast'])
-          : null,
+      lastBroadcast: json['lastBroadcast'] != null ? LastBroadcast.fromJson(json['lastBroadcast']) : null,
       stream: json['stream'] != null ? Stream.fromJson(json['stream']) : null,
       typename: json['__typename'] ?? '',
     );
@@ -186,10 +180,8 @@ class Channel {
     return Channel(
       id: json['id'] ?? '',
       typename: json['__typename'] ?? '',
-      selfEdge:
-          json['self'] != null ? ChannelSelfEdge.fromJson(json['self']) : null,
-      trailer:
-          json['trailer'] != null ? Trailer.fromJson(json['trailer']) : null,
+      selfEdge: json['self'] != null ? ChannelSelfEdge.fromJson(json['self']) : null,
+      trailer: json['trailer'] != null ? Trailer.fromJson(json['trailer']) : null,
     );
   }
 }

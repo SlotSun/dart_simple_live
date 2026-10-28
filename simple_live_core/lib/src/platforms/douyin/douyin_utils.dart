@@ -10,8 +10,7 @@ import 'douyin_request_params.dart';
 class DouyinUtils {
 // 根据传入长度产生随机字符串
   static String getMSToken({int randomLength = 184}) {
-    var baseStr =
-        'ABCDEFGHIGKLMNOPQRSTUVWXYZabcdefghigklmnopqrstuvwxyz0123456789=';
+    var baseStr = 'ABCDEFGHIGKLMNOPQRSTUVWXYZabcdefghigklmnopqrstuvwxyz0123456789=';
     var sb = StringBuffer();
     for (var i = 0; i < randomLength; i++) {
       var index = Random().nextInt(baseStr.length);

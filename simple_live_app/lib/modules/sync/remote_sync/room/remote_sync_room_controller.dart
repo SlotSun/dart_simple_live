@@ -14,7 +14,6 @@ import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/history.dart';
-import 'package:simple_live_app/services/bilibili_account_service.dart';
 import 'package:simple_live_app/services/db_service.dart';
 import 'package:simple_live_app/services/signalr_service.dart';
 
@@ -185,9 +184,9 @@ class RemoteSyncRoomController extends BaseController {
   void onReceiveBiliAccount(bool overlay, String data) async {
     try {
       var jsonBody = json.decode(data);
-      var cookie = jsonBody['cookie'];
-      BiliBiliAccountService.instance.setCookie(cookie);
-      BiliBiliAccountService.instance.loadUserInfo();
+      // var cookie = jsonBody['cookie'];
+      // BiliBiliAccountService.instance.setCookie(cookie);
+      // BiliBiliAccountService.instance.loadUserInfo();
       SmartDialog.showToast('已同步哔哩哔哩账号');
     } catch (e) {
       SmartDialog.showToast("同步失败:$e");
@@ -301,10 +300,10 @@ class RemoteSyncRoomController extends BaseController {
         SmartDialog.showToast("无设备连接");
         return;
       }
-      if (!BiliBiliAccountService.instance.logined.value) {
-        SmartDialog.showToast("未登录哔哩哔哩");
-        return;
-      }
+      // if (!BiliBiliAccountService.instance.logined.value) {
+      //   SmartDialog.showToast("未登录哔哩哔哩");
+      //   return;
+      // }
       SmartDialog.showLoading(msg: "发送中...");
 
       var resp = await signalR.sendContent(
@@ -312,7 +311,7 @@ class RemoteSyncRoomController extends BaseController {
         action: "SendBiliAccount",
         overlay: true,
         content: json.encode({
-          "cookie": BiliBiliAccountService.instance.cookie,
+          // "cookie": BiliBiliAccountService.instance.cookie,
         }),
       );
       if (resp.isSuccess) {

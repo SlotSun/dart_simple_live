@@ -150,10 +150,9 @@ class OtherSettingsController extends BaseController {
       allowedExtensions: ['log'],
       type: FileType.custom,
       fileName: item.name,
+      bytes: await File(item.path).readAsBytes(),
     );
     if (filePath != null) {
-      var file = File(item.path);
-      await file.copy(filePath);
       SmartDialog.showToast("保存成功");
     }
   }
@@ -172,26 +171,17 @@ class OtherSettingsController extends BaseController {
 
       var bytes = Uint8List.fromList(utf8.encode(jsonEncode(data)));
 
-      // FilePicker 直接写入
-      var inlineSave = Platform.isAndroid || Platform.isIOS || kIsWeb;
-
       var path = await FilePicker.saveFile(
         allowedExtensions: ['json'],
         type: FileType.custom,
         fileName: "simple_live_config.json",
-        bytes: inlineSave ? bytes : null,
+        bytes: bytes,
       );
 
       if (path == null && !kIsWeb) {
         SmartDialog.showToast("保存取消");
         return;
       }
-
-      // 桌面平台需要手动写入
-      if (!inlineSave && path != null) {
-        await File(path).writeAsBytes(bytes);
-      }
-
       SmartDialog.showToast("保存成功");
     } catch (e) {
       Log.logPrint(e);
@@ -205,10 +195,10 @@ class OtherSettingsController extends BaseController {
         allowedExtensions: ['json'],
         type: FileType.custom,
       );
-      if (file == null) {
+      if (file.isEmpty) {
         return;
       }
-      var filePath = file.files.single.path!;
+      var filePath = file.single.path!;
       var data = jsonDecode(await File(filePath).readAsString());
       if (data["type"] != "simple_live") {
         SmartDialog.showToast("不支持的配置文件");
@@ -242,7 +232,7 @@ class OtherSettingsController extends BaseController {
 
   Future<void> setWindowMaxAuto(bool e) async {
     AppSettingsController.instance.setWindowMaxAuto(e);
-    if(e){
+    if (e) {
       var maxState = await windowManager.isMaximized();
       AppSettingsController.instance.setWindowMaxState(maxState);
     }

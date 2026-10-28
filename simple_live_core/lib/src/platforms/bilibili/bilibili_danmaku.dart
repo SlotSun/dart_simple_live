@@ -9,6 +9,7 @@ import 'package:simple_live_core/src/common/convert_helper.dart';
 import 'package:simple_live_core/src/common/web_socket_util.dart';
 
 import '../../common/binary_writer.dart';
+import 'bilibili_emoticon.dart';
 
 class BiliBiliDanmakuArgs {
   final int roomId;
@@ -172,10 +173,8 @@ class BiliBiliDanmaku implements LiveDanmaku {
 
         var text = utf8.decode(body, allowMalformed: true);
 
-        var group =
-            text.split(RegExp(r"[\x00-\x1f]+", unicode: true, multiLine: true));
-        for (var item
-            in group.where((x) => x.length > 2 && x.startsWith('{'))) {
+        var group = text.split(RegExp(r"[\x00-\x1f]+", unicode: true, multiLine: true));
+        for (var item in group.where((x) => x.length > 2 && x.startsWith('{'))) {
           parseMessage(item);
         }
       }
@@ -189,18 +188,20 @@ class BiliBiliDanmaku implements LiveDanmaku {
       var obj = json.decode(jsonMessage);
       var cmd = obj["cmd"].toString();
       if (cmd.contains("DANMU_MSG")) {
-        if (obj["info"] != null && obj["info"].length != 0) {
-          var message = obj["info"][1].toString();
-          var color = asT<int?>(obj["info"][0][3]) ?? 0;
-          if (obj["info"][2] != null && obj["info"][2].length != 0) {
-            var username = obj["info"][2][1].toString();
+        // 安全转换：守卫只保证非空，String / Map 也有 length，直接强转
+        // 会在异常载荷上抛 TypeError，绕过 parseBilibiliEmoticons 自己的防御
+        var info = asT<List<dynamic>>(obj["info"]);
+        if (info != null && info.isNotEmpty) {
+          var message = info[1].toString();
+          var color = asT<int?>(info[0][3]) ?? 0;
+          if (info[2] != null && info[2].length != 0) {
+            var username = info[2][1].toString();
             var liveMsg = LiveMessage(
               type: LiveMessageType.chat,
               userName: username,
               message: message,
-              color: color == 0
-                  ? LiveMessageColor.white
-                  : LiveMessageColor.numberToColor(color),
+              color: color == 0 ? LiveMessageColor.white : LiveMessageColor.numberToColor(color),
+              emoticons: parseBilibiliEmoticons(info, message),
             );
             onMessage?.call(liveMsg);
           }
@@ -210,8 +211,7 @@ class BiliBiliDanmaku implements LiveDanmaku {
           return;
         }
         LiveSuperChatMessage sc = LiveSuperChatMessage(
-          backgroundBottomColor:
-              obj["data"]["background_bottom_color"].toString(),
+          backgroundBottomColor: obj["data"]["background_bottom_color"].toString(),
           backgroundColor: obj["data"]["background_color"].toString(),
           endTime: DateTime.fromMillisecondsSinceEpoch(
             obj["data"]["end_time"] * 1000,
@@ -239,8 +239,7 @@ class BiliBiliDanmaku implements LiveDanmaku {
   }
 
   int readInt(List<int> buffer, int start, int len) {
-    var bytes =
-        Uint8List.fromList(buffer.getRange(start, start + len).toList());
+    var bytes = Uint8List.fromList(buffer.getRange(start, start + len).toList());
     var byteBuffer = bytes.buffer;
     var data = ByteData.view(byteBuffer);
     var result = 0;

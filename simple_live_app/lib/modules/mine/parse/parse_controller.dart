@@ -45,7 +45,7 @@ class ParseController extends GetxController {
     try {
       SmartDialog.showLoading(msg: "");
       var detail = await site.liveSite.getRoomDetail(roomId: parseResult.first);
-      var qualites = await site.liveSite.getPlayQualites(detail: detail);
+      var qualites = await site.liveSite.getPlayQualities(detail: detail);
       SmartDialog.dismiss(status: SmartStatus.loading);
       if (qualites.isEmpty) {
         SmartDialog.showToast("读取直链失败,无法读取清晰度");

@@ -1,7 +1,7 @@
 {
-    "version": "1.8.14",
-    "version_num": 10814,
-    "version_desc": "- fix: 进一步修正douyu断流问题 \n- tips: ios和macos用户请到action更新测试或者下载上游仓库版本",
-    "prerelease": false,
+    "version": "1.8.15",
+    "version_num": 10815,
+    "version_desc": "- 支持B站和huya弹幕表情包 thanks @gaoxing64 \n- 支持斗鱼扫码登录 包括tv版本 \n- 支持全屏/桌面小窗模式下自动弹出SC \n- 支持更多的关注参数调整 \n- 支持安全模式加密敏感数据 \n- 跳过 huya 个别房间 vip清晰度 \n- 关注样式信息更集中 \n- tips: ios和macos用户请到action更新测试或者下载上游仓库版本 \n- 此版本构建基于 flutter 3.47.8",
+    "prerelease": true,
     "download_url": "https://github.com/SlotSun/dart_simple_live/releases"
 }

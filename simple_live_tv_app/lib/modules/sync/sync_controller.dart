@@ -8,10 +8,11 @@ import 'package:simple_live_tv_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_tv_app/app/controller/base_controller.dart';
 import 'package:simple_live_tv_app/app/event_bus.dart';
 import 'package:simple_live_tv_app/app/log.dart';
+import 'package:simple_live_tv_app/models/db/account.dart';
 import 'package:simple_live_tv_app/models/db/follow_user.dart';
 import 'package:simple_live_tv_app/models/db/history.dart';
-import 'package:simple_live_tv_app/services/bilibili_account_service.dart';
 import 'package:simple_live_tv_app/services/db_service.dart';
+import 'package:simple_live_tv_app/services/platform_service.dart';
 import 'package:simple_live_tv_app/services/signalr_service.dart';
 
 class SyncController extends BaseController {
@@ -33,7 +34,7 @@ class SyncController extends BaseController {
 
   @override
   void onInit() {
-    connect();
+    // connect();
     super.onInit();
   }
 
@@ -96,7 +97,7 @@ class SyncController extends BaseController {
       onReceiveShieldWord(data.$1, data.$2);
     });
     _onBiliAccountSubscription = signalR.onBiliAccountStream.listen((data) {
-      onReceiveBiliAccount(data.$1, data.$2);
+      onReceiveAccount(data.$1, data.$2);
     });
   }
 
@@ -160,13 +161,12 @@ class SyncController extends BaseController {
     }
   }
 
-  void onReceiveBiliAccount(bool overlay, String data) async {
+  void onReceiveAccount(bool overlay, String data) async {
     try {
       var jsonBody = json.decode(data);
-      var cookie = jsonBody['cookie'];
-      BiliBiliAccountService.instance.setCookie(cookie);
-      BiliBiliAccountService.instance.loadUserInfo();
-      SmartDialog.showToast('已同步哔哩哔哩账号');
+      Account account = Account.fromJson(jsonBody);
+      PlatformService.instance.updateAccount(account);
+      SmartDialog.showToast('已同步${account.siteId}账号');
     } catch (e) {
       SmartDialog.showToast("同步失败:$e");
       Log.logPrint(e);

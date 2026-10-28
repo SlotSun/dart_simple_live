@@ -9,8 +9,6 @@ import 'package:simple_live_core/src/platforms/douyin/douyin_request_params.dart
 import 'package:simple_live_core/src/platforms/douyin/proto/douyin.pb.dart';
 import 'package:simple_live_core/src/platforms/douyin/xbogus.dart';
 
-
-
 class DouyinDanmakuArgs {
   final String webRid;
   final String roomId;
@@ -79,8 +77,7 @@ class DouyinDanmaku implements LiveDanmaku {
       "browser_language": "zh-CN",
       "browser_platform": "Win32",
       "browser_name": "Mozilla",
-      "browser_version":
-          DouyinRequestParams.kDefaultUserAgent.replaceAll("Mozilla/", ""),
+      "browser_version": DouyinRequestParams.kDefaultUserAgent.replaceAll("Mozilla/", ""),
       "browser_online": "true",
       "tz_name": "Asia/Shanghai",
       "identity": "audience",
@@ -103,9 +100,9 @@ class DouyinDanmaku implements LiveDanmaku {
       },
       heartBeatTime: heartbeatTime,
       onMessage: (e) {
-        try{
+        try {
           decodeMessage(e);
-        }catch(e){
+        } catch (e) {
           CoreLog.error("douyin_danmaku_error$e");
         }
       },

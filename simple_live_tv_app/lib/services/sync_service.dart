@@ -10,10 +10,11 @@ import 'package:simple_live_tv_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_tv_app/app/event_bus.dart';
 import 'package:simple_live_tv_app/app/log.dart';
 import 'package:simple_live_tv_app/app/utils.dart';
+import 'package:simple_live_tv_app/models/db/account.dart';
 import 'package:simple_live_tv_app/models/db/follow_user.dart';
 import 'package:simple_live_tv_app/models/db/history.dart';
-import 'package:simple_live_tv_app/services/bilibili_account_service.dart';
 import 'package:simple_live_tv_app/services/db_service.dart';
+import 'package:simple_live_tv_app/services/platform_service.dart';
 import 'package:udp/udp.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
@@ -148,7 +149,7 @@ class SyncService extends GetxService {
       serverRouter.post('/sync/follow', _syncFollowUserReuqest);
       serverRouter.post('/sync/history', _syncHistoryReuqest);
       serverRouter.post('/sync/blocked_word', _syncBlockedWordReuqest);
-      serverRouter.post('/sync/account/bilibili', _syncBiliAccountReuqest);
+      serverRouter.post('/sync/account/account', _syncAccountRequest);
 
       var server = await shelf_io.serve(
         serverRouter.call,
@@ -290,15 +291,14 @@ class SyncService extends GetxService {
   }
 
   /// 同步哔哩哔哩账号
-  Future<shelf.Response> _syncBiliAccountReuqest(shelf.Request request) async {
+  Future<shelf.Response> _syncAccountRequest(shelf.Request request) async {
     try {
       var body = await request.readAsString();
-      Log.d('_syncBiliAccountReuqest: $body');
+      Log.d('_syncBiliAccountRequest: $body');
       var jsonBody = json.decode(body);
-      var cookie = jsonBody['cookie'];
-      BiliBiliAccountService.instance.setCookie(cookie);
-      BiliBiliAccountService.instance.loadUserInfo();
-      SmartDialog.showToast('已同步哔哩哔哩账号');
+      Account account = Account.fromJson(jsonBody);
+      PlatformService.instance.updateAccount(account);
+      SmartDialog.showToast('已同步${account.siteId}账号');
       return toJsonResponse({
         'status': true,
         'message': 'success',

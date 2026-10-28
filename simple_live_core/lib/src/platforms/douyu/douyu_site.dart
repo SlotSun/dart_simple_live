@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:dio/dio.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
@@ -24,10 +25,9 @@ class DouyuSite implements LiveSite {
   LiveDanmaku getDanmaku() => DouyuDanmaku();
 
   @override
-  Future<List<LiveCategory>> getCategores() async {
+  Future<List<LiveCategory>> getCategories() async {
     List<LiveCategory> categories = [];
-    var result =
-        await HttpClient.instance.getJson("https://m.douyu.com/api/cate/list");
+    var result = await HttpClient.instance.getJson("https://m.douyu.com/api/cate/list");
     var subCateList = result["data"]["cate2Info"] as List;
     for (var item in result["data"]["cate1Info"]) {
       var cate1Id = item["cate1Id"];
@@ -56,8 +56,7 @@ class DouyuSite implements LiveSite {
   }
 
   @override
-  Future<LiveCategoryResult> getCategoryRooms(LiveSubCategory category,
-      {int page = 1}) async {
+  Future<LiveCategoryResult> getCategoryRooms(LiveSubCategory category, {int page = 1}) async {
     var result = await HttpClient.instance.getJson(
       "https://www.douyu.com/gapi/rkc/directory/mixList/2_${category.id}/$page",
       queryParameters: {},
@@ -82,7 +81,7 @@ class DouyuSite implements LiveSite {
   }
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualites({required LiveRoomDetail detail}) async {
+  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoomDetail detail}) async {
     var data = await DouyuUtils.sign(detail.roomId, cookie: _cookie);
     List<LivePlayQuality> qualities = [];
     var result = await HttpClient.instance.postJson(
@@ -117,9 +116,7 @@ class DouyuSite implements LiveSite {
   }
 
   @override
-  Future<LivePlayUrl> getPlayUrls(
-      {required LiveRoomDetail detail,
-      required LivePlayQuality quality}) async {
+  Future<LivePlayUrl> getPlayUrls({required LiveRoomDetail detail, required LivePlayQuality quality}) async {
     var data = quality.data as DouyuPlayData;
 
     List<String> urls = [];
@@ -129,7 +126,7 @@ class DouyuSite implements LiveSite {
         // if expire=300 and cdn is ws then add &expire=0
         // user must be live in oversea
         // cookie is better, cookie needs refreshed every 7 days
-        if(url.contains('expire=300') && url.contains('fcdn=ws')){
+        if (url.contains('expire=300') && url.contains('fcdn=ws')) {
           url = '$url&expire=0';
         }
         urls.add(url);
@@ -188,9 +185,7 @@ class DouyuSite implements LiveSite {
       userAvatar: roomInfo["owner_avatar"].toString(),
       introduction: roomInfo["show_details"].toString(),
       notice: "",
-      status: roomInfo["show_status"] == 1 &&
-          roomInfo["videoLoop"] != 1 &&
-          !roomInfo["room_name"].startsWith("【回放】"),
+      status: roomInfo["show_status"] == 1 && roomInfo["videoLoop"] != 1 && !roomInfo["room_name"].startsWith("【回放】"),
       danmakuData: roomInfo["room_id"].toString(),
       data: "",
       url: "https://www.douyu.com/$roomId",
@@ -199,8 +194,7 @@ class DouyuSite implements LiveSite {
   }
 
   @override
-  Future<LiveSearchRoomResult> searchRooms(String keyword,
-      {int page = 1}) async {
+  Future<LiveSearchRoomResult> searchRooms(String keyword, {int page = 1}) async {
     var did = generateRandomString(32);
     var result = await HttpClient.instance.getJson(
       "https://www.douyu.com/japi/search/api/searchShow",
@@ -235,14 +229,12 @@ class DouyuSite implements LiveSite {
   }
 
   Future<Map> _getRoomInfo(String roomId) async {
-    var result = await HttpClient.instance.getJson(
-        "https://www.douyu.com/betard/$roomId",
-        queryParameters: {},
-        header: {
-          'referer': 'https://www.douyu.com/$roomId',
-          'user-agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43',
-        });
+    var result =
+        await HttpClient.instance.getJson("https://www.douyu.com/betard/$roomId", queryParameters: {}, header: {
+      'referer': 'https://www.douyu.com/$roomId',
+      'user-agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43',
+    });
     Map roomInfo;
     if (result is String) {
       roomInfo = json.decode(result)["room"];
@@ -264,8 +256,7 @@ class DouyuSite implements LiveSite {
   }
 
   @override
-  Future<LiveSearchAnchorResult> searchAnchors(String keyword,
-      {int page = 1}) async {
+  Future<LiveSearchAnchorResult> searchAnchors(String keyword, {int page = 1}) async {
     var did = generateRandomString(32);
     var result = await HttpClient.instance.getJson(
       "https://www.douyu.com/japi/search/api/searchUser",
@@ -285,10 +276,8 @@ class DouyuSite implements LiveSite {
 
     var items = <LiveAnchorItem>[];
     for (var item in result["data"]["relateUser"]) {
-      var liveStatus =
-          (int.tryParse(item["anchorInfo"]["isLive"].toString()) ?? 0) == 1;
-      var roomType =
-          (int.tryParse(item["anchorInfo"]["roomType"].toString()) ?? 0);
+      var liveStatus = (int.tryParse(item["anchorInfo"]["isLive"].toString()) ?? 0) == 1;
+      var roomType = (int.tryParse(item["anchorInfo"]["roomType"].toString()) ?? 0);
       var roomItem = LiveAnchorItem(
         roomId: item["anchorInfo"]["rid"].toString(),
         avatar: item["anchorInfo"]["avatar"].toString(),
@@ -304,9 +293,7 @@ class DouyuSite implements LiveSite {
   @override
   Future<bool> getLiveStatus({required String roomId}) async {
     var roomInfo = await _getRoomInfo(roomId);
-    return roomInfo["show_status"] == 1 &&
-        roomInfo["videoLoop"] != 1 &&
-        !roomInfo["room_name"].startsWith("【回放】");
+    return roomInfo["show_status"] == 1 && roomInfo["videoLoop"] != 1 && !roomInfo["room_name"].startsWith("【回放】");
   }
 
   int parseHotNum(String hn) {
@@ -322,8 +309,7 @@ class DouyuSite implements LiveSite {
   }
 
   @override
-  Future<List<LiveSuperChatMessage>> getSuperChatMessage(
-      {required String roomId}) {
+  Future<List<LiveSuperChatMessage>> getSuperChatMessage({required String roomId}) {
     //尚不支持
     return Future.value([]);
   }
@@ -335,10 +321,124 @@ class DouyuSite implements LiveSite {
   }
 
   @override
-  Future<void> setSiteAttrs(Map<String, dynamic> data) async {
-    if(data.containsKey('cookie')){
-      _cookie = data['cookie'] as String;
+  Future<void> setSiteAttrs(String data) async {
+    final Map<String, dynamic> map;
+    try {
+      map = jsonDecode(data) as Map<String, dynamic>;
+    } catch (e) {
+      return;
     }
+    if (map.containsKey('cookie')) {
+      _cookie = map['cookie'] as String;
+    }
+    if (map.containsKey('dy_did')) {
+      _dy_did = map['dy_did'] as String;
+      DouyuUtils.setDyDid(_dy_did);
+    }
+    if (map.containsKey('LTP0')) {
+      _ltp0 = map['LTP0'] as String;
+    }
+  }
+
+  @override
+  Future<AccountInfo> getAccountInfo({required String credential}) async {
+    AccountInfo info = AccountInfo();
+    final Map<String, dynamic> map;
+    try {
+      map = jsonDecode(credential) as Map<String, dynamic>;
+    } catch (e) {
+      return info;
+    }
+    setSiteAttrs(credential);
+    var newCookie = await DouyuUtils.refreshCookie(did: _dy_did, ltp0: _ltp0, cookie: _cookie);
+    var newCredential = jsonDecode(credential) as Map<String, dynamic>;
+    newCredential['cookie'] = newCookie;
+    return AccountInfo(
+      uid: DouyuUtils.pickCookie(newCookie, 'acf_uid'),
+      name: Uri.decodeComponent(DouyuUtils.pickCookie(newCookie, 'acf_nickname')),
+      avatar: '${Uri.decodeComponent(DouyuUtils.pickCookie(newCookie, 'acf_avatar'))}middle.jpg',
+      credential: jsonEncode(newCredential),
+      isValid: newCookie.isNotEmpty ? true : false,
+    );
+  }
+
+  @override
+  Future<QRCode> getQRCode() async {
+    var didRes = await HttpClient.instance.getText(
+      'https://passport.douyu.com/lapi/did/api/get',
+      queryParameters: {'client_id': '1', 'callback': 'cb'},
+      header: DouyuUtils.requestHeader(isLogin: true),
+    );
+    var text = (didRes).trim();
+    if (text.isNotEmpty && !text.startsWith('{')) {
+      final start = text.indexOf('(');
+      final end = text.lastIndexOf(')');
+      if (start != -1 && end > start) {
+        text = text.substring(start + 1, end).trim();
+      }
+    }
+    _dy_did = (jsonDecode(text) as Map<String, dynamic>)['data']['did'] ?? '10000000000000000000000000001501';
+    DouyuUtils.setDyDid(_dy_did);
+    var result = await HttpClient.instance.postJson(
+      'https://passport.douyu.com/scan/generateCode',
+      data: {'client_id': '1', 'isMultiAccount': '0'},
+      formUrlEncoded: true,
+      header: DouyuUtils.requestHeader(isLogin: true),
+    );
+    if (result["error"] != 0) {
+      throw result["data"];
+    }
+    QRCode qrCode = QRCode(
+      expireAt: DateTime.now().millisecondsSinceEpoch ~/ 1000 + 300,
+      key: result["data"]["code"],
+      url: result["data"]["url"],
+    );
+    return qrCode;
+  }
+
+  @override
+  Future<QRPollResult> getQRPollResult({required String qrcodeKey}) async {
+    var pollHeader = DouyuUtils.requestHeader(isLogin: true);
+    pollHeader['X-Requested-With'] = 'XMLHttpRequest';
+    var resp = await HttpClient.instance.getResponse(
+      'https://passport.douyu.com/japi/scan/auth',
+      responseType: ResponseType.json,
+      queryParameters: {
+        'code': qrcodeKey,
+        'time': DateTime.now().millisecondsSinceEpoch.toString(),
+      },
+      header: pollHeader,
+    );
+    QRPollResult qrPollResult = QRPollResult(status: QRStatus.failed);
+    var resData = resp.data;
+    switch (resData['error']) {
+      case -2:
+        qrPollResult.status = QRStatus.unscanned;
+        qrPollResult.message = resData['msg'];
+      case 1:
+        qrPollResult.status = QRStatus.scanned;
+        qrPollResult.message = resData['msg'];
+      case -1:
+        qrPollResult.status = QRStatus.expired;
+        qrPollResult.message = resData['msg'];
+      case 0:
+        final url = resData['data']?['url'] as String?;
+        if (url == null || url.isEmpty) {
+          throw StateError('斗鱼未返回登录确认地址');
+        }
+        // 这里就会下发 set-cookie lip0 通过 refreshCookie获取最新cookie
+        // cookie-jar maybe better
+        var pollCookie = resp.headers['set-cookie']!;
+        final ltp0 = DouyuUtils.pickSetCookie(pollCookie, 'LTP0');
+        var newCookie = await DouyuUtils.refreshCookie(did: _dy_did, ltp0: ltp0, cookie: _cookie);
+        // 拼装一下
+        final Map<String, dynamic> credentialJson = {'dy_did': _dy_did, 'LTP0': ltp0, 'cookie': newCookie};
+        qrPollResult.credential = jsonEncode(credentialJson);
+        qrPollResult.status = QRStatus.scanned;
+      default:
+        throw StateError('斗鱼暂时无法确认登录，请刷新重试');
+    }
+    return qrPollResult;
   }
 }
 

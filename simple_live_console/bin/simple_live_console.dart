@@ -51,7 +51,7 @@ Future printInfo(String url) async {
   print("状态：${(detail.status ? "直播中" : "未开播")}");
   if (detail.status) {
     print("可用清晰度：");
-    var quality = await site.getPlayQualites(detail: detail);
+    var quality = await site.getPlayQualities(detail: detail);
 
     for (int i = 0; i < quality.length; i++) {
       print("【${i + 1}】${quality[i].quality}");

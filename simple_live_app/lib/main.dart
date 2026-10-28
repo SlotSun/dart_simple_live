@@ -27,7 +27,6 @@ import 'package:simple_live_app/modules/settings/appstyle_settings/appstyle_sett
 import 'package:simple_live_app/routes/app_analytics_observer.dart';
 import 'package:simple_live_app/routes/app_pages.dart';
 import 'package:simple_live_app/routes/route_path.dart';
-import 'package:simple_live_app/services/bilibili_account_service.dart';
 import 'package:simple_live_app/services/db_service.dart';
 import 'package:simple_live_app/services/firebase_service.dart' as app;
 import 'package:simple_live_app/services/follow_block_service.dart';
@@ -36,9 +35,11 @@ import 'package:simple_live_app/services/history_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
 import 'package:simple_live_app/services/migration_service.dart';
 import 'package:simple_live_app/services/platform_service.dart';
+import 'package:simple_live_app/services/safe_service.dart';
+import 'package:simple_live_app/services/secure_store_service.dart';
 import 'package:simple_live_app/services/sync_service.dart';
 import 'package:simple_live_app/services/window_service.dart';
-import 'package:simple_live_app/src/rust/frb_generated.dart';
+import 'package:simple_live_app/rust/frb_generated.dart';
 import 'package:simple_live_app/widgets/status/app_loadding_widget.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:window_manager/window_manager.dart';
@@ -74,7 +75,6 @@ void main(List<String> arguments) async {
   await initServices();
   await initWindow();
 
-  await MigrationService.migrateDataByVersion();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   //设置状态栏为透明
   SystemUiOverlayStyle systemUiOverlayStyle = const SystemUiOverlayStyle(
@@ -107,20 +107,24 @@ Future initServices() async {
   Utils.packageInfo = await PackageInfo.fromPlatform();
   //本地存储
   Log.d("Init LocalStorage Service");
+  Get.put(SecureStoreService());
   await Get.put(LocalStorageService()).init();
   await Get.put(DBService()).init();
   //初始化设置控制器
   await Get.put(AppSettingsController()).onInit();
 
+  await Get.put(SafeService()).onInit();
+
   await Get.put(AppStyleSettingController()).init();
 
-  Get.put(BiliBiliAccountService());
+  Get.put(FollowService());
 
-  Get.put(PlatformService());
+  // platformService need migrate
+  await MigrationService.migrateDataByVersion();
+
+  await Get.put(PlatformService()).onInit();
 
   Get.put(SyncService());
-
-  Get.put(FollowService());
 
   Get.put(HistoryService());
 

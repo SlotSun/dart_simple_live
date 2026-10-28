@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
+import 'package:simple_live_app/app/utils/extensions/duration_2_str_utils.dart';
 import 'package:simple_live_app/app/utils/url_parse.dart';
 import 'package:simple_live_app/models/db/follow_user.dart' show FollowUser;
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
@@ -86,6 +87,20 @@ class FollowInfoController extends BasePageController<FollowUser> {
     followUser.refresh();
   }
 
+  Future<void> updateWatchDurationSec(int watchDurationSec) async {
+    final current = followUser.value;
+    if (current == null) return;
+    current.watchDurationSec = watchDurationSec;
+    // sync  history
+    History? followHistory = HistoryService.instance.getHistory(current.id);
+    if(followHistory != null){
+      followHistory.watchDuration = Duration(seconds: watchDurationSec).toHMSString();
+      HistoryService.instance.addOrUpdateHistory(followHistory);
+    }
+    await FollowService.instance.addFollow(current);
+    followUser.refresh();
+  }
+
   Future<void> pasteFromClipboard() async {
     final content = await Utils.getClipboard();
     if (content != null) {
@@ -162,18 +177,18 @@ class FollowInfoController extends BasePageController<FollowUser> {
     LiveRoomDetail detail = await targetSite.liveSite.getRoomDetail(roomId: targetRoomId);
     // 复制并更新关键信息
     final FollowUser newFollow = FollowUser(
-      id: '${targetSite.id}_$targetRoomId',
-      roomId: targetRoomId,
-      siteId: targetSite.id,
-      userName: detail.userName,
-      face: detail.userAvatar,
-      addTime: current.addTime,
-      watchDuration: current.watchDuration,
-      watchDurationSec: current.watchDurationSec,
-      tag: current.tag,
-      remark: current.remark,
-      romanName: current.romanName
-    )..liveStatus.value = current.liveStatus.value;
+        id: '${targetSite.id}_$targetRoomId',
+        roomId: targetRoomId,
+        siteId: targetSite.id,
+        userName: detail.userName,
+        face: detail.userAvatar,
+        addTime: current.addTime,
+        watchDuration: current.watchDuration,
+        watchDurationSec: current.watchDurationSec,
+        tag: current.tag,
+        remark: current.remark,
+        romanName: current.romanName)
+      ..liveStatus.value = current.liveStatus.value;
 
     // 替换关注
     await FollowService.instance.removeFollowUser(current.id);

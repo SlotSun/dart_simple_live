@@ -1,4 +1,4 @@
-﻿import 'package:simple_live_core/src/platforms/huya/tars/types.dart';
+import 'package:simple_live_core/src/platforms/huya/tars/types.dart';
 import 'package:tars_dart/tars/codec/tars_displayer.dart';
 import 'package:tars_dart/tars/codec/tars_input_stream.dart';
 import 'package:tars_dart/tars/codec/tars_output_stream.dart';
@@ -13,11 +13,11 @@ class GetGameEventMessageBoardReq extends TarsStruct {
 
   @override
   void readFrom(TarsInputStream _is) {
-    lPid                 = _is.read(lPid, 0, false);
-    sOffset              = _is.read(sOffset, 1, false);
-    tId                  = _is.read(tId, 2, false);
-    iMessageBoardScope   = _is.read(iMessageBoardScope, 3, false);
-    iPageSize            = _is.read(iPageSize, 4, false);
+    lPid = _is.read(lPid, 0, false);
+    sOffset = _is.read(sOffset, 1, false);
+    tId = _is.read(tId, 2, false);
+    iMessageBoardScope = _is.read(iMessageBoardScope, 3, false);
+    iPageSize = _is.read(iPageSize, 4, false);
   }
 
   @override
@@ -36,8 +36,7 @@ class GetGameEventMessageBoardReq extends TarsStruct {
       ..sOffset = sOffset
       ..tId = tId
       ..iMessageBoardScope = iMessageBoardScope
-      ..iPageSize = iPageSize
-    ;
+      ..iPageSize = iPageSize;
   }
 
   @override

@@ -1,79 +1,88 @@
-import 'dart:io';
+import 'dart:async';
+import 'dart:convert';
 
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/constant.dart';
+import 'package:simple_live_app/app/controller/app_settings_controller.dart';
+import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/sites.dart';
-import 'package:simple_live_app/models/account/douyin_user_info.dart';
+import 'package:simple_live_app/models/db/account.dart';
 import 'package:simple_live_app/requests/common_request.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
+import 'package:simple_live_app/services/safe_service.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 
 class PlatformService extends GetxService {
   static PlatformService get instance => Get.find<PlatformService>();
 
+  StreamSubscription<dynamic>? subscription;
+
+  RxList<Account> accountList = RxList();
+
+  Future<void> _initAccount() async {
+    accountList.value = await SafeService.instance.getDecodeAccounts();
+    // 加密模式, 未登录->跳过cookie使用/登录->解码
+    if (AppSettingsController.instance.appSafeEnable.value && !AppSettingsController.instance.appStoreKey.value) {
+      return;
+    }
+    // 自动更新
+    for (var account in accountList) {
+      accountLogin(account);
+    }
+  }
+
+  // 更新指定的站点账户数据
+  Future<void> updateAccount(Account ac) async {
+    accountList.assignAll(
+      accountList.map((a) => a.id == ac.id ? ac : a).toList(),
+    );
+    accountList.refresh();
+    await SafeService.instance.encodeAccount(ac);
+  }
+
+  Future<void> accountLogout(Account ac) async {
+    var logout = ac.copyWith(
+      id: ac.id,
+      userName: '',
+      credential: '',
+      isActive: false,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+    );
+    await updateAccount(logout);
+  }
+
+  Future<bool> accountLogin(Account ac) async {
+    var site = Sites.allSites[ac.siteId]!;
+    AccountInfo info = await site.liveSite.getAccountInfo(credential: ac.credential);
+    var resAc = ac.copyWith(
+      userName: info.name,
+      avatar: info.avatar,
+      uid: info.uid,
+      credential: info.credential,
+      isActive: info.isValid,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+    );
+    if (!info.isValid) {
+      SmartDialog.showToast('${site.name}账号失效，请重新设置');
+    } else {
+      site.liveSite.setSiteAttrs(resAc.credential);
+      await updateAccount(resAc);
+    }
+    return info.isValid;
+  }
+
   // ==================== 抖音 ====================
 
   final _douyinSite = (Sites.allSites[Constant.kDouyin]!.liveSite as DouyinSite);
 
-  var douyinLogined = false.obs;
-  var douyinCookie = "";
-  var douyinName = "未登录".obs;
-  var douyinHlsFirst = false;
-
-  void _initDouyin() {
-    douyinHlsFirst = LocalStorageService.instance.getValue(LocalStorageService.kDouyinHlsFirst, false);
-    _updateDouyinAttr();
-    douyinCookie = LocalStorageService.instance.getValue(LocalStorageService.kDouyinCookie, "");
-    douyinLogined.value = douyinCookie.isNotEmpty;
-    loadDouyinUserInfo();
-  }
-
   void _updateDouyinAttr() {
+    var douyinHlsFirst = LocalStorageService.instance.getValue(LocalStorageService.kDouyinHlsFirst, false);
     Map<String, dynamic> params = {
       'hlsFirst': douyinHlsFirst,
-      'cookie': douyinCookie,
     };
-    _douyinSite.setSiteAttrs(params);
-  }
-
-  Future loadDouyinUserInfo() async {
-    if (douyinCookie.isEmpty) return;
-    try {
-      final data = await _douyinSite.getUserInfoByCookie(douyinCookie);
-      if (data.isEmpty) {
-        SmartDialog.showToast("抖音登录已失效，请重新登录");
-        douyinLogout();
-        return;
-      }
-      var info = DouyinUserInfoModel.fromJson(data);
-      douyinName.value = info.nickname!;
-      douyinLogined.value = true;
-      _updateDouyinAttr();
-    } catch (e) {
-      SmartDialog.showToast("获取抖音登录用户信息失败，可前往账号管理重试");
-    }
-  }
-
-  void setDouyinCookie(String cookie) {
-    if(cookie.isEmpty) return;
-    douyinCookie = cookie;
-    LocalStorageService.instance.setValue(LocalStorageService.kDouyinCookie, cookie);
-    _updateDouyinAttr();
-  }
-
-  void douyinLogout() async {
-    douyinCookie = "";
-    LocalStorageService.instance.setValue(LocalStorageService.kDouyinCookie, "");
-    douyinLogined.value = false;
-    douyinName.value = "未登录";
-    _updateDouyinAttr();
-    if (Platform.isAndroid || Platform.isIOS) {
-      CookieManager cookieManager = CookieManager.instance();
-      await cookieManager.deleteAllCookies();
-    }
+    _douyinSite.setSiteAttrs(jsonEncode(params));
   }
 
   // ==================== 虎牙 ====================
@@ -89,11 +98,11 @@ class PlatformService extends GetxService {
 
   void _updateHuyaAttr() {
     var ua = huyaSdkUa.value.isNotEmpty ? huyaSdkUa.value : defaultHuyaSdkUa;
-    _huyaSite.setSiteAttrs(
+    _huyaSite.setSiteAttrs(jsonEncode(
       {
         'ua': ua,
       },
-    );
+    ));
     Log.i("HuyaSite.HYSDK_UA 已设置: $ua");
   }
 
@@ -121,80 +130,22 @@ class PlatformService extends GetxService {
     }
   }
 
-  // ==================== 斗鱼 ====================
-
-  var douyuCookie = ''.obs;
-  var dyLtp0 = '';
-  var dy_did = '';
-  final _douyuSite = (Sites.allSites[Constant.kDouyu]!.liveSite as DouyuSite);
-
-  void _initDouyu() {
-    douyuCookie.value = LocalStorageService.instance.getValue(LocalStorageService.kDouyuCookie, "");
-    dy_did = LocalStorageService.instance.getValue(LocalStorageService.kDouyuDyDid, "");
-    dyLtp0 = LocalStorageService.instance.getValue(LocalStorageService.kDouyuLTP0, "");
-    // set and refresh
-    _updateDouyuAttr();
-    _refreshDouyuCookie();
-  }
-
-  // 本地存储-> update Core-Site attrs
-  void setDouyuCookie(String cookie) {
-    if(cookie.isNotEmpty){
-      douyuCookie.value = cookie;
-      LocalStorageService.instance.setValue(LocalStorageService.kDouyuCookie, douyuCookie.value);
-    }
-  }
-
-  // for douyu cookie
-  Future<void> setDouyuDidAndLtp0(String did, String ltp0) async {
-    if(did.isNotEmpty){
-      dy_did = did;
-      LocalStorageService.instance.setValue(LocalStorageService.kDouyuDyDid, dy_did);
-    }
-    if(ltp0.isNotEmpty){
-      dyLtp0 = ltp0;
-      LocalStorageService.instance.setValue(LocalStorageService.kDouyuLTP0, ltp0);
-    }
-    // set and refresh
-    _updateDouyuAttr();
-    _refreshDouyuCookie();
-  }
-  // 无论如何 都应检查cookie有效性后再保存
-  // logic: 有效则不变，无效且配置did&ltp0并保存
-  Future<void> _refreshDouyuCookie() async {
-    var cookie = await _douyuSite.refreshCookie(dy_did, dyLtp0);
-    setDouyuCookie(cookie);
-  }
-
-  void douyuLogout() async {
-    douyuCookie.value = "";
-    LocalStorageService.instance.setValue(LocalStorageService.kDouyuCookie, "");
-    dy_did = "";
-    LocalStorageService.instance.setValue(LocalStorageService.kDouyuDyDid, "");
-    dyLtp0 = "";
-    LocalStorageService.instance.setValue(LocalStorageService.kDouyuLTP0, "");
-    _updateDouyuAttr();
-    if (Platform.isAndroid || Platform.isIOS) {
-      CookieManager cookieManager = CookieManager.instance();
-      await cookieManager.deleteAllCookies();
-    }
-  }
-
-  void _updateDouyuAttr(){
-    Map<String,String> params = {
-      'cookie': douyuCookie.value,
-    };
-    _douyuSite.setSiteAttrs(params);
-  }
-
-
   // ==================== 生命周期 ====================
 
   @override
-  void onInit() {
-    _initDouyin();
+  Future<void> onInit() async {
+    subscription = EventBus.instance.listen(Constant.kUpdateAccount, (account) {
+      Log.i('update Account');
+      accountLogin(account);
+    });
+    await _initAccount();
+    _updateDouyinAttr();
     _initHuya();
-    _initDouyu();
     super.onInit();
+  }
+
+  @override
+  void onClose() {
+    subscription?.cancel();
   }
 }

@@ -27,6 +27,9 @@ class RoutePath {
   /// 其他设置
   static const kSettingsOther = "/settings/other";
 
+  /// 安全设置
+  static const kSettingsSafe = "/settings/safe";
+
   /// 赞助
   static const kSponsor = "/sponsor";
 
@@ -59,6 +62,9 @@ class RoutePath {
 
   /// BiliBili 二维码登录
   static const kBiliBiliQRLogin = "/settings/account/bilibili/qr_login";
+
+  /// 二维码登录
+  static const kAccountQRLogin = "/settings/account/qr_login/qr_login";
 
   /// 数据同步
   static const kLocalSync = "/local_sync";

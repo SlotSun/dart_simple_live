@@ -159,9 +159,20 @@ class PlaySettingsPage extends GetView<AppSettingsController> {
                       title: "进入小窗隐藏弹幕",
                       value: controller.pipHideDanmu.value,
                       onChanged: (e) {
-                        controller.setPIPHideDanmu(e);
+                        controller.setPipHideDanmu(e);
                       },
                     ),
+                  ),
+                ),
+                AppStyle.divider,
+                Obx(
+                  () => SettingsSwitch(
+                    title: "全屏模式自动SC弹出",
+                    subtitle: '会持续15秒',
+                    value: controller.autoShowFullSCEnable.value,
+                    onChanged: (e) {
+                      controller.setAutoShowFullSCEnable(e);
+                    },
                   ),
                 ),
               ],

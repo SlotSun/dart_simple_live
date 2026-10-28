@@ -1,0 +1,67 @@
+﻿name: app-tv_prebuild-dev
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'dev'
+    paths:
+      - 'simple_live_tv_app/**'
+# If previous workflow is still running, we push again, we will cancel the previous workflow
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      # 签出代码
+      - uses: actions/checkout@v7
+        with:
+          ref: dev
+
+      # APK 签名设置
+      - name: Download tv keystore
+        id: TV_keystore
+        uses: timheuer/base64-to-file@v1.2
+        with:
+          fileName: keystore.jks
+          encodedString: ${{ secrets.TV_KEYSTORE_BASE64 }}
+      - name: Create key.properties
+        run: |
+          echo "storeFile=${{ steps.TV_keystore.outputs.filePath }}" > simple_live_tv_app/android/key.properties
+          echo "storePassword=${{ secrets.TV_STORE_PASSWORD }}" >> simple_live_tv_app/android/key.properties
+          echo "keyPassword=${{ secrets.TV_KEY_PASSWORD }}" >> simple_live_tv_app/android/key.properties
+          echo "keyAlias=${{ secrets.TV_KEY_ALIAS }}" >> simple_live_tv_app/android/key.properties
+
+      # 设置 JAVA 环境
+      - uses: actions/setup-java@v5
+        with:
+          distribution: "zulu"
+          java-version: "17"
+          cache: "gradle"
+          cache-dependency-path: |
+            simple_live_tv_app/android/*.gradle*
+            simple_live_tv_app/android/**/gradle-wrapper.properties
+
+      # 设置 Flutter
+      - name: Flutter action
+        uses: subosito/flutter-action@v2.16.0
+        with:
+          channel: stable
+          flutter-version-file: simple_live_tv_app/pubspec.yaml
+          cache: true
+
+      # 更新 Flutter 的 packages
+      - name: Restore packages
+        run: |
+          cd simple_live_tv_app
+          flutter pub get
+
+      # 打包 APK
+      - name: Build APK
+        run: |
+          cd simple_live_tv_app
+          flutter build apk --release --split-per-abi

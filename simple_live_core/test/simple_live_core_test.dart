@@ -26,7 +26,7 @@ void testSite(LiveSite site) async {
     if (site is TwitchSite) {
       return;
     }
-    categores = await site.getCategores();
+    categores = await site.getCategories();
     expect(categores, isNotEmpty);
     for (var item in categores) {
       expect(item.name, isNotEmpty);
@@ -100,7 +100,7 @@ void testSite(LiveSite site) async {
 
   List<LivePlayQuality> playQualities = [];
   test('getPlayQuality', () async {
-    playQualities = await site.getPlayQualites(detail: roomDetail!);
+    playQualities = await site.getPlayQualities(detail: roomDetail!);
     expect(playQualities, isNotEmpty);
     for (var item in playQualities) {
       expect(item.quality, isNotEmpty);

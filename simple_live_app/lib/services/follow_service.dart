@@ -187,27 +187,38 @@ class FollowService extends GetxService {
     await addFollow(item);
   }
 
-  void filterDataByTag(FollowUserTag tag) {
+  void filterDataByTag(FollowUserTag tag,{bool hideOffline = false}) {
     // 清空curTagFollowList
     curTagFollowList.clear();
-    // 用一个新的列表来存储需要删除的 userId
-    List<String> toRemove = [];
-    for (var id in tag.userId) {
-      if (followList.any((x) => x.id == id)) {
-        // 找到对应的 followUser 添加到 curTagFollowList
-        curTagFollowList.add(followList.firstWhere((x) => x.id == id));
-      } else {
-        // 标记要删除的 id
-        toRemove.add(id);
+    if (tag.tag == "全部") {
+      curTagFollowList.assignAll(followList);
+    } else if (tag.tag == "直播中") {
+      curTagFollowList.assignAll(liveList);
+    } else if (tag.tag == "未开播") {
+      curTagFollowList.assignAll(notLiveList);
+    }else{ // tags from user
+      // 用一个新的列表来存储需要删除的 userId
+      List<String> toRemove = [];
+      for (var id in tag.userId) {
+        if (followList.any((x) => x.id == id)) {
+          // 找到对应的 followUser 添加到 curTagFollowList
+          curTagFollowList.add(followList.firstWhere((x) => x.id == id));
+        } else {
+          // 标记要删除的 id
+          toRemove.add(id);
+        }
       }
+      // 在遍历结束后统一移除不在 followList 中的 id
+      tag.userId.removeWhere((id) => toRemove.contains(id));
+      // 更新数据库
+      if (toRemove.isNotEmpty) {
+        DBService.instance.updateFollowTag(tag);
+      }
+      listSortByMethod(curTagFollowList, AppSettingsController.instance.followSortMethod.value);
     }
-    // 在遍历结束后统一移除不在 followList 中的 id
-    tag.userId.removeWhere((id) => toRemove.contains(id));
-    // 更新数据库
-    if (toRemove.isNotEmpty) {
-      DBService.instance.updateFollowTag(tag);
+    if (hideOffline && tag.tag != "未开播") {
+      curTagFollowList.retainWhere((user) => user.liveStatus.value == 2);
     }
-    listSortByMethod(curTagFollowList, AppSettingsController.instance.followSortMethod.value);
   }
 
   void updateFollowTagOrder(FollowUserTag oldTag, FollowUserTag newTag) {
@@ -400,7 +411,7 @@ class FollowService extends GetxService {
 
     Duration maxDuration = const Duration();
     for (var user in followList) {
-      final duration = user.watchDuration!.toDuration();
+      final duration = Duration(seconds: user.watchDurationSec);
       if (duration > maxDuration) {
         maxDuration = duration;
       }
@@ -635,10 +646,10 @@ class FollowService extends GetxService {
         type: FileType.custom,
         allowedExtensions: ['json'],
       );
-      if (file == null) {
+      if (file.isEmpty) {
         return;
       }
-      var jsonFile = File(file.files.single.path!);
+      var jsonFile = File(file.single.path!);
       await inputJson(await jsonFile.readAsString());
       SmartDialog.showToast("导入成功");
     } catch (e) {

@@ -1,4 +1,5 @@
-﻿import 'dart:convert';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
@@ -6,7 +7,7 @@ import 'package:simple_live_core/src/common/parse_cookie.dart';
 
 class DouyuUtils {
   // params
-  static final String _did = '10000000000000000000000000001501';
+  static String _did = '10000000000000000000000000001501';
 
   static final int _encCacheTTL = 5 * 60;
 
@@ -21,24 +22,33 @@ class DouyuUtils {
 
   static final douyuOrigin = 'https://www.douyu.com';
 
+  static final douyuLoginReferer = 'https://passport.douyu.com/index/login?type=login&client_id=1';
 
   // douyu-live-stream
-  static Map<String, String> requestHeader({String roomId = '', String cookie = ''}) {
+  static Map<String, String> requestHeader({String roomId = '', String cookie = '', bool isLogin = false}) {
     var referer = roomId.isEmpty ? douyuOrigin : '$douyuOrigin/$roomId';
+    if (isLogin) {
+      referer = douyuLoginReferer;
+    }
     var res = {
       'accept': '*/*',
       'accept-encoding': 'gzip, deflate, br, zstd',
       'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,zh-Hans;q=0.5',
-      'origin':  douyuOrigin,
+      'origin': douyuOrigin,
       'referer': referer,
       "content-type": "application/x-www-form-urlencoded",
-      'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43',
+      'user-agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43',
       'cookie': 'dy_did=$_did; acf_did=$_did',
     };
     if (cookie.isNotEmpty) {
       res['cookie'] = cookie;
     }
     return res;
+  }
+
+  static void setDyDid(String dy_did) {
+    _did = dy_did;
   }
 
   static Future<String> refreshCookie({String did = '', String ltp0 = '', String cookie = ''}) async {
@@ -62,6 +72,9 @@ class DouyuUtils {
           .map((raw) => raw.split(';').first.trim())
           .where((s) => s.contains('='))
           .join('; ');
+      // check again
+      cookie = _isCookieExpired(cookie) ? '' : cookie;
+      _did = did;
     }
     return cookie;
   }
@@ -82,7 +95,7 @@ class DouyuUtils {
   }
 
   static String? _getJwtToken(String cookie) {
-    if(cookie.isNotEmpty){
+    if (cookie.isNotEmpty) {
       for (final pair in cookie.split(';')) {
         final p = pair.trim();
         if (p.startsWith('acf_jwt_token=')) {
@@ -144,4 +157,31 @@ class DouyuUtils {
     return postData;
   }
   // todo: 获取real_rid 暂未发现 fake_id
+
+  // 从set-cookie中获取字段
+  static String pickSetCookie(List<String> raw, String name) {
+    for (final e in raw) {
+      final c = Cookie.fromSetCookieValue(e);
+      if (c.name == name) {
+        return c.value;
+      }
+    }
+    return '';
+  }
+
+  // 从cookie 中获取字段
+  static String pickCookie(String? cookie, String name) {
+    if (cookie == null || cookie.isEmpty) return '';
+
+    for (final part in cookie.split(';')) {
+      final p = part.trim();
+      if (p.isEmpty) continue;
+      final i = p.indexOf('=');
+      if (i <= 0) continue;
+      if (p.substring(0, i).trim() == name) {
+        return p.substring(i + 1).trim();
+      }
+    }
+    return '';
+  }
 }

@@ -14,10 +14,10 @@ import 'package:simple_live_app/modules/live_room/live_room_controller.dart';
 import 'package:simple_live_app/modules/live_room/live_room_page.dart';
 import 'package:simple_live_app/modules/mine/account/account_controller.dart';
 import 'package:simple_live_app/modules/mine/account/account_page.dart';
-import 'package:simple_live_app/modules/mine/account/bilibili/qr_login_controller.dart';
-import 'package:simple_live_app/modules/mine/account/bilibili/qr_login_page.dart';
 import 'package:simple_live_app/modules/mine/account/bilibili/web_login_controller.dart';
 import 'package:simple_live_app/modules/mine/account/bilibili/web_login_page.dart';
+import 'package:simple_live_app/modules/mine/account/qr_login/qr_login_controller.dart';
+import 'package:simple_live_app/modules/mine/account/qr_login/qr_login_page.dart';
 import 'package:simple_live_app/modules/mine/history/history_controller.dart';
 import 'package:simple_live_app/modules/mine/history/history_page.dart';
 import 'package:simple_live_app/modules/mine/parse/parse_controller.dart';
@@ -34,6 +34,8 @@ import 'package:simple_live_app/modules/settings/indexed_settings/indexed_settin
 import 'package:simple_live_app/modules/settings/other/other_settings_controller.dart';
 import 'package:simple_live_app/modules/settings/other/other_settings_page.dart';
 import 'package:simple_live_app/modules/settings/play_settings_page.dart';
+import 'package:simple_live_app/modules/settings/safe_settings/safe_settings_controller.dart';
+import 'package:simple_live_app/modules/settings/safe_settings/safe_settings_page.dart';
 import 'package:simple_live_app/modules/sync/local_sync/device/sync_device_controller.dart';
 import 'package:simple_live_app/modules/sync/local_sync/device/sync_device_page.dart';
 import 'package:simple_live_app/modules/sync/local_sync/local_sync_controller.dart';
@@ -165,12 +167,12 @@ class AppPages {
         BindingsBuilder.put(() => BiliBiliWebLoginController()),
       ],
     ),
-    //哔哩哔哩二维码登录
+    //二维码登录
     GetPage(
-      name: RoutePath.kBiliBiliQRLogin,
-      page: () => const BiliBiliQRLoginPage(),
+      name: RoutePath.kAccountQRLogin,
+      page: () => const QRLoginPage(),
       bindings: [
-        BindingsBuilder.put(() => BiliBiliQRLoginController()),
+        BindingsBuilder.put(() => QRLoginController()),
       ],
     ),
     // 数据同步
@@ -242,6 +244,14 @@ class AppPages {
       page: () => const OtherSettingsPage(),
       bindings: [
         BindingsBuilder.put(() => OtherSettingsController()),
+      ],
+    ),
+    //安全设置
+    GetPage(
+      name: RoutePath.kSettingsSafe,
+      page: () => const SafeSettingPage(),
+      bindings: [
+        BindingsBuilder.put(() => SafeSettingsController()),
       ],
     ),
     //关注设置

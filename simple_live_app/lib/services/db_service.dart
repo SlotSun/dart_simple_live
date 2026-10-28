@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:fractional_indexing_dart/fractional_indexing_dart.dart';
 import 'package:get/get.dart';
 import 'package:hive_ce/hive_ce.dart';
+import 'package:simple_live_app/models/db/account.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_block.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
@@ -15,12 +16,26 @@ class DBService extends GetxService {
   late Box<FollowUser> followBox;
   late Box<FollowUserTag> tagBox;
   late Box<FollowUserBlock> followUserBlockBox;
+  late Box<Account> accountBox;
 
   Future init() async {
     historyBox = await Hive.openBox("History");
     followBox = await Hive.openBox("FollowUser");
     tagBox = await Hive.openBox("FollowUserTag");
     followUserBlockBox = await Hive.openBox("FollowUserBlock");
+    accountBox = await Hive.openBox("account");
+  }
+
+  Future addAccount(Account account) async {
+    await accountBox.put(account.id, account);
+  }
+
+  Account getAccount(String id) {
+    return accountBox.values.firstWhere((item)=>item.id == id);
+  }
+
+  List<Account> getAllAccounts() {
+    return accountBox.values.toList();
   }
 
   Future<void> clearFollowTag() async {

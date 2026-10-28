@@ -8,6 +8,7 @@ import 'package:simple_live_app/modules/sync/remote_sync/webdav/executor/sync_ex
 import 'package:simple_live_app/requests/webdav_client.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
 import 'package:simple_live_app/services/migration_service.dart';
+import 'package:simple_live_app/services/safe_service.dart';
 
 class RemoteSyncWebDAVController extends BaseController {
   // ui
@@ -29,8 +30,8 @@ class RemoteSyncWebDAVController extends BaseController {
   var webDavBackupDirectory = "/simple_live_app".obs;
 
   @override
-  void onInit() {
-    doWebDAVInit();
+  Future<void> onInit() async {
+    await doWebDAVInit();
     super.onInit();
   }
 
@@ -60,13 +61,13 @@ class RemoteSyncWebDAVController extends BaseController {
 
   // webDAV 逻辑
   // 初始化webDAV
-  void doWebDAVInit() {
+  Future<void> doWebDAVInit() async {
     uri = LocalStorageService.instance.getValue(LocalStorageService.kWebDAVUri, "");
     if (uri.isEmpty) {
       notLogin.value = true;
     } else {
       user.value = LocalStorageService.instance.getValue(LocalStorageService.kWebDAVUser, "");
-      password = LocalStorageService.instance.getValue(LocalStorageService.kWebDAVPassword, "");
+      password = await SafeService.instance.getDecodeWPassword();
       webDavBackupDirectory.value = LocalStorageService.instance.getValue(
         LocalStorageService.kWebDAVDirectory,
         "/simple_live_app",
@@ -120,7 +121,7 @@ class RemoteSyncWebDAVController extends BaseController {
       LocalStorageService.instance.setValue(LocalStorageService.kWebDAVUri, webDAVUri);
       LocalStorageService.instance.setValue(LocalStorageService.kWebDAVUser, webDAVUser);
       user.value = webDAVUser;
-      LocalStorageService.instance.setValue(LocalStorageService.kWebDAVPassword, webDAVPassword);
+      await SafeService.instance.encodeWPassword(webDAVPassword);
       Get.back();
       SmartDialog.showToast("登录成功！");
     } else {
@@ -147,7 +148,6 @@ class RemoteSyncWebDAVController extends BaseController {
     try {
       await _sync(mode: SyncMode.uploadAll);
       SmartDialog.dismiss();
-      SmartDialog.showToast("上传成功");
       DateTime uploadTime = DateTime.now();
       lastUploadTime.value = Utils.parseTime(uploadTime);
       LocalStorageService.instance

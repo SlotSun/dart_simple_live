@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/modules/follow_user/follow_app_setting/follow_app_settings_controller.dart';
 import 'package:simple_live_app/services/follow_service.dart';

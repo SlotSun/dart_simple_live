@@ -216,13 +216,14 @@ class WSMsgItem extends TarsStruct {
 
   @override
   Object deepCopy() => WSMsgItem()
-    .. iUri = iUri
+    ..iUri = iUri
     ..sMsg = List<int>.from(sMsg)
     ..lMsgId = lMsgId;
 
   @override
   void displayAsString(StringBuffer sb, int level) {}
 }
+
 class WebSocketCommand extends TarsStruct {
   int cmdType = 0; //tag 0
   List<int> data = []; //tag 1
@@ -274,8 +275,8 @@ class WsRegisterGroupReq extends TarsStruct {
   String token = ''; //tag 1
   @override
   void readFrom(TarsInputStream _is) {
-    groupId              = _is.readList<String>(groupId, 0, false);
-    token                = _is.read(token, 1, false);
+    groupId = _is.readList<String>(groupId, 0, false);
+    token = _is.read(token, 1, false);
   }
 
   @override
@@ -288,28 +289,26 @@ class WsRegisterGroupReq extends TarsStruct {
   TarsStruct deepCopy() {
     return WsRegisterGroupReq()
       ..groupId = groupId
-      ..token = token
-    ;
+      ..token = token;
   }
 
   @override
-  displayAsString(StringBuffer sb, int level) {
-  }
+  displayAsString(StringBuffer sb, int level) {}
 }
 
 class LiveAppUAEx extends TarsStruct {
-  String sImei = "";//tag 1
-  String sApn = "";//tag 2
-  String sNetType = "";//tag 3
-  String sDeviceId = "";//tag 4
-  String sMid = "";//tag 5
+  String sImei = ""; //tag 1
+  String sApn = ""; //tag 2
+  String sNetType = ""; //tag 3
+  String sDeviceId = ""; //tag 4
+  String sMid = ""; //tag 5
   @override
   void readFrom(TarsInputStream _is) {
-    sImei                = _is.read(sImei, 1, false);
-    sApn                 = _is.read(sApn, 2, false);
-    sNetType             = _is.read(sNetType, 3, false);
-    sDeviceId            = _is.read(sDeviceId, 4, false);
-    sMid                 = _is.read(sMid, 5, false);
+    sImei = _is.read(sImei, 1, false);
+    sApn = _is.read(sApn, 2, false);
+    sNetType = _is.read(sNetType, 3, false);
+    sDeviceId = _is.read(sDeviceId, 4, false);
+    sMid = _is.read(sMid, 5, false);
   }
 
   @override
@@ -328,8 +327,7 @@ class LiveAppUAEx extends TarsStruct {
       ..sApn = sApn
       ..sNetType = sNetType
       ..sDeviceId = sDeviceId
-      ..sMid = sMid
-    ;
+      ..sMid = sMid;
   }
 
   @override
@@ -342,6 +340,7 @@ class LiveAppUAEx extends TarsStruct {
     _ds.DisplayString(sMid, "sMid");
   }
 }
+
 class LiveUserBase extends TarsStruct {
   int eSource = 0; //tag 0
   int eType = 0; //tag 1
@@ -377,15 +376,16 @@ class LiveUserBase extends TarsStruct {
     _ds.DisplayTarsStruct(uaEx, "uaEx");
   }
 }
+
 class LiveLaunchReq extends TarsStruct {
-  HuyaUserId id = HuyaUserId();//tag 0
-  LiveUserBase liveUb = LiveUserBase();//tag 1
-  bool supportDomain = false;//tag 2
+  HuyaUserId id = HuyaUserId(); //tag 0
+  LiveUserBase liveUb = LiveUserBase(); //tag 1
+  bool supportDomain = false; //tag 2
   @override
   void readFrom(TarsInputStream _is) {
-    id                   = _is.read(id, 0, false);
-    liveUb               = _is.read(liveUb, 1, false);
-    supportDomain        = _is.read(supportDomain, 2, false);
+    id = _is.read(id, 0, false);
+    liveUb = _is.read(liveUb, 1, false);
+    supportDomain = _is.read(supportDomain, 2, false);
   }
 
   @override
@@ -400,8 +400,7 @@ class LiveLaunchReq extends TarsStruct {
     return LiveLaunchReq()
       ..id = id
       ..liveUb = liveUb
-      ..supportDomain = supportDomain
-    ;
+      ..supportDomain = supportDomain;
   }
 
   @override

@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:simple_live_core/simple_live_core.dart';
@@ -55,12 +55,13 @@ class TwitchDanmaku implements LiveDanmaku {
 
   void joinRoom(String roomId) {
     var user = "justinfan${1000 + Random().nextInt(99999 - 1000 + 1)}";
-    webScoketUtils?..sendMessage(
-        "CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership")..sendMessage(
-        "PASS SCHMOOPIIE")..sendMessage("NICK $user")..sendMessage(
-        "USER $user 8 * :$user")..sendMessage("JOIN #$roomId");
+    webScoketUtils
+      ?..sendMessage("CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership")
+      ..sendMessage("PASS SCHMOOPIIE")
+      ..sendMessage("NICK $user")
+      ..sendMessage("USER $user 8 * :$user")
+      ..sendMessage("JOIN #$roomId");
   }
-
 
   @override
   Future stop() async {
@@ -91,8 +92,7 @@ class TwitchDanmaku implements LiveDanmaku {
             type: LiveMessageType.chat,
             message: contentMatch.group(1) ?? "",
             userName: nameMatch.group(1) ?? "",
-            color: LiveMessageColor.numberToColor(
-                int.parse(colorMatch.group(1) ?? "FFFFFF", radix: 16)),
+            color: LiveMessageColor.numberToColor(int.parse(colorMatch.group(1) ?? "FFFFFF", radix: 16)),
           );
           onMessage?.call(liveMsg);
         }

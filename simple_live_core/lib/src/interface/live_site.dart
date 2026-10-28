@@ -1,3 +1,6 @@
+import 'package:simple_live_core/src/common/qr_status.dart';
+import 'package:simple_live_core/src/model/account_info.dart';
+import 'package:simple_live_core/src/model/account_qr_code.dart';
 import 'package:simple_live_core/src/model/live_anchor_item.dart';
 
 import '../interface/live_danmaku.dart';
@@ -22,7 +25,7 @@ class LiveSite {
   LiveDanmaku getDanmaku() => LiveDanmaku();
 
   /// 读取网站的分类
-  Future<List<LiveCategory>> getCategores() {
+  Future<List<LiveCategory>> getCategories() {
     return Future.value(<LiveCategory>[]);
   }
 
@@ -66,7 +69,7 @@ class LiveSite {
   }
 
   /// 读取房间清晰度
-  Future<List<LivePlayQuality>> getPlayQualites(
+  Future<List<LivePlayQuality>> getPlayQualities(
       {required LiveRoomDetail detail}) {
     return Future.value(<LivePlayQuality>[]);
   }
@@ -89,7 +92,25 @@ class LiveSite {
   }
 
   /// 配置站点参数，包括不限于 cookie/ua
-  void setSiteAttrs(Map<String, dynamic> data){
+  ///
+  /// `data` string2json来适配不同平台的credentials
+  void setSiteAttrs(String data){
   }
 
+  /// 获取登录二维码
+  Future<QRCode> getQRCode() {
+    return Future.value(QRCode(key: '', url: ''));
+  }
+
+  /// 获取二维码扫码状态
+  Future<QRPollResult> getQRPollResult({required String qrcodeKey}) {
+    return Future.value(QRPollResult(status: QRStatus.failed));
+  }
+  /// data follow: login or init -> getAccountInfo(== check credential like cookie/did etc)
+  /// if account_info.isValid == true -> save -> setSiteAttrs->
+  /// because every site is singleInstant
+  /// 获取账号数据
+  Future<AccountInfo> getAccountInfo({required String credential}) {
+    return Future.value(AccountInfo());
+  }
 }

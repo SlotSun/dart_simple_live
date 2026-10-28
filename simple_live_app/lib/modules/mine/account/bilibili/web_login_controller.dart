@@ -1,11 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/app/log.dart';
+import 'package:simple_live_app/models/db/account.dart';
 import 'package:simple_live_app/routes/route_path.dart';
-import 'package:simple_live_app/services/bilibili_account_service.dart';
+import 'package:simple_live_app/services/platform_service.dart';
 
 class BiliBiliWebLoginController extends BaseController {
+  Account account = Get.arguments;
   InAppWebViewController? webViewController;
   final CookieManager cookieManager = CookieManager.instance();
   void onWebViewCreated(InAppWebViewController controller) {
@@ -18,7 +23,7 @@ class BiliBiliWebLoginController extends BaseController {
   }
 
   void toQRLogin() async {
-    await Get.toNamed(RoutePath.kBiliBiliQRLogin);
+    await Get.toNamed(RoutePath.kAccountQRLogin, arguments: account);
     Get.back();
   }
 
@@ -39,8 +44,16 @@ class BiliBiliWebLoginController extends BaseController {
       }
       var cookieStr = cookies.map((e) => "${e.name}=${e.value}").join(";");
       Log.i(cookieStr);
-      BiliBiliAccountService.instance.setCookie(cookieStr);
-      await BiliBiliAccountService.instance.loadUserInfo();
+      var credential = jsonEncode({'cookie': cookieStr});
+
+      var res = await PlatformService.instance.accountLogin(
+        account.copyWith(
+          credential: credential,
+        ),
+      );
+      if (res == false) {
+        SmartDialog.showToast('登录错误请重新登录！');
+      }
       Get.back();
       return true;
     } catch (e) {

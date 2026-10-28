@@ -1,6 +1,6 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
@@ -10,18 +10,17 @@ import 'package:simple_live_app/routes/app_navigation.dart';
 import 'package:simple_live_app/routes/route_path.dart';
 import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/widgets/filter_button.dart';
+import 'package:simple_live_app/widgets/follow_user_card.dart';
 import 'package:simple_live_app/widgets/follow_user_item.dart';
 import 'package:simple_live_app/widgets/keep_alive_wrapper.dart';
-import 'package:simple_live_app/widgets/live_room_card.dart';
 import 'package:simple_live_app/widgets/page_grid_view.dart';
-import 'package:simple_live_core/simple_live_core.dart';
 
 class FollowUserPage extends GetView<FollowUserController> {
   const FollowUserPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    var count = MediaQuery.of(context).size.width ~/ 500;
+    var count = MediaQuery.of(context).size.width ~/ 350;
     if (count < 1) count = 1;
     var c = MediaQuery.of(context).size.width ~/ 200;
     if (c < 2) {
@@ -144,69 +143,53 @@ class FollowUserPage extends GetView<FollowUserController> {
               ],
             ),
           ),
-          Obx(
-            () => Expanded(
-              child: AppSettingsController.instance.followStyleNotGrid.value
-                  ? PageGridView(
-                      crossAxisSpacing: 12,
-                      crossAxisCount: count,
-                      pageController: controller,
-                      firstRefresh: true,
-                      showPCRefreshButton: false,
-                      itemBuilder: (_, i) {
-                        var item = controller.list[i];
-                        var site = Sites.allSites[item.siteId]!;
-                        return FollowUserItem(
-                          item: item,
-                          onRemove: () {
-                            controller.removeFollow(item);
-                          },
-                          onTap: () {
-                            AppNavigator.toLiveRoomDetail(site: site, roomId: item.roomId);
-                          },
-                          onLongPress: () {
-                            // 长按弹出操作：设置标签或查看详情
-                            controller.showBottomMenu(item);
-                          },
-                        );
-                      },
-                    )
-                  : KeepAliveWrapper(
-                      child: Obx(
-                        () {
-                          // temp
-                          final hide = AppSettingsController.instance.hideRemoveFollowButton.value;
-                          return PageGridView(
-                            pageController: controller,
-                            padding: AppStyle.edgeInsetsA12,
-                            firstRefresh: true,
-                            mainAxisSpacing: 12,
-                            crossAxisSpacing: 12,
-                            crossAxisCount: c,
-                            itemBuilder: (_, i) {
-                              var item = controller.list[i];
-                              // 或许直接继承字段更好，标记工作
-                              LiveRoomItem liveRoomItem = LiveRoomItem(
-                                roomId: item.roomId,
-                                title: item.title.value,
-                                cover: item.cover.value,
-                                userName: item.userName,
-                                online: item.online.value,
-                              );
-                              var site = Sites.allSites[item.siteId]!;
-                              return LiveRoomCard(
-                                site,
-                                liveRoomItem,
-                                onFollowRemove: hide ? null : () => controller.removeFollow(item),
-                                onLongPress: () {
-                                  controller.showBottomMenu(item);
-                                },
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
+          Expanded(
+            child: KeepAliveWrapper(
+              child: Obx(
+                () {
+                  // temp
+                  final hide = AppSettingsController.instance.hideRemoveFollowButton.value;
+                  var mode = AppSettingsController.instance.followStyleNotGrid.value;
+                  var crossCount = mode ? count : c;
+                  var padding = mode ? null : AppStyle.edgeInsetsA12;
+                  double mainAxisSpacing = mode ? 0.0 : 12.0;
+                  return PageGridView(
+                    pageController: controller,
+                    padding: padding,
+                    firstRefresh: true,
+                    showPCRefreshButton: false,
+                    mainAxisSpacing: mainAxisSpacing,
+                    crossAxisSpacing: 12,
+                    crossAxisCount: crossCount,
+                    itemBuilder: (_, i) {
+                      var item = controller.list[i];
+                      var site = Sites.allSites[item.siteId]!;
+                      return mode
+                          ? FollowUserItem(
+                              item: item,
+                              onRemove: () {
+                                controller.removeFollow(item);
+                              },
+                              onTap: () {
+                                AppNavigator.toLiveRoomDetail(site: site, roomId: item.roomId);
+                              },
+                              onLongPress: () {
+                                // 长按弹出操作：设置标签或查看详情
+                                controller.showBottomMenu(item);
+                              },
+                            )
+                          : FollowUserCard(
+                              item,
+                              onFollowRemove: hide ? null : () => controller.removeFollow(item),
+                              onLongPress: () {
+                                // 长按弹出操作：设置标签或查看详情
+                                controller.showBottomMenu(item);
+                              },
+                            );
+                    },
+                  );
+                },
+              ),
             ),
           ),
         ],

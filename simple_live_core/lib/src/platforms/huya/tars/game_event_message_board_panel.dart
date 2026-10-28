@@ -1,4 +1,4 @@
-﻿import 'package:tars_dart/tars/codec/tars_displayer.dart';
+import 'package:tars_dart/tars/codec/tars_displayer.dart';
 import 'package:tars_dart/tars/codec/tars_input_stream.dart';
 import 'package:tars_dart/tars/codec/tars_output_stream.dart';
 import 'package:tars_dart/tars/codec/tars_struct.dart';
@@ -12,9 +12,7 @@ class GameEventMessageBoardPanel extends TarsStruct {
 
   @override
   void readFrom(TarsInputStream _is) {
-    vGameEventMessageBoardInfo = _is
-        .read(vGameEventMessageBoardInfo, 1, false)
-        .cast<GameEventMessageBoardInfo>();
+    vGameEventMessageBoardInfo = _is.read(vGameEventMessageBoardInfo, 1, false).cast<GameEventMessageBoardInfo>();
   }
 
   @override
@@ -25,9 +23,8 @@ class GameEventMessageBoardPanel extends TarsStruct {
   @override
   Object deepCopy() {
     return GameEventMessageBoardPanel()
-      ..vGameEventMessageBoardInfo = vGameEventMessageBoardInfo
-          .map((e) => e.deepCopy() as GameEventMessageBoardInfo)
-          .toList();
+      ..vGameEventMessageBoardInfo =
+          vGameEventMessageBoardInfo.map((e) => e.deepCopy() as GameEventMessageBoardInfo).toList();
   }
 
   @override

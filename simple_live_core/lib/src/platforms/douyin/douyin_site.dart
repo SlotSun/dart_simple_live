@@ -4,7 +4,10 @@ import 'dart:math';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/convert_helper.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
+import 'package:simple_live_core/src/model/account_info.dart';
+import 'package:simple_live_core/src/model/account_qr_code.dart';
 import 'package:simple_live_core/src/platforms/douyin/douyin_utils.dart';
+import 'package:simple_live_core/src/platforms/douyin/model/douyin_user_info.dart';
 import 'douyin_request_params.dart';
 
 class DouyinSite implements LiveSite {
@@ -53,38 +56,8 @@ class DouyinSite implements LiveSite {
     }
   }
 
-  /// 通过 Cookie 获取当前登录用户信息
-  /// 成功返回 data(Map)，失败返回空 Map
-  Future<Map<String, dynamic>> getUserInfoByCookie(String cookie) async {
-    try {
-      final url = "https://live.douyin.com/webcast/user/me/";
-      final result = await HttpClient.instance.getJson(
-        url,
-        queryParameters: {
-          "aid": DouyinRequestParams.aidValue,
-        },
-        header: {
-          "user-agent": DouyinRequestParams.kDefaultUserAgent,
-          'accept': 'application/json, text/plain, */*',
-          'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
-          "Cookie": cookie,
-        },
-      );
-      if (result is Map<String, dynamic>) {
-        final data = result["data"];
-        if (data is Map<String, dynamic>) {
-          return data;
-        }
-      }
-      return {};
-    } catch (e) {
-      CoreLog.error(e);
-    }
-    return {};
-  }
-
   @override
-  Future<List<LiveCategory>> getCategores() async {
+  Future<List<LiveCategory>> getCategories() async {
     List<LiveCategory> categories = [];
     var result = await HttpClient.instance.getText(
       "https://live.douyin.com/",
@@ -476,7 +449,7 @@ class DouyinSite implements LiveSite {
   }
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualites({required LiveRoomDetail detail}) async {
+  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoomDetail detail}) async {
     List<LivePlayQuality> qualities = [];
 
     var qulityList = detail.data["live_core_sdk_data"]["pull_data"]["options"]["qualities"];
@@ -703,12 +676,76 @@ class DouyinSite implements LiveSite {
   }
 
   @override
-  void setSiteAttrs(Map<String, dynamic> data) {
-    if (data.containsKey('cookie')) {
-      _updateDouyinCookie(data['cookie'] as String);
+  void setSiteAttrs(String data) {
+    final Map<String, dynamic> map;
+    try {
+      map = jsonDecode(data) as Map<String, dynamic>;
+    } catch (e) {
+      return;
     }
-    if (data.containsKey('hlsFirst')) {
-      hlsFirst = data['hlsFirst'] as bool;
+    if (map.containsKey('cookie')) {
+      _updateDouyinCookie(map['cookie'] as String);
     }
+    if (map.containsKey('hlsFirst')) {
+      hlsFirst = map['hlsFirst'] as bool;
+    }
+  }
+
+  @override
+  Future<AccountInfo> getAccountInfo({required String credential}) async {
+    AccountInfo info = AccountInfo();
+    final Map<String, dynamic> map;
+    try {
+      map = jsonDecode(credential) as Map<String, dynamic>;
+    } catch (e) {
+      return info;
+    }
+    var cookie = map['cookie'] as String;
+    if (cookie.isEmpty) {
+      return info;
+    }
+    try {
+      final url = "https://live.douyin.com/webcast/user/me/";
+      final result = await HttpClient.instance.getJson(
+        url,
+        queryParameters: {
+          "aid": DouyinRequestParams.aidValue,
+        },
+        header: {
+          "user-agent": DouyinRequestParams.kDefaultUserAgent,
+          'accept': 'application/json, text/plain, */*',
+          'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
+          "Cookie": cookie,
+        },
+      );
+      if (result is Map<String, dynamic>) {
+        final data = result["data"];
+        if (data is Map<String, dynamic>) {
+          var model = DouyinUserInfoModel.fromJson(data);
+          info = info.copyWith(
+            name: model.nickname,
+            uid: model.id,
+            avatar: model.avatar,
+            credential: credential,
+            isValid: true,
+          );
+        }
+      }
+    } catch (e) {
+      CoreLog.error(e);
+    }
+    return info;
+  }
+
+  @override
+  Future<QRCode> getQRCode() {
+    // TODO: implement getQRCode
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<QRPollResult> getQRPollResult({required String qrcodeKey}) {
+    // TODO: implement getQRPollResult
+    throw UnimplementedError();
   }
 }

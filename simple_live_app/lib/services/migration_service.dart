@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/app/utils/extensions/duration_2_str_utils.dart';
+import 'package:simple_live_app/models/db/account.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/services/db_service.dart';
@@ -107,6 +110,70 @@ class MigrationService {
         }
       }
       Log.i("Migration: initialized lastWatchTime for ${followList.length} follows");
+    }
+
+    // form local-storage cookie -> Accounts after v10815
+    if (curDBVer <= 10815) {
+      var curTime = DateTime.now().millisecondsSinceEpoch;
+      var accountList = DBService.instance.getAllAccounts();
+      var existingSiteIds = accountList.map((e) => e.siteId).toSet();
+      // migration from map<String, cookie> to AccountModel
+      var biliCredential = jsonEncode({
+        'cookie': LocalStorageService.instance.getValue(LocalStorageService.kBilibiliCookie, ''),
+      });
+      var douyuCredential = jsonEncode({
+        'cookie': LocalStorageService.instance.getValue(LocalStorageService.kDouyuCookie, ''),
+        'dy_did': LocalStorageService.instance.getValue(LocalStorageService.kDouyuDyDid, ''),
+        'LTP0': LocalStorageService.instance.getValue(LocalStorageService.kDouyuLTP0, ''),
+      });
+
+      var douyinCredential = jsonEncode({
+        'cookie': LocalStorageService.instance.getValue(LocalStorageService.kDouyinCookie, ''),
+      });
+
+      final defaults = [
+        Account(
+          id: '0',
+          siteId: Constant.kBiliBili,
+          credential: biliCredential,
+          isActive: false,
+          supportCookieLogin: true,
+          supportQRLogin: true,
+          supportWebLogin: true,
+          createdAt: curTime,
+          updatedAt: curTime,
+        ),
+        Account(
+            id: '1',
+            siteId: Constant.kDouyu,
+            credential: douyuCredential,
+            isActive: false,
+            supportCookieLogin: true,
+            supportQRLogin: true,
+            createdAt: curTime,
+            updatedAt: curTime),
+        Account(
+          id: '2',
+          siteId: Constant.kDouyin,
+          credential: douyinCredential,
+          isActive: false,
+          supportCookieLogin: true,
+          createdAt: curTime,
+          updatedAt: curTime,
+        ),
+      ];
+
+      for (final ac in defaults) {
+        if (existingSiteIds.contains(ac.siteId) == false) {
+          DBService.instance.addAccount(ac);
+        }
+      }
+      // 移除过期敏感字段
+      LocalStorageService.instance.removeValue(LocalStorageService.kBilibiliCookie);
+      LocalStorageService.instance.removeValue(LocalStorageService.kDouyuCookie);
+      LocalStorageService.instance.removeValue(LocalStorageService.kDouyuDyDid);
+      LocalStorageService.instance.removeValue(LocalStorageService.kDouyuLTP0);
+      LocalStorageService.instance.removeValue(LocalStorageService.kDouyinCookie);
     }
     LocalStorageService.instance.settingsBox.put(LocalStorageService.kHiveDbVer, curAppVer);
   }

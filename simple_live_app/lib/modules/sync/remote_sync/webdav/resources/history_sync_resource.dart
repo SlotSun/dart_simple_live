@@ -53,6 +53,7 @@ class HistorySyncResource implements SyncResource<List<History>> {
         continue;
       }
 
+      //todo: 同步问题有bug
       final remoteSeconds = remoteItem.watchDuration?.toDuration().inSeconds ?? 0;
       final localSyncSeconds = localItem.syncDuration;
 

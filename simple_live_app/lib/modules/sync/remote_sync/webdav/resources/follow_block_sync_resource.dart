@@ -19,7 +19,8 @@ class FollowBlockSyncResource implements SyncResource<List<FollowUserBlock>> {
     final file = archive.findFile(fileName);
     if (file == null) return null;
     final jsonData = jsonDecode(utf8.decode(file.content));
-    return (jsonData['data'] as List).map((e) => FollowUserBlock.fromJson(e)).toList();
+    List<FollowUserBlock>? res = (jsonData['data'] as List).map((e) => FollowUserBlock.fromJson(e)).toList();
+    return res;
   }
 
   @override

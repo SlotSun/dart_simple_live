@@ -96,6 +96,17 @@ class DanmuSettingsView extends GetView<AppSettingsController> {
               ),
               AppStyle.divider,
               Obx(
+                () => SettingsSwitch(
+                  title: "表情包",
+                  subtitle: "把 B 站弹幕与聊天区的表情渲染成图片",
+                  value: controller.danmuEmoticonEnable.value,
+                  onChanged: (e) {
+                    controller.setDanmuEmoticonEnable(e);
+                  },
+                ),
+              ),
+              AppStyle.divider,
+              Obx(
                 () => SettingsNumber(
                   title: "显示区域",
                   value: (controller.danmuArea.value * 100).toInt(),

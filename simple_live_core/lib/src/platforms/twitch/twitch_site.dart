@@ -1,8 +1,10 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
+import 'package:simple_live_core/src/model/account_info.dart';
+import 'package:simple_live_core/src/model/account_qr_code.dart';
 import 'package:simple_live_core/src/platforms/twitch/twitch_danmaku.dart';
 import 'package:simple_live_core/src/platforms/twitch/twitch_models.dart';
 
@@ -29,10 +31,7 @@ class TwitchSite implements LiveSite {
     'client-id': 'kimne78kx3ncx6brgo4mv6wki5h1ko',
   };
 
-  final playSessionIds = [
-    "bdd22331a986c7f1073628f2fc5b19da",
-    "064bc3ff1722b6f53b0b5b8c01e46ca5"
-  ];
+  final playSessionIds = ["bdd22331a986c7f1073628f2fc5b19da", "064bc3ff1722b6f53b0b5b8c01e46ca5"];
 
   void getRequestHeaders() {
     headers['device-id'] = getDeviceId();
@@ -47,8 +46,7 @@ class TwitchSite implements LiveSite {
     return deviceId.toString();
   }
 
-  String buildPersistedRequest(
-      String operationName, String sha265Hash, Map<String, dynamic> variables) {
+  String buildPersistedRequest(String operationName, String sha265Hash, Map<String, dynamic> variables) {
     final variablesJson = jsonEncode(variables);
     final query = '''
      {
@@ -66,14 +64,13 @@ class TwitchSite implements LiveSite {
   }
 
   @override
-  Future<List<LiveCategory>> getCategores() {
+  Future<List<LiveCategory>> getCategories() {
     //尚不支持
     return Future.value([]);
   }
 
   @override
-  Future<LiveCategoryResult> getCategoryRooms(LiveSubCategory category,
-      {int page = 1}) {
+  Future<LiveCategoryResult> getCategoryRooms(LiveSubCategory category, {int page = 1}) {
     //尚不支持
     return Future.value(LiveCategoryResult(hasMore: false, items: []));
   }
@@ -89,8 +86,7 @@ class TwitchSite implements LiveSite {
   }
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualites(
-      {required LiveRoomDetail detail}) async {
+  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoomDetail detail}) async {
     List<LivePlayQuality> qualities = <LivePlayQuality>[];
     var liveGpl = buildPersistedRequest(
       "PlaybackAccessToken",
@@ -135,8 +131,7 @@ class TwitchSite implements LiveSite {
         "token": token,
         "transcode_mode": "cbr_v1"
       };
-      var m3u8Url =
-          "https://usher.ttvnw.net/api/channel/hls/${detail.roomId}.m3u8";
+      var m3u8Url = "https://usher.ttvnw.net/api/channel/hls/${detail.roomId}.m3u8";
       var content = await HttpClient.instance.getText(
         m3u8Url,
         queryParameters: params,
@@ -161,19 +156,14 @@ class TwitchSite implements LiveSite {
       }
       // 匹配带宽信息
       final bandwidthPattern = RegExp(r'BANDWIDTH=(\d+)');
-      final bandwidthList = bandwidthPattern
-          .allMatches(content)
-          .map((match) => match.group(1)!)
-          .toList();
+      final bandwidthList = bandwidthPattern.allMatches(content).map((match) => match.group(1)!).toList();
       // 映射
       final urlToBandwidth = <String, int>{};
       for (int i = 0; i < _playUrlList.length; i++) {
-        final bandwidth =
-            i < bandwidthList.length ? int.parse(bandwidthList[i]) : 0;
+        final bandwidth = i < bandwidthList.length ? int.parse(bandwidthList[i]) : 0;
         urlToBandwidth[_playUrlList[i]] = bandwidth;
       }
-      _playUrlList
-          .sort((a, b) => urlToBandwidth[b]!.compareTo(urlToBandwidth[a]!));
+      _playUrlList.sort((a, b) => urlToBandwidth[b]!.compareTo(urlToBandwidth[a]!));
 
       qualities = _playUrlList.map((url) {
         final bandwidth = urlToBandwidth[url] ?? 0;
@@ -228,8 +218,7 @@ class TwitchSite implements LiveSite {
     }
     var user = streamMetaData.data.user;
     if (user == null) {
-      CoreLog.e(
-          'User not found: ${userOrError?.displayName}', StackTrace.empty);
+      CoreLog.e('User not found: ${userOrError?.displayName}', StackTrace.empty);
       throw Exception('Could not find user');
     }
     bool online = switch (user.stream) {
@@ -281,9 +270,7 @@ class TwitchSite implements LiveSite {
     CoreLog.d("twitch-response:$response");
 
     final List<dynamic> decoded = response;
-    final responses = decoded
-        .map((item) => TwitchResponse.fromJson(item as Map<String, dynamic>))
-        .toList();
+    final responses = decoded.map((item) => TwitchResponse.fromJson(item as Map<String, dynamic>)).toList();
     if (responses.length < 2) {
       CoreLog.error('Invalid response from Twitch API');
     }
@@ -291,8 +278,7 @@ class TwitchSite implements LiveSite {
   }
 
   @override
-  Future<List<LiveSuperChatMessage>> getSuperChatMessage(
-      {required String roomId}) {
+  Future<List<LiveSuperChatMessage>> getSuperChatMessage({required String roomId}) {
     //尚不支持
     return Future.value([]);
   }
@@ -308,8 +294,26 @@ class TwitchSite implements LiveSite {
   }
 
   @override
-  Future<void> setSiteAttrs(Map<String, dynamic> data) {
+  Future<void> setSiteAttrs(String data) {
     // TODO: implement setSiteAttrs
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AccountInfo> getAccountInfo({required String credential}) {
+    // TODO: implement getAccountInfo
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<QRCode> getQRCode() {
+    // TODO: implement getQRCode
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<QRPollResult> getQRPollResult({required String qrcodeKey}) {
+    // TODO: implement getQRPollResult
     throw UnimplementedError();
   }
 }

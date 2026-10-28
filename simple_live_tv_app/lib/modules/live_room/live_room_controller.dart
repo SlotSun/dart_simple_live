@@ -151,7 +151,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       online.value = detail.value!.online;
       liveStatus.value = detail.value!.status || detail.value!.isRecord;
       if (liveStatus.value) {
-        getPlayQualites();
+        getPlayQualities();
       }
       if (detail.value!.isRecord) {
         SmartDialog.showToast("当前主播未开播，正在轮播录像");
@@ -168,12 +168,12 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   }
 
   /// 初始化播放器
-  void getPlayQualites() async {
+  void getPlayQualities() async {
     qualites.clear();
     currentQuality = -1;
     try {
       var playQualites =
-          await site.liveSite.getPlayQualites(detail: detail.value!);
+          await site.liveSite.getPlayQualities(detail: detail.value!);
 
       if (playQualites.isEmpty) {
         SmartDialog.showToast("无法读取播放清晰度");
