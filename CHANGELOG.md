@@ -6,6 +6,20 @@ Format: Each version section starts with `## x.x.x`, followed by change lines st
 
 ---
 
+## 1.8.15
+
+##### 新功能：
+- 支持B站和huya弹幕表情包 thanks @gaoxing64
+- 支持斗鱼扫码登录 包括tv版本
+- 支持全屏/桌面小窗模式下自动弹出SC
+- 支持更多的关注参数调整
+- 支持安全模式加密敏感数据
+#### 修复调整：
+- 跳过 huya 个别房间 vip清晰度
+- 关注样式信息更集中
+- tips: ios和macos用户请到action更新测试或者下载上游仓库版本
+- 此版本构建基于 flutter 3.47.8
+- 
 ## 1.8.14
 
 - fix: 进一步修正douyu断流问题
