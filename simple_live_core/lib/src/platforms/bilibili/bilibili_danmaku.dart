@@ -224,6 +224,10 @@ class BiliBiliDanmaku implements LiveDanmaku {
           ),
           userName: obj["data"]["user_info"]["uname"].toString(),
         );
+        // 2元SC, 不如不发
+        if (sc.price == 2) {
+          return;
+        }
         var liveMsg = LiveMessage(
           type: LiveMessageType.superChat,
           userName: "SUPER_CHAT_MESSAGE",
