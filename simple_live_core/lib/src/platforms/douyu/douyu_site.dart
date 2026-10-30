@@ -342,6 +342,13 @@ class DouyuSite implements LiveSite {
 
   @override
   Future<AccountInfo> getAccountInfo({required String credential}) async {
+    AccountInfo info = AccountInfo();
+    final Map<String, dynamic> map;
+    try {
+      map = jsonDecode(credential) as Map<String, dynamic>;
+    } catch (e) {
+      return info;
+    }
     setSiteAttrs(credential);
     var newCookie = await DouyuUtils.refreshCookie(did: _dy_did, ltp0: _ltp0, cookie: _cookie);
     var newCredential = jsonDecode(credential) as Map<String, dynamic>;

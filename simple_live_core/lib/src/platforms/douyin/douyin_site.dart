@@ -693,8 +693,13 @@ class DouyinSite implements LiveSite {
 
   @override
   Future<AccountInfo> getAccountInfo({required String credential}) async {
-    final map = jsonDecode(credential) as Map<String, dynamic>;
     AccountInfo info = AccountInfo();
+    final Map<String, dynamic> map;
+    try {
+      map = jsonDecode(credential) as Map<String, dynamic>;
+    } catch (e) {
+      return info;
+    }
     var cookie = map['cookie'] as String;
     if (cookie.isEmpty) {
       return info;
