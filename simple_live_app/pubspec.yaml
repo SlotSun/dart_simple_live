@@ -15,15 +15,14 @@ dependencies:
   simple_live_core:
     path: ../simple_live_core
   # 图标
-  cupertino_icons: ^1.0.9
   remixicon: ^4.9.3 # Remix 图标
 
   # 框架、工具
   archive: ^4.3.0 # 文件压缩
   get: ^4.7.3 # 状态管理、路由管理、国际化
   dio: ^5.11.0 # 网络请求
-  hive_ce: ^2.19.3 # 持久化存储
-  hive_ce_flutter: ^2.3.4 # 持久化存储
+  hive_ce: ^2.22.0 # 持久化存储
+  hive_ce_flutter: ^2.5.0 # 持久化存储
   logger: ^2.8.0 # 日志
   firebase_analytics: ^12.4.6
   firebase_crashlytics: ^5.2.7 # firebase
@@ -51,12 +50,12 @@ dependencies:
 
   # Widget
   flutter_staggered_grid_view: ^0.7.0 # 瀑布流 / GridView
-  easy_refresh: ^3.5.1 # 下拉刷新、上拉加载
+  easy_refresh: ^4.0.0 # 下拉刷新、上拉加载
   extended_image: ^10.1.0 # 拓展 Image ，支持缓存
   flutter_smart_dialog: ^5.3.0 # 各种弹窗 Toast / Dialog / Popup
   sticky_headers: ^0.3.0+2 # 吸顶
   lottie: ^3.3.2 # Lottie 动画
-  canvas_danmaku: ^0.3.1 # 弹幕库
+  canvas_danmaku: ^0.3.4 # 弹幕库
 
   # 系统交互
   package_info_plus: ^10.2.2 # 包信息

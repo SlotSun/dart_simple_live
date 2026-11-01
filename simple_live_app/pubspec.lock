@@ -141,10 +141,10 @@ packages:
     dependency: "direct main"
     description:
       name: canvas_danmaku
-      sha256: "1ff071d027b1cf3320d4b58ff1aee6811de51ce39b5b5773c2e0d7693e02d401"
+      sha256: "636c25392c980f1d3b1c19ab00512d78c1ea61c089bc3a2a6f9db3cd71bdfefb"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.3"
+    version: "0.3.4"
   characters:
     dependency: transitive
     description:
@@ -249,22 +249,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.4"
-  cupertino_icons:
-    dependency: "direct main"
-    description:
-      name: cupertino_icons
-      sha256: "41e005c33bd814be4d3096aff55b1908d419fde52ca656c8c47719ec745873cd"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.9"
   cupertino_ui:
     dependency: "direct main"
     description:
       name: cupertino_ui
-      sha256: e9dfe7fac704028f8928cbe4028a0be5e8a709498e8daf8247de99e99a32aef3
+      sha256: e003b87afde18cb396ec15928c7894063d64af04462c68df9a1404c461316dd2
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.2"
+    version: "1.1.5"
   dart_sm:
     dependency: transitive
     description:
@@ -333,10 +325,10 @@ packages:
     dependency: "direct main"
     description:
       name: easy_refresh
-      sha256: "513a5dc82c044f8a9c9a3d600b3d5d3256070575bfd8761940533d8e209ba79b"
+      sha256: e8a3c60f940b53d7fb8365d5f14fbf2c2b157ba69f947dcccebed41736b0aacf
       url: "https://pub.dev"
     source: hosted
-    version: "3.5.1"
+    version: "4.0.0"
   extended_image:
     dependency: "direct main"
     description:
@@ -739,18 +731,18 @@ packages:
     dependency: "direct main"
     description:
       name: hive_ce
-      sha256: "8e9980e68643afb1e765d3af32b47996552a64e190d03faf622cea07c1294418"
+      sha256: "8b6eea82b06a7e2bb298a6a279139c45838b82491a66f3972bf609d48681392a"
       url: "https://pub.dev"
     source: hosted
-    version: "2.19.3"
+    version: "2.22.0"
   hive_ce_flutter:
     dependency: "direct main"
     description:
       name: hive_ce_flutter
-      sha256: "2677e95a333ff15af43ccd06af7eb7abbf1a4f154ea071997f3de4346cae913a"
+      sha256: "7853fb2924c5dd6715c81f7a5cc4574afe4aac3c2d7ecd657fdeba409505f1d1"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.4"
+    version: "2.5.0"
   hive_ce_generator:
     dependency: "direct dev"
     description:
@@ -968,10 +960,10 @@ packages:
     dependency: "direct main"
     description:
       name: material_ui
-      sha256: "9c0156b0cf8b3f56d365c8ffe051a720be3cae9eec55119f01e01b986ffb7101"
+      sha256: feb289df1e5f9ed9522f9fe3d909432a7f7bc76943f16abad09f80a16cd25196
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.1"
+    version: "1.9.0"
   media_kit:
     dependency: "direct main"
     description:
@@ -1809,5 +1801,5 @@ packages:
     source: hosted
     version: "2.1.0"
 sdks:
-  dart: ">=3.12.0 <4.0.0"
+  dart: ">=3.13.0 <4.0.0"
   flutter: ">=3.47.9"
