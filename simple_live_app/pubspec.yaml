@@ -4,7 +4,7 @@ publish_to: none
 description: "Slive APP"
 environment: 
   sdk: '>=3.0.5 <4.0.0'
-  flutter: 3.47.8
+  flutter: 3.47.9
 
 dependencies: 
   flutter: 
@@ -84,7 +84,7 @@ dependencies:
       path: flutter_inappwebview
       ref: sbi_fx_pc/v6.2.0-beta.3
   connectivity_plus: ^7.0.0 # 网络状态
-  qr_code_scanner_plus: ^2.0.14 # 二维码扫描
+  qr_code_scanner_plus: ^2.3.2 # 二维码扫描
   flutter_secure_storage: ^11.2.0 # 密钥存储
 
   # 网络相关
