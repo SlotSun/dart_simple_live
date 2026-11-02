@@ -65,3 +65,13 @@ jobs:
         run: |
           cd simple_live_tv_app
           flutter build apk --release --split-per-abi
+
+      # 上传 Artifacts
+      - name: Upload APK to Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: android
+          path: |
+            simple_live_tv_app/build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            simple_live_tv_app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            simple_live_tv_app/build/app/outputs/flutter-apk/app-x86_64-release.apk
