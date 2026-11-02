@@ -1,0 +1,43 @@
+name: Build TV APK (Manual)
+
+on:
+  workflow_dispatch:   # 关键：允许在网页上手动点击按钮触发
+
+jobs:
+  build-tv:
+    runs-on: ubuntu-latest   # 用 Linux 跑 TV 打包就够了，比 macOS 更快、更省额度
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "17"
+          cache: "gradle"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.38.x"
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          cd simple_live_tv_app
+          flutter pub get
+
+      - name: Build TV APK
+        run: |
+          cd simple_live_tv_app
+          flutter build apk --release --split-per-abi
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-tv-apk
+          path: |
+            simple_live_tv_app/build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            simple_live_tv_app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            simple_live_tv_app/build/app/outputs/flutter-apk/app-x86_64-release.apk
