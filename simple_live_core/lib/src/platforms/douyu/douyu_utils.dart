@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
 import 'package:simple_live_core/src/common/parse_cookie.dart';
 
@@ -63,18 +64,23 @@ class DouyuUtils {
         'callback': 'axiosJsonpCallback',
       };
 
-      final resp = await HttpClient.instance.getResponse(
-        _apiDouyuPassport,
-        queryParameters: query,
-        header: requestHeader(cookie: 'dy_did=$did;LTP0=$ltp0'),
-      );
-      cookie = (resp.headers['set-cookie'] ?? const <String>[])
-          .map((raw) => raw.split(';').first.trim())
-          .where((s) => s.contains('='))
-          .join('; ');
-      // check again
-      cookie = _isCookieExpired(cookie) ? '' : cookie;
-      _did = did;
+      try {
+        final resp = await HttpClient.instance.getResponse(
+          _apiDouyuPassport,
+          queryParameters: query,
+          header: requestHeader(cookie: 'dy_did=$did;LTP0=$ltp0'),
+        );
+        cookie = (resp.headers['set-cookie'] ?? const <String>[])
+            .map((raw) => raw.split(';').first.trim())
+            .where((s) => s.contains('='))
+            .join('; ');
+        // check again
+        cookie = _isCookieExpired(cookie) ? '' : cookie;
+        _did = did;
+      } catch (e, s) {
+        CoreLog.e('Douyu refresh cookie error: ${e.toString()}', s);
+        cookie = '';
+      }
     }
     return cookie;
   }
@@ -114,15 +120,19 @@ class DouyuUtils {
     if (_encKeyCheck()) {
       return;
     }
-    var res = await HttpClient.instance.getJson(
-      _apiDouyuEnc,
-      queryParameters: {
-        "did": _did,
-      },
-      header: requestHeader(cookie: cookie),
-    );
-    res['data']?["expire_at"] = DateTime.now().millisecondsSinceEpoch ~/ 1000 + _encCacheTTL;
-    _encKey = res['data'];
+    try {
+      var res = await HttpClient.instance.getJson(
+        _apiDouyuEnc,
+        queryParameters: {
+          "did": _did,
+        },
+        header: requestHeader(cookie: cookie),
+      );
+      res['data']?["expire_at"] = DateTime.now().millisecondsSinceEpoch ~/ 1000 + _encCacheTTL;
+      _encKey = res['data'];
+    } catch (e, s) {
+      CoreLog.e('Douyu encKey update: ${e.toString()}', s);
+    }
   }
 
   // 用于流/登录/弹幕，暂时只需要流获取
@@ -156,6 +166,7 @@ class DouyuUtils {
     ).query;
     return postData;
   }
+
   // todo: 获取real_rid 暂未发现 fake_id
 
   // 从set-cookie中获取字段
