@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/web_socket_util.dart';
 import 'package:simple_live_core/src/platforms/huya/model/huya_damaku_model.dart';
+import 'package:simple_live_core/src/platforms/huya/tars/gift/send_item_sub_board_cast_packet.dart';
 import 'package:simple_live_core/src/platforms/huya/tars/huya_danmaku.dart';
 import 'package:simple_live_core/src/platforms/huya/tars/types.dart';
 import 'package:tars_dart/tars/codec/tars_input_stream.dart';
@@ -227,6 +228,11 @@ class HuyaDanmaku implements LiveDanmaku {
               userName: "",
             ),
           );
+        } else if (wSPushMessage.uri == 6501){
+          // gift
+          // SendItemSubBroadcastPacket sp = SendItemSubBroadcastPacket();
+          // sp.readFrom(TarsInputStream(Uint8List.fromList(wSPushMessage.msg)));
+          // CoreLog.i('gift: ${sp.sSenderNick}_${sp.sPropsName}_${sp.sCustomText}_${sp.iItemType}_${sp.sSendContent}');
         }
       } else if (type == 22) {
         WSPushMessageV2 wsPushMessageV2 = WSPushMessageV2();
