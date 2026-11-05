@@ -125,6 +125,9 @@ mixin PlayerStateMixin on PlayerMixin {
   /// 是否显示弹幕
   RxBool showDanmakuState = false.obs;
 
+  /// 是否显示视频
+  RxBool showVideoState = true.obs;
+
   /// 是否显示控制器
   RxBool showControlsState = false.obs;
 
@@ -171,6 +174,15 @@ mixin PlayerStateMixin on PlayerMixin {
 
   var showQualites = false.obs;
   var showLines = false.obs;
+
+  void setVideoState() async {
+    showVideoState.value = !showVideoState.value;
+    if (showVideoState.value) {
+      await player.setVideoTrack(VideoTrack.auto());
+    } else {
+      await player.setVideoTrack(VideoTrack.no());
+    }
+  }
 
   /// 隐藏控制器
   void hideControls() {
@@ -833,7 +845,8 @@ class PlayerController extends BaseController
   }
 
   void mediaEnd() {
-    WakelockPlus.disable();
+    // 弱网调整：用户自责
+    // WakelockPlus.disable();
   }
 
   void mediaError(String error) {
