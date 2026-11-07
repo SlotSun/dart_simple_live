@@ -32,6 +32,7 @@ import 'package:simple_live_app/services/firebase_service.dart' as app;
 import 'package:simple_live_app/services/follow_block_service.dart';
 import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/services/history_service.dart';
+import 'package:simple_live_app/services/hot_key_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
 import 'package:simple_live_app/services/migration_service.dart';
 import 'package:simple_live_app/services/platform_service.dart';
@@ -133,6 +134,7 @@ Future initServices() async {
   // 移动平台不使用 windowManager
   if (!Platform.isAndroid && !Platform.isIOS) {
     Get.put(WindowService());
+    Get.put(HotKeyService());
   }
 
   // only android use firebase

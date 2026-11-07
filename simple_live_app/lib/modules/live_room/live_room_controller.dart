@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
@@ -23,12 +24,14 @@ import 'package:simple_live_app/models/db/follow_user_block.dart';
 import 'package:simple_live_app/models/db/history.dart';
 import 'package:simple_live_app/modules/live_room/danmaku/danmaku_emoticon.dart';
 import 'package:simple_live_app/modules/live_room/player/player_controller.dart';
+import 'package:simple_live_app/modules/live_room/player/player_controls.dart';
 import 'package:simple_live_app/modules/settings/danmu_settings_page.dart';
+import 'package:simple_live_app/rust/api/danmaku_mask.dart';
 import 'package:simple_live_app/services/db_service.dart';
 import 'package:simple_live_app/services/follow_block_service.dart';
 import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/services/history_service.dart';
-import 'package:simple_live_app/rust/api/danmaku_mask.dart';
+import 'package:simple_live_app/services/hot_key_service.dart';
 import 'package:simple_live_app/widgets/desktop_refresh_button.dart';
 import 'package:simple_live_app/widgets/follow_user_item.dart';
 import 'package:simple_live_app/widgets/superchat_card.dart';
@@ -128,12 +131,18 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
   final int _kMaxChatMessageCount = 150;
 
+  // hotkey
+  VoidCallback? _hotkeyShowFollowFull;
+  VoidCallback? _hotkeyShowSCListFull;
+  VoidCallback? _hotkeyShowSettingFull;
+
   @override
   void onInit() {
     WidgetsBinding.instance.addObserver(this);
     if (FollowService.instance.followList.isEmpty) {
       FollowService.instance.loadData();
     }
+    _initHotKeyWhenFull();
     initAutoExit();
     showDanmakuState.value = AppSettingsController.instance.danmuEnable.value;
     followed.value = FollowService.instance.getFollowExist("${site.id}_$roomId");
@@ -149,6 +158,44 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     });
     _initDanmakuMask();
     super.onInit();
+  }
+
+  void _initHotKeyWhenFull() {
+    _hotkeyShowFollowFull = HotKeyService.instance.register(
+      HotKeyService.instance.hotKeyShowFollowFull,
+      _buildHotKeyRegister(() => showFollowUser(this)),
+    );
+    _hotkeyShowSCListFull = HotKeyService.instance.register(
+      HotKeyService.instance.hotkeyShowSCListFull,
+      _buildHotKeyRegister(() => showSuperChatSheet()),
+    );
+    _hotkeyShowSettingFull = HotKeyService.instance.register(
+      HotKeyService.instance.hotkeyShowSettingFull,
+      _buildHotKeyRegister(() => showPlayerSettings(this)),
+    );
+  }
+
+  VoidCallback _buildHotKeyRegister(VoidCallback fun) {
+    return () {
+      if (fullScreenState.value == false) {
+        return;
+      }
+      if (SmartDialog.checkExist()) {
+        SmartDialog.dismiss(status: SmartStatus.allCustom);
+      } else {
+        fun(); // call()
+      }
+    };
+  }
+
+  // dispose need use
+  void _unregisterHotkey() {
+    _hotkeyShowFollowFull?.call();
+    _hotkeyShowFollowFull = null;
+    _hotkeyShowSCListFull?.call();
+    _hotkeyShowSCListFull = null;
+    _hotkeyShowSettingFull?.call();
+    _hotkeyShowSettingFull = null;
   }
 
   void _initDanmakuMask() async {
@@ -1346,6 +1393,7 @@ ${error?.stackTrace}''');
     // 留在静态缓存里的源图句柄与合成位图出房间后就没有复用价值了。
     DanmakuEmoticonRenderer.clearCache();
     rustDanmakuMask.dispose();
+    _unregisterHotkey();
     super.onClose();
   }
 }

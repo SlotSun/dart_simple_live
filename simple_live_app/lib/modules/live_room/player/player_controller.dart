@@ -378,8 +378,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
 
   /// 退出全屏
   void exitFull() async {
-    // todo: 还应该关闭所有的dialog
-    SmartDialog.dismiss();
+    SmartDialog.dismiss(status: SmartStatus.allCustom);
     if (Platform.isAndroid || Platform.isIOS) {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: SystemUiOverlay.values);
       setPortraitOrientation();
