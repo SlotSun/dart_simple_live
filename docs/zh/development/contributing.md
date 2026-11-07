@@ -38,7 +38,7 @@
 
 确保你的环境中已安装： 
 
-- **Flutter 3.38.6^**
+- **Flutter 3.47.8^**
 - **Rust 1.28^**
 - **Visual Studio**
 
