@@ -161,6 +161,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   }
 
   void _initHotKeyWhenFull() {
+    if (Platform.isAndroid || Platform.isIOS) {
+      return;
+    }
     _hotkeyShowFollowFull = HotKeyService.instance.register(
       HotKeyService.instance.hotKeyShowFollowFull,
       _buildHotKeyRegister(() => showFollowUser(this)),
