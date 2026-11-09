@@ -135,8 +135,13 @@ class PlatformService extends GetxService {
   @override
   Future<void> onInit() async {
     subscription = EventBus.instance.listen(Constant.kUpdateAccount, (account) {
-      Log.i('update Account');
-      accountLogin(account);
+      if (account is Account) {
+        Log.i('update Account');
+        accountLogin(account);
+      } else {
+        // all
+        _initAccount();
+      }
     });
     await _initAccount();
     _updateDouyinAttr();

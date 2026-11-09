@@ -31,8 +31,8 @@ class UserAccountCookieSyncResource implements SyncResource<List<Account>> {
     await DBService.instance.accountBox.clear();
     for (var item in data) {
       await DBService.instance.addAccount(item);
-      EventBus.instance.emit(Constant.kUpdateAccount, item);
     }
+    EventBus.instance.emit(Constant.kUpdateAccount, 0);
   }
 
   @override
