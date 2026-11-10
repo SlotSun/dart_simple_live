@@ -29,7 +29,7 @@ class PlatformService extends GetxService {
     }
     // 自动更新
     for (var account in accountList) {
-      accountLogin(account);
+      accountLogin(account, init: true);
     }
   }
 
@@ -53,7 +53,7 @@ class PlatformService extends GetxService {
     await updateAccount(logout);
   }
 
-  Future<bool> accountLogin(Account ac) async {
+  Future<bool> accountLogin(Account ac, {bool init = false}) async {
     var site = Sites.allSites[ac.siteId]!;
     AccountInfo info = await site.liveSite.getAccountInfo(credential: ac.credential);
     var resAc = ac.copyWith(
@@ -65,7 +65,12 @@ class PlatformService extends GetxService {
       updatedAt: DateTime.now().millisecondsSinceEpoch,
     );
     if (!info.isValid) {
-      SmartDialog.showToast('${site.name}账号失效，请重新设置');
+      if (init) {
+        Log.e('${site.name}账号失效，请重新设置');
+      } else {
+        // smart_dialog be used after init
+        SmartDialog.showToast('${site.name}账号失效，请重新设置');
+      }
     } else {
       site.liveSite.setSiteAttrs(resAc.credential);
       await updateAccount(resAc);

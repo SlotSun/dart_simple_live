@@ -70,7 +70,7 @@ class Log {
     }
   }
 
-  static void e(String message, StackTrace stackTrace, [bool writeFile = true]) {
+  static void e(String message, [StackTrace? stackTrace, bool writeFile = true]) {
     addDebugLog('$message\r\n\r\n$stackTrace', Colors.red);
     logger.e("${DateTime.now().toString()}\n$message", stackTrace: stackTrace);
     if (writeFile) {
