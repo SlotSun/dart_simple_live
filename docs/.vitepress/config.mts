@@ -35,7 +35,7 @@ export default defineConfig({
       { text: '指南', link: '/zh/guides/' },
       { text: '平台', link: '/zh/platforms/' },
       { text: '更新日志', link: '/zh/change-logs/' },
-      { text: '开发指南', link: '/zh/development/contributing' },
+      { text: '开发指南', link: '/zh/development/' },
     ],
 
     sidebar: [
@@ -73,6 +73,7 @@ export default defineConfig({
       {
         text: '开发',
         items: [
+          {text:'介绍', link: '/zh/development/' },
           {text:'代码贡献', link: '/zh/development/contributing' },
         ]
       },

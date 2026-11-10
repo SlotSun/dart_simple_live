@@ -4,13 +4,13 @@ Slive 目前支持5个直播平台，可自动检测并拉取直播流和弹幕�
 ## 平台列表
 ## 平台列表
 
-| 平台                      | URL 格式                      | 协议    | 弹幕 |
-|---------------------------|-------------------------------|---------|------|
-| [Bilibili](./bilibili.md) | `live.bilibili.com/{room_id}` | FLV/HLS | ✅   |
-| [抖音](./douyin.md)       | `live.douyin.com/{room_id}`   | FLV/HLS | ✅   |
-| [斗鱼](./douyu.md)        | `douyu.com/{room_id}`         | FLV     | ✅   |
-| [虎牙](./huya.md)         | `huya.com/{room_id}`          | FLV/HLS | ✅   |
-| [Twitch](./twitch.md)     | `twitch.tv/{channel}`         | HLS     | ✅   |
+| 平台                      | URL 格式                      | 协议    | 弹幕 | 认证 |
+|---------------------------|-------------------------------|---------|------|----- |
+| [Bilibili](./bilibili.md) | `live.bilibili.com/{room_id}` | FLV/HLS | ✅   | ✅|
+| [抖音](./douyin.md)       | `live.douyin.com/{room_id}`   | FLV/HLS | ✅   | ✅|
+| [斗鱼](./douyu.md)        | `douyu.com/{room_id}`         | FLV     | ✅   | ✅|
+| [虎牙](./huya.md)         | `huya.com/{room_id}`          | FLV/HLS | ✅   | ✅|
+| [Twitch](./twitch.md)     | `twitch.tv/{channel}`         | HLS     | ✅   | ✅|
 
 ## 通用配置
 每个平台可通过 平台配置 → 平台 进行配置。
