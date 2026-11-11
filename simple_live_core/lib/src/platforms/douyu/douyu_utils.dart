@@ -76,6 +76,7 @@ class DouyuUtils {
         // cookie没过期但失效，其他端重新申请了新的cookie,换设备did重新申请cookie
         // 过期但没失效，服务器问题了
         did = generateRandomString(32);
+        CoreLog.i('douyu generate new did because cookie was set by another.new did: $did');
       }
       try {
         final resp = await HttpClient.instance.getResponse(
@@ -117,7 +118,6 @@ class DouyuUtils {
     } catch (_) {
       checkRes = true;
     }
-
     return checkRes;
   }
 
@@ -149,6 +149,7 @@ class DouyuUtils {
         formUrlEncoded: true,
         header: requestHeader(roomId: '6657', cookie: cookie),
       );
+      CoreLog.i('douyu cookie is not expired.');
     } on CoreError catch (e) {
       if (e.statusCode == 401 || e.statusCode == 403) {
         return true;

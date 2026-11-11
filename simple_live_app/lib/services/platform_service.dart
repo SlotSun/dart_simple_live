@@ -76,6 +76,7 @@ class PlatformService extends GetxService {
       // 针对 douyu cookie 更新问题 , bilibili && douyin 不更新cookie
       if(resAc.credential != ac.credential){
         await updateAccount(resAc);
+        Log.i('douyu credential has refresh');
       }
     }
     return info.isValid;
@@ -139,14 +140,13 @@ class PlatformService extends GetxService {
   }
 
   // ==================== 生命周期 ====================
-
-  @override
-  Future<void> onInit() async {
+  // 规避二次 初始化
+  Future<void> init()async{
     subscription = EventBus.instance.listen(Constant.kUpdateAccount, (account) {
       if (account is Account) {
         Log.i('update Account');
         accountLogin(account);
-      } else {
+      } else if (account is int) {
         // all
         _initAccount();
       }
@@ -154,6 +154,10 @@ class PlatformService extends GetxService {
     await _initAccount();
     _updateDouyinAttr();
     _initHuya();
+  }
+
+  @override
+  Future<void> onInit() async {
     super.onInit();
   }
 

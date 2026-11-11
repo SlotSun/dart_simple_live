@@ -114,7 +114,7 @@ Future initServices() async {
   //初始化设置控制器
   await Get.put(AppSettingsController()).onInit();
 
-  await Get.put(SafeService()).onInit();
+  await Get.put(SafeService()).init();
 
   await Get.put(AppStyleSettingController()).init();
 
@@ -123,7 +123,7 @@ Future initServices() async {
   // platformService need migrate
   await MigrationService.migrateDataByVersion();
 
-  await Get.put(PlatformService()).onInit();
+  await Get.put(PlatformService()).init();
 
   Get.put(SyncService());
 

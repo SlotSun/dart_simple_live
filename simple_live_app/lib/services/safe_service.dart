@@ -18,10 +18,10 @@ class SafeService extends GetxService {
   Future<List<Account>> getDecodeAccounts() async {
     List<Account> list = DBService.instance.getAllAccounts();
     if (AppSettingsController.instance.appSafeEnable.value) {
+      var key = await SecureStoreService.instance.getAppSecureKey();
       for (int i = 0; i < list.length; i++) {
         Account account = list[i];
         if (AppSettingsController.instance.appStoreKey.value) {
-          var key = await SecureStoreService.instance.getAppSecureKey();
           try {
             account.credential = await AesUtils.decrypt(account.credential, key!);
           } catch (e, s) {
@@ -205,9 +205,12 @@ class SafeService extends GetxService {
     SmartDialog.showToast('已重置敏感数据');
   }
 
+  Future<void> init() async {
+    await checkKeyValid();
+  }
+
   @override
   Future<void> onInit() async {
-    await checkKeyValid();
     super.onInit();
   }
 }
