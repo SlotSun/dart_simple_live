@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:html_unescape/html_unescape.dart';
@@ -195,7 +194,7 @@ class DouyuSite implements LiveSite {
 
   @override
   Future<LiveSearchRoomResult> searchRooms(String keyword, {int page = 1}) async {
-    var did = generateRandomString(32);
+    var did = DouyuUtils.generateRandomString(32);
     var result = await HttpClient.instance.getJson(
       "https://www.douyu.com/japi/search/api/searchShow",
       queryParameters: {
@@ -244,20 +243,11 @@ class DouyuSite implements LiveSite {
     return roomInfo;
   }
 
-  //生成指定长度的16进制随机字符串
-  String generateRandomString(int length) {
-    var random = Random.secure();
-    var values = List<int>.generate(length, (i) => random.nextInt(16));
-    StringBuffer stringBuffer = StringBuffer();
-    for (var item in values) {
-      stringBuffer.write(item.toRadixString(16));
-    }
-    return stringBuffer.toString();
-  }
+
 
   @override
   Future<LiveSearchAnchorResult> searchAnchors(String keyword, {int page = 1}) async {
-    var did = generateRandomString(32);
+    var did = DouyuUtils.generateRandomString(32);
     var result = await HttpClient.instance.getJson(
       "https://www.douyu.com/japi/search/api/searchUser",
       queryParameters: {
@@ -314,11 +304,6 @@ class DouyuSite implements LiveSite {
     return Future.value([]);
   }
 
-  Future<String> refreshCookie(String dy_did, String ltp0) async {
-    var newCookie = await DouyuUtils.refreshCookie(did: dy_did, ltp0: ltp0, cookie: _cookie);
-    _cookie = newCookie;
-    return newCookie;
-  }
 
   @override
   Future<void> setSiteAttrs(String data) async {
@@ -349,10 +334,14 @@ class DouyuSite implements LiveSite {
     } catch (e) {
       return info;
     }
-    setSiteAttrs(credential);
-    var newCookie = await DouyuUtils.refreshCookie(did: _dy_did, ltp0: _ltp0, cookie: _cookie);
-    var newCredential = jsonDecode(credential) as Map<String, dynamic>;
-    newCredential['cookie'] = newCookie;
+    // 先验证 再设置
+    String dy_did = map['dy_did'] ?? '';
+    String ltp0 = map['LTP0'] ?? '';
+    String cookie = map['cookie'] ?? '';
+
+    Map<String, dynamic> newCredential = await DouyuUtils.refreshCookie(did: dy_did, ltp0: ltp0, cookie: cookie);
+    var newCookie = newCredential['cookie'] ?? '';
+    setSiteAttrs(jsonEncode(newCredential));
     return AccountInfo(
       uid: DouyuUtils.pickCookie(newCookie, 'acf_uid'),
       name: Uri.decodeComponent(DouyuUtils.pickCookie(newCookie, 'acf_nickname')),

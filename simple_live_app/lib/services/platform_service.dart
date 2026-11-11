@@ -69,11 +69,14 @@ class PlatformService extends GetxService {
         Log.e('${site.name}账号失效，请重新设置');
       } else {
         // smart_dialog be used after init
-        SmartDialog.showToast('${site.name}账号失效，请重新设置');
+        SmartDialog.showToast('${site.name}账号失效，请检查网络或重新设置');
       }
     } else {
       site.liveSite.setSiteAttrs(resAc.credential);
-      await updateAccount(resAc);
+      // 针对 douyu cookie 更新问题 , bilibili && douyin 不更新cookie
+      if(resAc.credential != ac.credential){
+        await updateAccount(resAc);
+      }
     }
     return info.isValid;
   }

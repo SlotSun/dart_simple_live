@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/models/db/account.dart';
@@ -16,12 +17,17 @@ class SiteSettingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final site = Sites.allSites[account.siteId]!;
     final logined = account.isActive;
+    final updateTime = DateFormat('MM-dd HH:mm').format(DateTime.fromMillisecondsSinceEpoch(account.updatedAt));
     return ListTile(
       leading: logined && account.avatar?.isNotEmpty == true
           ? NetImage(account.avatar!, width: 36, height: 36, borderRadius: 18)
           : Image.asset(site.logo, width: 36, height: 36),
       title: Text(site.name),
-      subtitle: Text(logined ? account.userName ?? '已登录' : "未登录"),
+      subtitle: Text(
+        logined ? '${account.userName ?? '已登录'} $updateTime' : '未登录',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
       trailing: logined ? const Icon(Icons.logout) : const Icon(Icons.chevron_right),
       onTap: onTap,
     );

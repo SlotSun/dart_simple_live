@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:simple_live_core/simple_live_core.dart';
+import 'package:simple_live_core/src/common/core_error.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
 import 'package:simple_live_core/src/common/parse_cookie.dart';
 
@@ -49,12 +51,17 @@ class DouyuUtils {
   }
 
   static void setDyDid(String dy_did) {
-    _did = dy_did;
+    if (dy_did.isNotEmpty) {
+      _did = dy_did;
+    }
   }
 
-  static Future<String> refreshCookie({String did = '', String ltp0 = '', String cookie = ''}) async {
+  static Future<Map<String, dynamic>> refreshCookie({String did = '', String ltp0 = '', String cookie = ''}) async {
+    setDyDid(did);
     // expired-> refresh
-    if (_isCookieExpired(cookie) && ltp0.isNotEmpty && did.isNotEmpty) {
+    bool cookieExpired = await _isCookieExpired(cookie);
+    bool validExpire = await _validateCookie(cookie);
+    if ((cookieExpired || validExpire) && ltp0.isNotEmpty) {
       // milliseconds not sec
       final t = DateTime.now().millisecondsSinceEpoch.toString();
       final query = <String, dynamic>{
@@ -64,6 +71,12 @@ class DouyuUtils {
         'callback': 'axiosJsonpCallback',
       };
 
+      // generate new did for new_cookie
+      if (cookieExpired == false && validExpire == true) {
+        // cookie没过期但失效，其他端重新申请了新的cookie,换设备did重新申请cookie
+        // 过期但没失效，服务器问题了
+        did = generateRandomString(32);
+      }
       try {
         final resp = await HttpClient.instance.getResponse(
           _apiDouyuPassport,
@@ -75,18 +88,24 @@ class DouyuUtils {
             .where((s) => s.contains('='))
             .join('; ');
         // check again
-        cookie = _isCookieExpired(cookie) ? '' : cookie;
-        _did = did;
+        cookie = await _isCookieExpired(cookie) ? '' : cookie;
+        setDyDid(did);
       } catch (e, s) {
         CoreLog.e('Douyu refresh cookie error: ${e.toString()}', s);
         cookie = '';
       }
     }
-    return cookie;
+    Map<String, dynamic> map = {
+      'cookie': cookie,
+      'dy_did': did,
+      'LTP0': ltp0,
+    };
+    return map;
   }
 
   // expired -> true
-  static bool _isCookieExpired(String cookie) {
+  static Future<bool> _isCookieExpired(String cookie) async {
+    bool checkRes = false;
     final jwt = _getJwtToken(cookie);
     if (jwt == null) return true;
     try {
@@ -94,10 +113,12 @@ class DouyuUtils {
       var exp = payload['exp'];
       if (exp is! int) return true;
       final nowSec = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-      return nowSec >= exp;
+      checkRes = nowSec >= exp;
     } catch (_) {
-      return true;
+      checkRes = true;
     }
+
+    return checkRes;
   }
 
   static String? _getJwtToken(String cookie) {
@@ -110,6 +131,30 @@ class DouyuUtils {
       }
     }
     return null;
+  }
+
+  // expired -> true
+  static Future<bool> _validateCookie(String cookie) async {
+    // acf_uid
+    String uid = pickCookie(cookie, 'acf_uid');
+    if (uid.isEmpty) {
+      return true;
+    }
+    // 6657 24小时轮播
+    var data = await sign('6657', cookie: cookie);
+    try {
+      var result = await HttpClient.instance.postJson(
+        "https://www.douyu.com/lapi/live/getH5PlayV1/6657",
+        data: data,
+        formUrlEncoded: true,
+        header: requestHeader(roomId: '6657', cookie: cookie),
+      );
+    } on CoreError catch (e) {
+      if (e.statusCode == 401 || e.statusCode == 403) {
+        return true;
+      }
+    }
+    return false;
   }
 
   static bool _encKeyCheck() {
@@ -194,5 +239,16 @@ class DouyuUtils {
       }
     }
     return '';
+  }
+
+  //生成指定长度的16进制随机字符串
+  static String generateRandomString(int length) {
+    var random = Random.secure();
+    var values = List<int>.generate(length, (i) => random.nextInt(16));
+    StringBuffer stringBuffer = StringBuffer();
+    for (var item in values) {
+      stringBuffer.write(item.toRadixString(16));
+    }
+    return stringBuffer.toString();
   }
 }
