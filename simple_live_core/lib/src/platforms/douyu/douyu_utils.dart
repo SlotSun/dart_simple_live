@@ -70,14 +70,7 @@ class DouyuUtils {
         '_': t,
         'callback': 'axiosJsonpCallback',
       };
-
-      // generate new did for new_cookie
-      if (cookieExpired == false && validExpire == true) {
-        // cookie没过期但失效，其他端重新申请了新的cookie,换设备did重新申请cookie
-        // 过期但没失效，服务器问题了
-        did = generateRandomString(32);
-        CoreLog.i('douyu generate new did because cookie was set by another.new did: $did');
-      }
+      // douyu 有cookie会话残留绑定did需要重启，暂时写死did
       try {
         final resp = await HttpClient.instance.getResponse(
           _apiDouyuPassport,
@@ -89,8 +82,9 @@ class DouyuUtils {
             .where((s) => s.contains('='))
             .join('; ');
         // check again
-        cookie = await _isCookieExpired(cookie) ? '' : cookie;
-        setDyDid(did);
+        bool validAgain = await _validateCookie(cookie);
+        bool expiredAgain = await _isCookieExpired(cookie);
+        cookie = (validAgain || expiredAgain) ? '' : cookie;
       } catch (e, s) {
         CoreLog.e('Douyu refresh cookie error: ${e.toString()}', s);
         cookie = '';
