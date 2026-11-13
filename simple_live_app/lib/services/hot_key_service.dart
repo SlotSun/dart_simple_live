@@ -25,6 +25,10 @@ class HotKeyService extends GetxService {
       alt: true,
       includeRepeats: false,
     ),
+    'hotkeyShowMessagePanel': SingleActivator(
+      LogicalKeyboardKey.f11,
+      includeRepeats: false,
+    ),
   };
 
   SingleActivator get hotKeyShowFollowFull => hotKeyMap['hotKeyShowFollowFull']!;
@@ -32,6 +36,8 @@ class HotKeyService extends GetxService {
   SingleActivator get hotkeyShowSCListFull => hotKeyMap['hotkeyShowSCListFull']!;
 
   SingleActivator get hotkeyShowSettingFull => hotKeyMap['hotkeyShowSettingFull']!;
+
+  SingleActivator get hotkeyShowMessagePanel => hotKeyMap['hotkeyShowMessagePanel']!;
 
   @override
   void onInit() {

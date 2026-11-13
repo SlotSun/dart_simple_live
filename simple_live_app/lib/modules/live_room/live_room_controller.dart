@@ -134,6 +134,10 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   VoidCallback? _hotkeyShowFollowFull;
   VoidCallback? _hotkeyShowSCListFull;
   VoidCallback? _hotkeyShowSettingFull;
+  VoidCallback? _hotkeyShowMessagePanel;
+
+  // ui control
+  RxBool showMessagePanel = true.obs;
 
   @override
   void onInit() {
@@ -141,7 +145,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     if (FollowService.instance.followList.isEmpty) {
       FollowService.instance.loadData();
     }
-    _initHotKeyWhenFull();
+    _initHotKey();
     initAutoExit();
     showDanmakuState.value = AppSettingsController.instance.danmuEnable.value;
     followed.value = FollowService.instance.getFollowExist("${site.id}_$roomId");
@@ -159,25 +163,29 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     super.onInit();
   }
 
-  void _initHotKeyWhenFull() {
+  void _initHotKey() {
     if (Platform.isAndroid || Platform.isIOS) {
       return;
     }
     _hotkeyShowFollowFull = HotKeyService.instance.register(
       HotKeyService.instance.hotKeyShowFollowFull,
-      _buildHotKeyRegister(() => showFollowUser(this)),
+      _buildFullHotKeyRegister(() => showFollowUser(this)),
     );
     _hotkeyShowSCListFull = HotKeyService.instance.register(
       HotKeyService.instance.hotkeyShowSCListFull,
-      _buildHotKeyRegister(() => showSuperChatSheet()),
+      _buildFullHotKeyRegister(() => showSuperChatSheet()),
     );
     _hotkeyShowSettingFull = HotKeyService.instance.register(
       HotKeyService.instance.hotkeyShowSettingFull,
-      _buildHotKeyRegister(() => showPlayerSettings(this)),
+      _buildFullHotKeyRegister(() => showPlayerSettings(this)),
+    );
+    _hotkeyShowMessagePanel = HotKeyService.instance.register(
+      HotKeyService.instance.hotkeyShowMessagePanel,
+      () => setShowMessagePanel(),
     );
   }
 
-  VoidCallback _buildHotKeyRegister(VoidCallback fun) {
+  VoidCallback _buildFullHotKeyRegister(VoidCallback fun) {
     return () {
       if (fullScreenState.value == false) {
         return;
@@ -198,6 +206,12 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     _hotkeyShowSCListFull = null;
     _hotkeyShowSettingFull?.call();
     _hotkeyShowSettingFull = null;
+    _hotkeyShowMessagePanel?.call();
+    _hotkeyShowMessagePanel = null;
+  }
+
+  void setShowMessagePanel() {
+    showMessagePanel.value = !showMessagePanel.value;
   }
 
   void _initDanmakuMask() async {
