@@ -20,6 +20,7 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
+    - rust_builder/cargokit/**
 include: package:flutter_lints/flutter.yaml
 
 formatter:

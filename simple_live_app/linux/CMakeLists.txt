@@ -57,6 +57,10 @@ pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0)
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")
 
+# flutter 3.50.0 needs
+target_link_options(${BINARY_NAME} PRIVATE
+        "LINKER:--push-state,--no-as-needed,-lgcc_s,--pop-state")
+
 # Run the Flutter tool portions of the build. This must not be removed.
 add_dependencies(${BINARY_NAME} flutter_assemble)
 

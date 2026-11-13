@@ -46,7 +46,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: "zulu"
-          java-version: "17"
+          java-version: "21"
           cache: "gradle"
           cache-dependency-path: |
             simple_live_app/android/*.gradle*

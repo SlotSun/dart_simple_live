@@ -4,7 +4,7 @@ publish_to: none
 description: "Slive APP"
 environment: 
   sdk: '>=3.0.5 <4.0.0'
-  flutter: 3.47.9
+  flutter: 3.50.0
 
 dependencies: 
   flutter: 
@@ -24,9 +24,9 @@ dependencies:
   hive_ce: ^2.22.0 # 持久化存储
   hive_ce_flutter: ^2.5.0 # 持久化存储
   logger: ^2.8.0 # 日志
-  firebase_analytics: ^12.4.6
-  firebase_crashlytics: ^5.2.7 # firebase
-  firebase_core: ^4.13.0
+  firebase_analytics: ^13.0.1
+  firebase_crashlytics: ^6.0.1 # firebase
+  firebase_core: ^5.1.0
   intl: ^0.20.2 # 国际化
   pinyin: ^3.3.0
   cryptography: ^2.9.0
@@ -46,7 +46,7 @@ dependencies:
   # ffi
   rust_lib_simple_live_app:
     path: rust_builder
-  flutter_rust_bridge: ^2.13.0
+  flutter_rust_bridge: 2.14.0-beta.2
 
   # Widget
   flutter_staggered_grid_view: ^0.7.0 # 瀑布流 / GridView
@@ -66,15 +66,15 @@ dependencies:
   cross_file: ^0.3.5+4 # 跨平台文件
   # permission_handler: ^12.0.1 # 权限处理
   permission_handler_apple: ^9.5.0
-  permission_handler_android: ^14.0.0
+  permission_handler_android: ^13.0.1
   permission_handler_platform_interface: ^4.4.0
-  flutter_image_gallery_saver: ^2.0.0 # 图片保存到相册
-  screen_brightness_android: ^2.1.3
-  screen_brightness_ios: ^2.1.2
-  screen_brightness_platform_interface: ^2.1.0 #亮度控制
+  flutter_image_gallery_saver: ^2.1.0 # 图片保存到相册
+  screen_brightness_android: ^2.1.6
+  screen_brightness_ios: ^2.1.4
+  screen_brightness_platform_interface: ^2.1.2 #亮度控制
   auto_orientation_v2: 2.3.8 # 屏幕方向
   wakelock_plus: ^1.3.3 # 屏幕常亮
-  file_picker: ^13.1.0 # 文件选择
+  file_picker: ^13.3.3 # 文件选择
   window_manager: ^0.5.0 # 窗口管理
   floating: ^6.0.0 # PIP 画中画
   flutter_inappwebview:
@@ -82,8 +82,8 @@ dependencies:
       url: https://github.com/guide-inc-org/guide-flutter_inappwebview.git
       path: flutter_inappwebview
       ref: sbi_fx_pc/v6.2.0-beta.3
-  connectivity_plus: ^7.0.0 # 网络状态
-  qr_code_scanner_plus: ^2.3.2 # 二维码扫描
+  connectivity_plus: ^7.3.2 # 网络状态
+  qr_code_scanner_plus: ^2.4.1 # 二维码扫描
   flutter_secure_storage: ^11.2.0 # 密钥存储
 
   # 网络相关
@@ -94,16 +94,16 @@ dependencies:
   signalr_netcore: ^1.4.4 # SignalR
 
   # 视频播放
-  volume_controller: any
+  volume_controller: ^3.7.1
   media_kit:
     git:
       url: https://github.com/SlotSun/media-kit.git
-      ref: 15bb693c0dced866ce1c1d6dad88947c056fcd9c
+      ref: 06d441cd3d6da9c67ec5f99455004629482b53cb
       path: ./media_kit
   media_kit_video:
     git:
       url: https://github.com/SlotSun/media-kit.git
-      ref: 15bb693c0dced866ce1c1d6dad88947c056fcd9c
+      ref: 06d441cd3d6da9c67ec5f99455004629482b53cb
       path: ./media_kit_video
 
 dependency_overrides:
@@ -114,7 +114,7 @@ dependency_overrides:
 
 dev_dependencies:
   flutter_lints: ^6.0.0
-  build_runner: ^2.15.1
+  build_runner: ^2.16.1
   hive_ce_generator: ^1.11.2
   flutter_launcher_icons: ^0.14.4
   flutter_test: 
