@@ -187,13 +187,12 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
   VoidCallback _buildFullHotKeyRegister(VoidCallback fun) {
     return () {
-      if (fullScreenState.value == false) {
-        return;
-      }
-      if (SmartDialog.checkExist()) {
-        SmartDialog.dismiss(status: SmartStatus.allCustom);
-      } else {
-        fun(); // call()
+      if (fullScreenState.value || showMessagePanel.value == false) {
+        if (SmartDialog.checkExist()) {
+          SmartDialog.dismiss(status: SmartStatus.allCustom);
+        } else {
+          fun(); // call()
+        }
       }
     };
   }
@@ -1190,7 +1189,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
   // 弹出sc列表
   void showSuperChatSheet({int? duration}) {
-    if (fullScreenState.value) {
+    if (fullScreenState.value || showMessagePanel.value == false) {
       if (isVertical.value && duration == null) {
         // 不适配竖屏直播间
         Utils.showBottomSheet(
