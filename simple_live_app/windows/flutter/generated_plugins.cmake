@@ -8,11 +8,11 @@ list(APPEND FLUTTER_PLUGIN_LIST
   firebase_core
   flutter_inappwebview_windows
   flutter_secure_storage_windows
-  screen_retriever_windows
-  url_launcher_windows
-  share_plus
-  volume_controller
   media_kit_video
+  screen_retriever_windows
+  share_plus
+  url_launcher_windows
+  volume_controller
   window_manager
 )
 
