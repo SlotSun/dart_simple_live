@@ -4,10 +4,9 @@ import 'dart:math';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/convert_helper.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
-import 'package:simple_live_core/src/model/account_info.dart';
-import 'package:simple_live_core/src/model/account_qr_code.dart';
 import 'package:simple_live_core/src/platforms/douyin/douyin_utils.dart';
 import 'package:simple_live_core/src/platforms/douyin/model/douyin_user_info.dart';
+
 import 'douyin_request_params.dart';
 
 class DouyinSite implements LiveSite {

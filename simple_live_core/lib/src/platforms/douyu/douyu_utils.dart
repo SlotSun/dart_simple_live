@@ -62,33 +62,7 @@ class DouyuUtils {
     bool cookieExpired = await _isCookieExpired(cookie);
     bool validExpire = await _validateCookie(cookie);
     if ((cookieExpired || validExpire) && ltp0.isNotEmpty) {
-      // milliseconds not sec
-      final t = DateTime.now().millisecondsSinceEpoch.toString();
-      final query = <String, dynamic>{
-        'client_id': '1',
-        't': t,
-        '_': t,
-        'callback': 'axiosJsonpCallback',
-      };
-      // douyu 有cookie会话残留绑定did需要重启，暂时写死did
-      try {
-        final resp = await HttpClient.instance.getResponse(
-          _apiDouyuPassport,
-          queryParameters: query,
-          header: requestHeader(cookie: 'dy_did=$did;LTP0=$ltp0'),
-        );
-        cookie = (resp.headers['set-cookie'] ?? const <String>[])
-            .map((raw) => raw.split(';').first.trim())
-            .where((s) => s.contains('='))
-            .join('; ');
-        // check again
-        bool validAgain = await _validateCookie(cookie);
-        bool expiredAgain = await _isCookieExpired(cookie);
-        cookie = (validAgain || expiredAgain) ? '' : cookie;
-      } catch (e, s) {
-        CoreLog.e('Douyu refresh cookie error: ${e.toString()}', s);
-        cookie = '';
-      }
+      cookie = await getNewCookies(did: did, ltp0: ltp0, cookie: cookie);
     }
     Map<String, dynamic> map = {
       'cookie': cookie,
@@ -96,6 +70,36 @@ class DouyuUtils {
       'LTP0': ltp0,
     };
     return map;
+  }
+
+  static Future<String> getNewCookies({String did = '', String ltp0 = '', String cookie = ''}) async {
+    // milliseconds not sec
+    final t = DateTime.now().millisecondsSinceEpoch.toString();
+    final query = <String, dynamic>{
+      'client_id': '1',
+      't': t,
+      '_': t,
+      'callback': 'axiosJsonpCallback',
+    };
+    // douyu 有cookie会话残留绑定did需要重启，暂时写死did
+    try {
+      final resp = await HttpClient.instance.getResponse(
+        _apiDouyuPassport,
+        queryParameters: query,
+        header: requestHeader(cookie: 'dy_did=$did;LTP0=$ltp0'),
+      );
+      cookie = (resp.headers['set-cookie'] ?? const <String>[])
+          .map((raw) => raw.split(';').first.trim())
+          .where((s) => s.contains('='))
+          .join('; ');
+      // check again
+      bool validAgain = await _validateCookie(cookie);
+      cookie = validAgain ? '' : cookie;
+    } catch (e, s) {
+      CoreLog.e('Douyu refresh cookie error: ${e.toString()}', s);
+      cookie = '';
+    }
+    return cookie;
   }
 
   // expired -> true

@@ -419,7 +419,7 @@ class DouyuSite implements LiveSite {
         // cookie-jar maybe better
         var pollCookie = resp.headers['set-cookie']!;
         final ltp0 = DouyuUtils.pickSetCookie(pollCookie, 'LTP0');
-        var newCookie = await DouyuUtils.refreshCookie(did: _dy_did, ltp0: ltp0, cookie: _cookie);
+        var newCookie = await DouyuUtils.getNewCookies(did: _dy_did, ltp0: ltp0, cookie: _cookie);
         // 拼装一下
         final Map<String, dynamic> credentialJson = {'dy_did': _dy_did, 'LTP0': ltp0, 'cookie': newCookie};
         qrPollResult.credential = jsonEncode(credentialJson);
