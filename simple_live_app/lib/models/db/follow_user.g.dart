@@ -32,13 +32,16 @@ class FollowUserAdapter extends TypeAdapter<FollowUser> {
       deleted: fields[12] == null ? false : fields[12] as bool,
       updateTime: fields[13] == null ? 0 : (fields[13] as num).toInt(),
       lastWatchTime: fields[14] == null ? 0 : (fields[14] as num?)?.toInt(),
+      categoryId: fields[15] == null ? '' : fields[15] as String?,
+      categoryName: fields[16] == null ? '' : fields[16] as String?,
+      tagLocked: fields[17] == null ? false : fields[17] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, FollowUser obj) {
     writer
-      ..writeByte(15)
+      ..writeByte(18)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -68,7 +71,13 @@ class FollowUserAdapter extends TypeAdapter<FollowUser> {
       ..writeByte(13)
       ..write(obj.updateTime)
       ..writeByte(14)
-      ..write(obj.lastWatchTime);
+      ..write(obj.lastWatchTime)
+      ..writeByte(15)
+      ..write(obj.categoryId)
+      ..writeByte(16)
+      ..write(obj.categoryName)
+      ..writeByte(17)
+      ..write(obj.tagLocked);
   }
 
   @override
@@ -77,5 +86,7 @@ class FollowUserAdapter extends TypeAdapter<FollowUser> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is FollowUserAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
+      other is FollowUserAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
 }

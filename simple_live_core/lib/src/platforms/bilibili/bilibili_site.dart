@@ -242,6 +242,9 @@ class BiliBiliSite implements LiveSite {
       url: "https://live.bilibili.com/$roomId",
       introduction: roomInfo["room_info"]["description"].toString(),
       notice: "",
+      categoryId: asT<int?>(roomInfo["room_info"]["area_id"])?.toString(),
+      categoryName: asT<String?>(roomInfo["room_info"]["area_name"]),
+      parentCategoryName: asT<String?>(roomInfo["room_info"]["parent_area_name"]),
       danmakuData: BiliBiliDanmakuArgs(
         roomId: int.tryParse(realRoomId) ?? 0,
         uid: userId,

@@ -261,6 +261,9 @@ class LocalStorageService extends GetxService {
   /// 数据库版本
   static const String kHiveDbVer = "kHiveDbVer";
 
+  /// 标签自动归类：老数据“手动标签锁定”迁移标记
+  static const String kTagAutoMigrated = "kTagAutoMigrated";
+
   /// 隐藏不在线关注
   static const String kHideOfflineFollow = "HideOfflineFollow";
 

@@ -236,7 +236,9 @@ class TwitchSite implements LiveSite {
         introduction: "",
         notice: "",
         danmakuData: roomId,
-        data: null);
+        data: null,
+        categoryId: user.stream?.game?.id,
+        categoryName: user.stream?.game?.name);
   }
 
   Future<List<TwitchResponse>> _getRoomInfo(String roomId) async {

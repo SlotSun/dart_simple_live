@@ -20,6 +20,7 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(FollowUserBlockAdapter());
     registerAdapter(FollowUserTagAdapter());
     registerAdapter(HistoryAdapter());
+    registerAdapter(TagBindingAdapter());
   }
 }
 
@@ -33,5 +34,6 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
     registerAdapter(FollowUserBlockAdapter());
     registerAdapter(FollowUserTagAdapter());
     registerAdapter(HistoryAdapter());
+    registerAdapter(TagBindingAdapter());
   }
 }

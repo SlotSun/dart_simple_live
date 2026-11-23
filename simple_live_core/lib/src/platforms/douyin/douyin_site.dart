@@ -254,6 +254,9 @@ class DouyinSite implements LiveSite {
         cookie: headers["cookie"],
       ),
       data: room["stream_url"],
+      // 抖音分类字段尚未实测确认，取不到则为 null（此时该房间不参与自动打标签）
+      categoryId: room["partition_id"]?.toString(),
+      categoryName: room["partition_type_name"]?.toString(),
     );
   }
 
@@ -311,6 +314,8 @@ class DouyinSite implements LiveSite {
         cookie: headers["cookie"],
       ),
       data: roomStatus ? roomData["stream_url"] : {},
+      categoryId: roomData["partition_id"]?.toString(),
+      categoryName: roomData["partition_type_name"]?.toString(),
     );
   }
 
@@ -350,6 +355,8 @@ class DouyinSite implements LiveSite {
         cookie: headers["cookie"],
       ),
       data: roomStatus ? room["stream_url"] : {},
+      categoryId: room["partition_id"]?.toString(),
+      categoryName: room["partition_type_name"]?.toString(),
     );
   }
 

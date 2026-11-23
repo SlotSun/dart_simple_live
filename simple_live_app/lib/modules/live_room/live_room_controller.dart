@@ -21,6 +21,7 @@ import 'package:simple_live_app/app/utils/sandbox.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_block.dart';
 import 'package:simple_live_app/models/db/history.dart';
+import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/modules/live_room/danmaku/danmaku_emoticon.dart';
 import 'package:simple_live_app/modules/live_room/player/player_controller.dart';
 import 'package:simple_live_app/modules/live_room/player/player_controls.dart';
@@ -789,6 +790,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
         addTime: DateTime.now(),
         lastWatchTime: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         watchDurationSec: historyDurationSec,
+        categoryId: detail.value?.categoryId ?? "",
+        categoryName: detail.value?.categoryName ?? "",
       )
         ..liveStatus.value = liveStatus.value ? 2 : 1
         ..cover.value = detail.value?.cover ?? "",
@@ -837,12 +840,26 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
           }
           var item = follow;
           var options = FollowService.instance.getTagOptionsWithAll();
+          var categoryId = detail.value?.categoryId ?? "";
+          var hasCategory = categoryId.isNotEmpty;
+          var categoryName = detail.value?.categoryName ?? categoryId;
           return ListView.separated(
             shrinkWrap: true,
-            itemCount: options.length,
+            itemCount: options.length + (hasCategory ? 1 : 0),
             separatorBuilder: (_, __) => const Divider(height: 1),
             itemBuilder: (context, i) {
-              var tag = options[i];
+              if (hasCategory && i == 0) {
+                return ListTile(
+                  leading: const Icon(Icons.sell_outlined),
+                  title: Text("把当前分类「$categoryName」绑定到标签"),
+                  subtitle: const Text("绑定后，关注该分类的主播会自动归入该标签"),
+                  onTap: () {
+                    Get.back();
+                    bindCurrentCategoryToTag();
+                  },
+                );
+              }
+              var tag = options[hasCategory ? i - 1 : i];
               var selected = tag.tag == item.tag;
               return ListTile(
                 title: Text(tag.tag),
@@ -862,6 +879,54 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
                   SmartDialog.showToast("已切换到「${tag.tag}」");
                 },
               );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  /// 把当前直播间的平台分类绑定到某个标签（绑定后自动归类生效）
+  Future<void> bindCurrentCategoryToTag() async {
+    final d = detail.value;
+    if (d == null) {
+      return;
+    }
+    final categoryId = d.categoryId ?? "";
+    if (categoryId.isEmpty) {
+      SmartDialog.showToast("当前平台未取到分类，暂不支持绑定");
+      return;
+    }
+    final categoryName = d.categoryName ?? categoryId;
+    final tags = FollowService.instance.followTagList;
+    if (tags.isEmpty) {
+      SmartDialog.showToast("请先在「标签管理」中添加标签");
+      return;
+    }
+    await Utils.showBottomSheet(
+      title: "将「$categoryName」绑定到标签",
+      child: ListView.separated(
+        shrinkWrap: true,
+        itemCount: tags.length,
+        separatorBuilder: (_, __) => const Divider(height: 1),
+        itemBuilder: (context, i) {
+          final tag = tags[i];
+          final bound = tag.bindings.any((b) => b.matches(site.id, categoryId));
+          return ListTile(
+            title: Text(tag.tag),
+            trailing: bound ? const Icon(Icons.link) : null,
+            onTap: () async {
+              Get.back();
+              if (bound) {
+                SmartDialog.showToast("「${tag.tag}」已绑定该分类");
+                return;
+              }
+              tag.bindings = [
+                ...tag.bindings,
+                TagBinding(siteId: site.id, categoryId: categoryId, categoryName: categoryName),
+              ];
+              await FollowService.instance.updateFollowUserTag(tag);
+              SmartDialog.showToast("已绑定「$categoryName」到「${tag.tag}」");
             },
           );
         },

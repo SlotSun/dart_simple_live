@@ -253,6 +253,8 @@ class HuyaSite implements LiveSite {
           introduction: streamDataGameLiveInfo["introduction"],
           notice: streamDataGameLiveInfo["introduction"],
           isRecord: roomDataJson["isReplay"],
+          categoryId: streamDataGameLiveInfo["gid"]?.toString(),
+          categoryName: streamDataGameLiveInfo["gameFullName"]?.toString(),
         );
         // live -> add HuyaUrlDataModel and danmaku
         if (result.status) {

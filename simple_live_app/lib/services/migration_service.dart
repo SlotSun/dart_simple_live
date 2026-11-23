@@ -175,6 +175,20 @@ class MigrationService {
       LocalStorageService.instance.removeValue(LocalStorageService.kDouyuLTP0);
       LocalStorageService.instance.removeValue(LocalStorageService.kDouyinCookie);
     }
+    // 标签自动归类：老数据里已手动归类过的关注一律锁定，避免被自动归类覆盖
+    if (LocalStorageService.instance.getValue(LocalStorageService.kTagAutoMigrated, false) != true) {
+      var followList = DBService.instance.followBox.values.toList();
+      var locked = 0;
+      for (FollowUser follow in followList) {
+        if (follow.tag != "全部" && !follow.tagLocked) {
+          follow.tagLocked = true;
+          await DBService.instance.addFollow(follow);
+          locked++;
+        }
+      }
+      await LocalStorageService.instance.setValue(LocalStorageService.kTagAutoMigrated, true);
+      Log.i("Migration: locked manual tags for $locked follows");
+    }
     LocalStorageService.instance.settingsBox.put(LocalStorageService.kHiveDbVer, curAppVer);
   }
 }

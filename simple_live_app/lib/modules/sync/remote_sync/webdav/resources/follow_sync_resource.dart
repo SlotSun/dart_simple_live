@@ -112,6 +112,13 @@ class FollowSyncResource implements SyncResource<FollowBundle> {
     final Map<String, List<String>> tagMap = {
       for (var tag in local.tags) tag.tag: <String>[],
     };
+    // 合并两侧的标签绑定配置（标签名 -> 平台分类），本地优先，远程补齐
+    final Map<String, List<TagBinding>> bindingMap = {
+      for (var tag in remote.tags) tag.tag: tag.bindings,
+    };
+    for (var tag in local.tags) {
+      bindingMap[tag.tag] = tag.bindings;
+    }
 
     for (var follow in resFollows) {
       if (follow.tag != "全部") {
@@ -126,6 +133,7 @@ class FollowSyncResource implements SyncResource<FollowBundle> {
         id: lastKey,
         tag: entry.key,
         userId: entry.value,
+        bindings: bindingMap[entry.key] ?? [],
       );
       resTags.add(followUserTag);
     }
