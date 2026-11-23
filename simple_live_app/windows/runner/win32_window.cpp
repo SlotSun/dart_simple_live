@@ -16,6 +16,24 @@ namespace {
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 #endif
 
+/// Window attributes that let the app choose the title bar colors itself.
+/// Redefined in case the developer's machine has a Windows SDK older than
+/// version 10.0.22000.0.
+/// See: https://learn.microsoft.com/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute
+#ifndef DWMWA_BORDER_COLOR
+#define DWMWA_BORDER_COLOR 34
+#endif
+#ifndef DWMWA_CAPTION_COLOR
+#define DWMWA_CAPTION_COLOR 35
+#endif
+#ifndef DWMWA_TEXT_COLOR
+#define DWMWA_TEXT_COLOR 36
+#endif
+
+/// Passing this value to the caption/text/border color attributes restores the
+/// system default color.
+constexpr unsigned int kTitleBarColorDefault = 0xFFFFFFFF;
+
 constexpr const wchar_t kWindowClassName[] = L"FLUTTER_RUNNER_WIN32_WINDOW";
 
 /// Registry key for app theme preference.
@@ -272,17 +290,76 @@ void Win32Window::OnDestroy() {
   // No-op; provided for subclasses.
 }
 
-void Win32Window::UpdateTheme(HWND const window) {
-  DWORD light_mode;
-  DWORD light_mode_size = sizeof(light_mode);
-  LSTATUS result = RegGetValue(HKEY_CURRENT_USER, kGetPreferredBrightnessRegKey,
-                               kGetPreferredBrightnessRegValue,
-                               RRF_RT_REG_DWORD, nullptr, &light_mode,
-                               &light_mode_size);
+// static
+bool Win32Window::app_title_bar_theme_set_ = false;
+bool Win32Window::app_title_bar_dark_ = false;
+bool Win32Window::app_title_bar_use_caption_color_ = false;
+unsigned int Win32Window::app_title_bar_caption_color_ = kTitleBarColorDefault;
+unsigned int Win32Window::app_title_bar_text_color_ = kTitleBarColorDefault;
 
-  if (result == ERROR_SUCCESS) {
-    BOOL enable_dark_mode = light_mode == 0;
-    DwmSetWindowAttribute(window, DWMWA_USE_IMMERSIVE_DARK_MODE,
-                          &enable_dark_mode, sizeof(enable_dark_mode));
+// static
+void Win32Window::SetTitleBarTheme(HWND const window,
+                                   bool dark,
+                                   bool use_caption_color,
+                                   unsigned int caption_color,
+                                   unsigned int text_color) {
+  app_title_bar_theme_set_ = true;
+  app_title_bar_dark_ = dark;
+  app_title_bar_use_caption_color_ = use_caption_color;
+  app_title_bar_caption_color_ = caption_color;
+  app_title_bar_text_color_ = text_color;
+
+  ApplyTitleBarTheme(window);
+}
+
+// static
+void Win32Window::UpdateTheme(HWND const window) {
+  // The app's own theme wins over the system theme once it has been reported.
+  if (!app_title_bar_theme_set_) {
+    DWORD light_mode;
+    DWORD light_mode_size = sizeof(light_mode);
+    LSTATUS result =
+        RegGetValue(HKEY_CURRENT_USER, kGetPreferredBrightnessRegKey,
+                    kGetPreferredBrightnessRegValue, RRF_RT_REG_DWORD, nullptr,
+                    &light_mode, &light_mode_size);
+
+    if (result != ERROR_SUCCESS) {
+      return;
+    }
+    app_title_bar_dark_ = light_mode == 0;
+    app_title_bar_use_caption_color_ = false;
   }
+
+  ApplyTitleBarTheme(window);
+}
+
+// static
+void Win32Window::ApplyTitleBarTheme(HWND const window) {
+  BOOL enable_dark_mode = app_title_bar_dark_ ? TRUE : FALSE;
+  DwmSetWindowAttribute(window, DWMWA_USE_IMMERSIVE_DARK_MODE,
+                        &enable_dark_mode, sizeof(enable_dark_mode));
+
+  // Custom caption colors require Windows 11 (build 22000) or later. Older
+  // builds reject these attributes, which is harmless: the immersive dark mode
+  // flag above already produced a dark or light frame there.
+  unsigned int caption_color = kTitleBarColorDefault;
+  unsigned int text_color = kTitleBarColorDefault;
+  unsigned int border_color = kTitleBarColorDefault;
+  if (app_title_bar_use_caption_color_) {
+    caption_color = app_title_bar_caption_color_;
+    text_color = app_title_bar_text_color_;
+    border_color = app_title_bar_caption_color_;
+  }
+  DwmSetWindowAttribute(window, DWMWA_CAPTION_COLOR, &caption_color,
+                        sizeof(caption_color));
+  DwmSetWindowAttribute(window, DWMWA_TEXT_COLOR, &text_color,
+                        sizeof(text_color));
+  DwmSetWindowAttribute(window, DWMWA_BORDER_COLOR, &border_color,
+                        sizeof(border_color));
+
+  // Repaint the non-client area so the new frame shows up immediately instead
+  // of on the next activation or resize.
+  ::SetWindowPos(window, nullptr, 0, 0, 0, 0,
+                 SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+                     SWP_NOACTIVATE | SWP_NOOWNERZORDER);
 }

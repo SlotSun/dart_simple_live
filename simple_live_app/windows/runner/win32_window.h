@@ -55,6 +55,17 @@ class Win32Window {
   // Return a RECT representing the bounds of the current client area.
   RECT GetClientArea();
 
+  // Applies an app-controlled title bar theme (caption/text/border colors)
+  // instead of following the Windows system theme. |caption_color| and
+  // |text_color| are COLORREF values (0x00BBGGRR). Pass
+  // |use_caption_color| = false to restore the system default caption colors.
+  // Once called, the window stops mirroring the system light/dark setting.
+  static void SetTitleBarTheme(HWND const window,
+                              bool dark,
+                              bool use_caption_color,
+                              unsigned int caption_color,
+                              unsigned int text_color);
+
  protected:
   // Processes and route salient window messages for mouse handling,
   // size change and DPI. Delegates handling of these to member overloads that
@@ -87,8 +98,21 @@ class Win32Window {
   // Retrieves a class instance pointer for |window|
   static Win32Window* GetThisFromHandle(HWND const window) noexcept;
 
-  // Update the window frame's theme to match the system theme.
+  // Update the window frame's theme: follows the app-controlled theme when one
+  // has been set, otherwise mirrors the system theme.
   static void UpdateTheme(HWND const window);
+
+  // Writes the stored title bar theme (app preference or system fallback) to
+  // |window|.
+  static void ApplyTitleBarTheme(HWND const window);
+
+  // App-controlled title bar theme. Valid only when
+  // |app_title_bar_theme_set_| is true.
+  static bool app_title_bar_theme_set_;
+  static bool app_title_bar_dark_;
+  static bool app_title_bar_use_caption_color_;
+  static unsigned int app_title_bar_caption_color_;
+  static unsigned int app_title_bar_text_color_;
 
   bool quit_on_close_ = false;
 
