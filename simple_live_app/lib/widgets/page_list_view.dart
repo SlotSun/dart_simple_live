@@ -49,28 +49,11 @@ class PageListView extends StatelessWidget {
             onLoad: pageController.loadData,
             onRefresh: pageController.refreshData,
             child: ListView.separated(
+              controller: pageController.scrollController,
               padding: padding,
               itemCount: pageController.list.length,
               itemBuilder: itemBuilder,
               separatorBuilder: separatorBuilder ?? (context, i) => const SizedBox(),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: // 加载更多按钮
-                Visibility(
-              visible: (Platform.isWindows || Platform.isLinux || Platform.isMacOS) &&
-                  pageController.canLoadMore.value &&
-                  !pageController.pageLoadding.value &&
-                  !pageController.pageEmpty.value,
-              child: Center(
-                child: TextButton(
-                  onPressed: pageController.loadData,
-                  child: const Text("加载更多"),
-                ),
-              ),
             ),
           ),
           Positioned(
