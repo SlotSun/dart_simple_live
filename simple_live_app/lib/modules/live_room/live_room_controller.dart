@@ -812,6 +812,63 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     EventBus.instance.emit(Constant.kUpdateFollow, id);
   }
 
+  /// 当前直播间在关注列表中的分类名（未关注时为“全部”）
+  String get currentFollowTag {
+    var id = "${site.id}_$roomId";
+    var follow =
+        FollowService.instance.followList.firstWhereOrNull((u) => u.id == id);
+    return follow?.tag ?? "全部";
+  }
+
+  /// 弹出分类选择：勾选当前分类，点击其它分类即切换
+  Future<void> showTagPicker() async {
+    var id = "${site.id}_$roomId";
+    await Utils.showBottomSheet(
+      title: "选择分类",
+      child: Obx(
+        () {
+          var follow = FollowService.instance.followList
+              .firstWhereOrNull((u) => u.id == id);
+          if (follow == null) {
+            return const Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(child: Text("请先关注该直播间")),
+            );
+          }
+          var item = follow;
+          var options = FollowService.instance.getTagOptionsWithAll();
+          return ListView.separated(
+            shrinkWrap: true,
+            itemCount: options.length,
+            separatorBuilder: (_, __) => const Divider(height: 1),
+            itemBuilder: (context, i) {
+              var tag = options[i];
+              var selected = tag.tag == item.tag;
+              return ListTile(
+                title: Text(tag.tag),
+                trailing: selected
+                    ? Icon(
+                        Icons.check,
+                        color: Theme.of(context).colorScheme.primary,
+                      )
+                    : null,
+                onTap: () async {
+                  Get.back();
+                  if (selected) {
+                    return;
+                  }
+                  await FollowService.instance.setFollowTag(item, tag);
+                  EventBus.instance.emit(Constant.kUpdateFollow, id);
+                  SmartDialog.showToast("已切换到「${tag.tag}」");
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
   void share() {
     if (detail.value == null) {
       return;

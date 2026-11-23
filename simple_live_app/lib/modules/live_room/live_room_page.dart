@@ -234,6 +234,22 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                                   label: const Text("关注"),
                                 ),
                         ),
+                        // 分类（仅 Windows，未关注时隐藏）
+                        if (Platform.isWindows)
+                          Obx(
+                            () => controller.followed.value
+                                ? TextButton.icon(
+                                    style: TextButton.styleFrom(
+                                      textStyle: const TextStyle(fontSize: 14),
+                                    ),
+                                    onPressed: controller.showTagPicker,
+                                    icon: const Icon(Remix.price_tag_3_line),
+                                    label: Text(
+                                      "分类：${controller.currentFollowTag}",
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
                         const Expanded(child: Center()),
                         TextButton.icon(
                           style: TextButton.styleFrom(
