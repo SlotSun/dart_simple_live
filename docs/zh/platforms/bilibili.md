@@ -5,6 +5,7 @@
 ## URL 格式
 ``` 
 https://live.bilibili.com/{房间号}
+https://b23.tv/{房间号}
 ```
 
 ## 功能
