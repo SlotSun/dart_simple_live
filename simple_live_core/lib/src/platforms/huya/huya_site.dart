@@ -4,8 +4,6 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
-import 'package:simple_live_core/src/model/account_info.dart';
-import 'package:simple_live_core/src/model/account_qr_code.dart';
 import 'package:simple_live_core/src/platforms/huya/common/huya_request_params.dart';
 import 'package:simple_live_core/src/platforms/huya/huya_utils.dart';
 import 'package:simple_live_core/src/platforms/huya/tars/get_cdn_token_ex_req.dart';
