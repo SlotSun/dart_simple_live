@@ -48,8 +48,7 @@ class AppSettingsController extends GetxController {
 
   var dbPath = "";
 
-  @override
-  Future<void> onInit() async {
+  Future<void> init() async {
     getThemeMode();
     firstRun = LocalStorageService.instance.getValue(LocalStorageService.kFirstRun, true);
     getAppSafeEnable();

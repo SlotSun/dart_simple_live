@@ -112,7 +112,7 @@ Future initServices() async {
   await Get.put(LocalStorageService()).init();
   await Get.put(DBService()).init();
   //初始化设置控制器
-  await Get.put(AppSettingsController()).onInit();
+  await Get.put(AppSettingsController()).init();
 
   await Get.put(SafeService()).init();
 
