@@ -518,6 +518,7 @@ class DouyinSite implements LiveSite {
       //     CoreLog.error("未找到 ao 流 $e");
       //   }
     }
+    qualities.removeWhere((item) => item.quality == '原画');
     qualities.sort((a, b) => b.sort.compareTo(a.sort));
     return qualities;
   }
