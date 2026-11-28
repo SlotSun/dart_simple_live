@@ -9,9 +9,17 @@ import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:flutter/services.dart';
 
-class WindowService extends GetxService implements WindowListener {
+class WindowService extends GetxService
+    with WidgetsBindingObserver
+    implements WindowListener {
   static WindowService get instance => Get.find<WindowService>();
+
+  static const MethodChannel _windowChannel = MethodChannel("slive/window");
+
+  /// 深色模式下标题栏与内容区共用这个底色，避免出现一条浅色分隔线
+  static const Color darkTitleBarColor = Color(0xFF121212);
 
   bool isPIP = false;
   bool isMaxAuto = false;
@@ -21,9 +29,65 @@ class WindowService extends GetxService implements WindowListener {
     windowManager.addListener(this);
   }
 
+  /// Windows 原生标题栏属于非客户区，不会跟随 Flutter 主题，必须显式同步。
+  /// 原生侧收到过一次应用主题后就不再跟随系统主题。
+  Future<void> syncTitleBarTheme() async {
+    if (!Platform.isWindows) {
+      return;
+    }
+    final isDark = _resolveDarkTitleBar();
+    try {
+      await _windowChannel.invokeMethod("setTitleBarTheme", {
+        "dark": isDark,
+        "useCaptionColor": isDark,
+        "captionColor": _toColorRef(darkTitleBarColor),
+        "textColor": _toColorRef(Colors.white),
+      });
+    } catch (e) {
+      Log.w("syncTitleBarTheme failed: $e", false);
+    }
+  }
+
+  bool _resolveDarkTitleBar() {
+    final mode =
+        ThemeMode.values[AppSettingsController.instance.themeMode.value];
+    if (mode == ThemeMode.dark) {
+      return true;
+    }
+    if (mode == ThemeMode.light) {
+      return false;
+    }
+    return WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+        Brightness.dark;
+  }
+
+  /// Flutter Color -> Win32 COLORREF (0x00BBGGRR)
+  int _toColorRef(Color color) {
+    final value = color.toARGB32();
+    final r = (value >> 16) & 0xFF;
+    final g = (value >> 8) & 0xFF;
+    final b = value & 0xFF;
+    return (b << 16) | (g << 8) | r;
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    syncTitleBarTheme();
+  }
+
+  @override
+  void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.onClose();
+  }
+
   Future<void> init() async {
     isMaxAuto = AppSettingsController.instance.windowMaxAuto.value;
     isMaxState = AppSettingsController.instance.windowMaxState.value;
+    // 系统深浅色变化时同步标题栏（仅“跟随系统”模式下有意义）
+    WidgetsBinding.instance.addObserver(this);
+    // 窗口尚未显示，此时设置标题栏不会出现“先浅后深”的闪烁
+    await syncTitleBarTheme();
     final width = LocalStorageService.instance.getValue(LocalStorageService.kWindowWidth, 1280.0);
     final height = LocalStorageService.instance.getValue(LocalStorageService.kWindowHeight, 720.0);
     final x = LocalStorageService.instance.getValue(LocalStorageService.kWindowX, 320.0);

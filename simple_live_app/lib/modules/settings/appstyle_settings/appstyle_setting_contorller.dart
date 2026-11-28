@@ -12,6 +12,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/log.dart';
+import 'package:simple_live_app/services/window_service.dart';
 import 'package:simple_live_app/models/font_model.dart';
 import 'package:simple_live_app/requests/http_client.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
@@ -230,8 +231,14 @@ class AppStyleSettingController extends GetxController {
     themeMode.value = i;
     var mode = ThemeMode.values[i];
 
-    LocalStorageService.instance.setValue(LocalStorageService.kThemeMode, i);
+    // 走生成的 setter，保证 Rx 与本地存储一致（main.dart 的 themeMode 读的是这个 Rx）
+    Get.find<AppSettingsController>().setThemeMode(i);
     Get.changeThemeMode(mode);
+
+    // Windows 原生标题栏不会跟随 Flutter 主题，需要显式同步
+    if (Platform.isWindows && Get.isRegistered<WindowService>()) {
+      WindowService.instance.syncTitleBarTheme();
+    }
   }
 
   void setStyleColor(int e) {
