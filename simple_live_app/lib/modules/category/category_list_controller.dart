@@ -9,6 +9,11 @@ class CategoryListController extends BasePageController<AppLiveCategory> {
 
   @override
   Future<List<AppLiveCategory>> getData(int page, int pageSize) async {
+    // 分类接口不分页，一次返回全部数据，
+    // 避免滚到底部自动加载时重复追加相同分类。
+    if (page > 1) {
+      return [];
+    }
     var result = await site.liveSite.getCategories();
 
     return result.map((e) => AppLiveCategory.fromLiveCategory(e)).toList();
