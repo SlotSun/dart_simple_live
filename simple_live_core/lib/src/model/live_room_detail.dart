@@ -40,6 +40,15 @@ class LiveRoomDetail {
   /// 链接
   final String url;
 
+  /// 平台分类ID（各平台自己的分类ID体系，用于标签自动绑定）
+  final String? categoryId;
+
+  /// 平台分类名（如：无畏契约 / VALORANT）
+  final String? categoryName;
+
+  /// 平台一级分类名（如：网游 / 娱乐）
+  final String? parentCategoryName;
+
   LiveRoomDetail({
     required this.roomId,
     required this.title,
@@ -54,6 +63,9 @@ class LiveRoomDetail {
     this.danmakuData,
     required this.url,
     this.isRecord = false,
+    this.categoryId,
+    this.categoryName,
+    this.parentCategoryName,
   });
 
   LiveRoomDetail copyWith({
@@ -70,6 +82,9 @@ class LiveRoomDetail {
     dynamic danmakuData,
     String? url,
     bool? isRecord,
+    String? categoryId,
+    String? categoryName,
+    String? parentCategoryName,
   }) {
     return LiveRoomDetail(
       roomId: roomId ?? this.roomId,
@@ -85,6 +100,9 @@ class LiveRoomDetail {
       danmakuData: danmakuData ?? this.danmakuData,
       isRecord: isRecord ?? this.isRecord,
       url: url ?? this.url,
+      categoryId: categoryId ?? this.categoryId,
+      categoryName: categoryName ?? this.categoryName,
+      parentCategoryName: parentCategoryName ?? this.parentCategoryName,
     );
   }
 
@@ -112,6 +130,9 @@ class LiveRoomDetail {
       "danmakuData": danmakuData.toString(),
       "url": url,
       "isRecord": isRecord,
+      "categoryId": categoryId,
+      "categoryName": categoryName,
+      "parentCategoryName": parentCategoryName,
     });
   }
 }

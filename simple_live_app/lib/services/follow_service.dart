@@ -72,6 +72,9 @@ class FollowService extends GetxService {
 
   bool _snap = false;
 
+  /// 正在执行自动归类（防止 setFollowTag -> addFollow -> applyAutoTag 递归）
+  bool _autoTagging = false;
+
   @override
   Future<void> onInit() async {
     subscription = EventBus.instance.listen(Constant.kUpdateFollow, (data) {
@@ -121,6 +124,9 @@ class FollowService extends GetxService {
   }
 
   Future removeFollowUserTag(FollowUserTag tag) async {
+    // 先移除标签，避免随后的自动归类把关注又归回该标签
+    followTagList.remove(tag);
+    await DBService.instance.deleteFollowTag(tag.id);
     // 将tag下的所有follow设置为全部
     for (var i in tag.userId) {
       var follow = DBService.instance.followBox.get(i);
@@ -129,8 +135,6 @@ class FollowService extends GetxService {
         await FollowService.instance.addFollow(follow);
       }
     }
-    followTagList.remove(tag);
-    await DBService.instance.deleteFollowTag(tag.id);
   }
 
   // 获取用户自定义标签列表
@@ -148,7 +152,7 @@ class FollowService extends GetxService {
   }
 
   /// 为关注项设置标签（统一逻辑）
-  Future<void> setFollowTag(FollowUser item, FollowUserTag targetTag) async {
+  Future<void> setFollowTag(FollowUser item, FollowUserTag targetTag, {bool manual = true}) async {
     // 当前标签对象（可能为“全部”且不在 followTagList 中）
     FollowUserTag? currentTag;
     if (item.tag != '全部') {
@@ -184,6 +188,10 @@ class FollowService extends GetxService {
 
     // 更新FollowUser本身
     item.tag = targetTag.tag;
+    // 用户手动设置标签后，不再参与自动归类
+    if (manual) {
+      item.tagLocked = true;
+    }
     await addFollow(item);
   }
 
@@ -246,6 +254,10 @@ class FollowService extends GetxService {
     // 重新关注时清除墓碑标记
     follow.deleted = false;
     follow.updateTime = 0;
+    // 自动归类（方案A：未手动设置过标签时，按平台分类自动归入绑定标签）
+    if (!_autoTagging) {
+      await applyAutoTag(follow);
+    }
 
     // 更新标签归属
     if (follow.tag != '全部') {
@@ -499,6 +511,8 @@ class FollowService extends GetxService {
     }
     await Future.wait(tasks);
     await pool.close();
+    // 已取得分类的关注项，顺手续上自动归类
+    await applyAutoTags();
 
     // 增量检查：自动解冻 lastWatchTime >= cutoff 的用户
     final threshold = AppSettingsController.instance.dormancyThreshold.value;
@@ -527,6 +541,8 @@ class FollowService extends GetxService {
       item.cover.value = detail.status ? detail.cover : "";
       item.title.value = detail.title;
       item.online.value = detail.online;
+      // 同步平台分类（用于标签自动归类）
+      await _syncFollowCategory(item, detail);
     } catch (e) {
       Log.logPrint(e);
     } finally {
@@ -537,6 +553,73 @@ class FollowService extends GetxService {
         filterData();
         updating.value = false;
       }
+    }
+  }
+
+  /// 同步关注项的平台分类（数据来自直播间详情，零额外请求）
+  Future<void> _syncFollowCategory(FollowUser item, LiveRoomDetail detail) async {
+    final categoryId = detail.categoryId ?? "";
+    final categoryName = detail.categoryName ?? "";
+    if (categoryId.isEmpty) {
+      return;
+    }
+    if (item.categoryId == categoryId && item.categoryName == categoryName) {
+      return;
+    }
+    item.categoryId = categoryId;
+    item.categoryName = categoryName;
+    await DBService.instance.addFollow(item);
+    // 老数据补齐：已关注但还没归类、也没手动设置过标签的，顺手归类
+    await applyAutoTag(item);
+  }
+
+  /// 按平台分类查找已绑定该分类的标签
+  FollowUserTag? findTagByCategory(String siteId, String categoryId) {
+    for (final tag in followTagList) {
+      if (tag.bindings.any((binding) => binding.matches(siteId, categoryId))) {
+        return tag;
+      }
+    }
+    return null;
+  }
+
+  /// 自动归类（方案A）
+  ///
+  /// 生效条件：未手动设置过标签(tagLocked=false)、当前标签为“全部”、
+  /// 已取得平台分类、且存在绑定了该分类的标签。
+  /// 归类后不再跟随主播换分类，避免标签来回跳动。
+  Future<bool> applyAutoTag(FollowUser follow) async {
+    if (_autoTagging) {
+      return false;
+    }
+    if (follow.tagLocked || follow.tag != "全部") {
+      return false;
+    }
+    final categoryId = follow.categoryId ?? "";
+    if (categoryId.isEmpty) {
+      return false;
+    }
+    final targetTag = findTagByCategory(follow.siteId, categoryId);
+    if (targetTag == null) {
+      return false;
+    }
+    _autoTagging = true;
+    try {
+      await setFollowTag(follow, targetTag, manual: false);
+    } finally {
+      _autoTagging = false;
+    }
+    Log.i("Follow-Service: auto tag ${follow.userName} -> ${targetTag.tag}");
+    return true;
+  }
+
+  /// 全量自动归类（老数据补齐、数据校准后调用）
+  Future<void> applyAutoTags() async {
+    if (followTagList.isEmpty) {
+      return;
+    }
+    for (final follow in followList.toList()) {
+      await applyAutoTag(follow);
     }
   }
 
@@ -793,6 +876,10 @@ class FollowService extends GetxService {
     var followUserListTemp = DBService.instance.getFollowList();
     var historyListTemp = DBService.instance.getHistories();
     var oldTagList = DBService.instance.getFollowTagList();
+    // 重建标签索引时保留已绑定的平台分类，避免自动归类配置丢失
+    final Map<String, List<TagBinding>> bindingMap = {
+      for (var tag in oldTagList) tag.tag: tag.bindings,
+    };
     final Map<String, List<String>> tagMap = {
       for (var tag in oldTagList) tag.tag: <String>[],
     };
@@ -828,6 +915,7 @@ class FollowService extends GetxService {
         id: lastKey,
         tag: entry.key,
         userId: entry.value,
+        bindings: bindingMap[entry.key] ?? [],
       );
       res[followUserTag.id] = followUserTag;
     }

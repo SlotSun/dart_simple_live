@@ -187,7 +187,10 @@ class FollowInfoController extends BasePageController<FollowUser> {
         watchDurationSec: current.watchDurationSec,
         tag: current.tag,
         remark: current.remark,
-        romanName: current.romanName)
+        romanName: current.romanName,
+        tagLocked: current.tagLocked,
+        categoryId: detail.categoryId ?? "",
+        categoryName: detail.categoryName ?? "")
       ..liveStatus.value = current.liveStatus.value;
 
     // 替换关注

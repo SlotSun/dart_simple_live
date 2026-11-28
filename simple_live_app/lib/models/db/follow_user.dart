@@ -23,6 +23,9 @@ class FollowUser implements Mappable {
     this.deleted = false,
     this.updateTime = 0,
     this.lastWatchTime = 0,
+    this.categoryId = "",
+    this.categoryName = "",
+    this.tagLocked = false,
   });
 
   ///id=siteId_roomId
@@ -75,6 +78,18 @@ class FollowUser implements Mappable {
   @HiveField(14, defaultValue: 0)
   int? lastWatchTime;
 
+  /// 平台分类ID（用于标签自动绑定，取自 LiveRoomDetail.categoryId）
+  @HiveField(15, defaultValue: "")
+  String? categoryId;
+
+  /// 平台分类名（仅展示）
+  @HiveField(16, defaultValue: "")
+  String? categoryName;
+
+  /// 用户是否手动设置过标签：true 后不再参与自动归类
+  @HiveField(17, defaultValue: false)
+  bool tagLocked;
+
   /// 直播状态
   /// 0=未知(加载中) 1=未开播 2=直播中
   Rx<int> liveStatus = 0.obs;
@@ -103,6 +118,9 @@ class FollowUser implements Mappable {
         deleted: json["deleted"] ?? false,
         updateTime: json["updateTime"] ?? 0,
         lastWatchTime: json["lastWatchTime"] ?? 0,
+        categoryId: json["categoryId"] ?? "",
+        categoryName: json["categoryName"] ?? "",
+        tagLocked: json["tagLocked"] ?? false,
       );
 
   Map<String, dynamic> toJson() => {
@@ -121,6 +139,9 @@ class FollowUser implements Mappable {
         "deleted": deleted,
         "updateTime": updateTime,
         "lastWatchTime": lastWatchTime,
+        "categoryId": categoryId,
+        "categoryName": categoryName,
+        "tagLocked": tagLocked,
       };
 
   @override

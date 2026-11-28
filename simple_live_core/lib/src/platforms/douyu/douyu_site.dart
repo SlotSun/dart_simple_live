@@ -174,6 +174,12 @@ class DouyuSite implements LiveSite {
   @override
   Future<LiveRoomDetail> getRoomDetail({required String roomId}) async {
     Map roomInfo = await _getRoomInfo(roomId);
+    // 分类：cate2_id 与分类浏览接口（cate2Info.cate2Id）保持一致，名称需反查
+    var cate2Id = roomInfo["cate2_id"]?.toString() ?? "";
+    var cate1Id = roomInfo["cate1_id"]?.toString() ?? "";
+    if (cate2Id.isNotEmpty) {
+      await _loadCateNameCache();
+    }
 
     return LiveRoomDetail(
       cover: roomInfo["room_pic"].toString(),
@@ -189,7 +195,33 @@ class DouyuSite implements LiveSite {
       data: "",
       url: "https://www.douyu.com/$roomId",
       isRecord: roomInfo["videoLoop"] == 1,
+      categoryId: cate2Id.isEmpty ? null : cate2Id,
+      categoryName: _cate2NameCache[cate2Id],
+      parentCategoryName: _cate1NameCache[cate1Id],
     );
+  }
+
+  // 斗鱼房间信息只带 cate1_id / cate2_id，分类名需要从分类接口反查（带缓存）
+  static final Map<String, String> _cate1NameCache = {};
+  static final Map<String, String> _cate2NameCache = {};
+  static bool _cateNameCacheLoaded = false;
+
+  Future<void> _loadCateNameCache() async {
+    if (_cateNameCacheLoaded) {
+      return;
+    }
+    try {
+      var result = await HttpClient.instance.getJson("https://m.douyu.com/api/cate/list");
+      for (var item in result["data"]["cate1Info"]) {
+        _cate1NameCache[item["cate1Id"].toString()] = item["cate1Name"].toString();
+      }
+      for (var item in result["data"]["cate2Info"]) {
+        _cate2NameCache[item["cate2Id"].toString()] = item["cate2Name"].toString();
+      }
+      _cateNameCacheLoaded = true;
+    } catch (e) {
+      CoreLog.error(e);
+    }
   }
 
   @override
